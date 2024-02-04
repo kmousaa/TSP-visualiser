@@ -51,68 +51,107 @@ function Graph() {
     }
   };
 
+  // Function to reset the graph
+  const resetGraph = () => {
+    setNumNodes(0);
+    setAdjMatrix([]);
+    setEdgeWeights({});
+  };
+
   // Function to update edge weight
   const updateEdgeWeight = (node1, node2, weight) => {
     const newWeights = { ...edgeWeights };
     newWeights[`${node1}-${node2}`] = weight;
-    
-    // Assuming symmetry for the adjacency matrix
-    newWeights[`${node2}-${node1}`] = weight;
-
-    // Assume weight 0 for the node to itself
-    newWeights[`${node1}-${node1}`] = 0;
-    newWeights[`${node2}-${node2}`] = 0;
-
+    newWeights[`${node2}-${node1}`] = weight; // Symmetrically assign weight
     setEdgeWeights(newWeights);
   };
 
-  // Function to print adjacency matrix and edge weights to console
-  const logData = () => {
-    console.log("Adjacency Matrix:");
-    console.table(adjMatrix);
-    console.log("Edge Weights:");
-    console.table(edgeWeights);
+  // Function to render node numbers next to each node
+  // Function to render node numbers around the circle
+  const renderNodeNumbers = () => {
+    const nodeCoordinates = generateNodeCoordinates(numNodes);
+    const radius = 15; // Radius for positioning node numbers
+    
+    return (
+      <svg>
+        {nodeCoordinates.map((node, index) => {
+          const angle = (2 * Math.PI * index) / numNodes;
+          const x = node.x + radius * Math.cos(angle);
+          const y = node.y + radius * Math.sin(angle);
+          
+          return (
+            <text
+              key={index}
+              x={x}
+              y={y}
+              fill="black"
+              fontSize="12"
+              fontWeight="bold"
+              textAnchor="middle" // Center align the text
+              alignmentBaseline="central" // Vertically align the text
+              // aadd padding to make numbers far from node
+
+            >
+              {index + 1}
+            </text>
+          );
+        })}
+      </svg>
+    );
   };
 
+  // Function to generate random weights for the adjacency matrix
+  const generateRandomWeights = () => {
+    const newWeights = {};
+    for (let i = 0; i < numNodes; i++) {
+      for (let j = i + 1; j < numNodes; j++) {
+        const weight = Math.floor(Math.random() * 10) + 1; // Generate a random weight between 1 and 10
+        newWeights[`${i}-${j}`] = weight;
+        newWeights[`${j}-${i}`] = weight; // Symmetrically assign weight
+      }
+    }
+    setEdgeWeights(newWeights);
+  };
+
+
+
   // Function to render the adjacency matrix
-const renderAdjacencyMatrix = () => {
-  return (
-    <table className="adjacency-matrix">
-      <thead>
-        <tr>
-          <th></th>
-          {[...Array(numNodes).keys()].map((node) => (
-            <th key={node}>Node {node + 1}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {adjMatrix.map((row, rowIndex) => (
-          <tr key={rowIndex}>
-            <td>Node {rowIndex + 1}</td>
-            {row.map((_, columnIndex) => (
-              <td key={columnIndex}>
-                {columnIndex === rowIndex ? (
-                  0 // Display 0 for the node to itself
-                ) : (
-                  <input
-                    type="number"
-                    value={edgeWeights[`${rowIndex}-${columnIndex}`] || ''}
-                    onChange={(e) =>
-                      updateEdgeWeight(rowIndex, columnIndex, e.target.value)
-                    }
-                  />
-                )}
-              </td>
+  const renderAdjacencyMatrix = () => {
+    return (
+      <table className="adjacency-matrix">
+        <thead>
+          <tr>
+            <th></th>
+            {[...Array(numNodes).keys()].map((node) => (
+              <th key={node}>Node {node + 1}</th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-};
-
-
+        </thead>
+        <tbody>
+          {adjMatrix.map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              <td>Node {rowIndex + 1}</td>
+              {row.map((_, columnIndex) => (
+                <td key={columnIndex}>
+                  {columnIndex === rowIndex ? (
+                    0 // Display 0 for the node to itself
+                  ) : (
+                    <input
+                      type="number"
+                      value={edgeWeights[`${rowIndex}-${columnIndex}`] || ''}
+                      onChange={(e) =>
+                        updateEdgeWeight(rowIndex, columnIndex, e.target.value)
+                      }
+                    />
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
 
   // Generate coordinates for nodes
   const nodeCoordinates = generateNodeCoordinates(numNodes);
@@ -144,13 +183,17 @@ const renderAdjacencyMatrix = () => {
         {nodeCoordinates.map((node, index) => (
           <circle key={index} cx={node.x} cy={node.y} r="10" fill="blue" />
         ))}
+        {/* Render node numbers */}
+        {renderNodeNumbers()}
+    
       </svg>
       <div className="buttons">
         <button onClick={addNode}>Add Node</button>
         <button onClick={removeNode} disabled={numNodes === 0}>
           Remove Node
         </button>
-        <button onClick={logData}>Log</button>
+        <button onClick={resetGraph}>Reset Graph</button>
+        <button onClick={generateRandomWeights}>Random Weight</button>
       </div>
       <div className="adjacency-matrix-container">
         <h3>Adjacency Matrix</h3>
