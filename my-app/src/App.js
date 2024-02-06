@@ -3,8 +3,7 @@ import './App.css';
 
 function Graph() {
   const [numNodes, setNumNodes] = useState(0); // Number of nodes
-  const [adjMatrix, setAdjMatrix] = useState([]); // Adjacency matrix for the graph
-  const [edgeWeights, setEdgeWeights] = useState({}); // Edge weights
+  const [adjacencyMatrix, setAdjacencyMatrix] = useState({}); // Edge weights
 
   // Function to generate coordinates for equidistant nodes on a circle
   const generateNodeCoordinates = (numNodes) => {
@@ -14,26 +13,38 @@ function Graph() {
     const radius = 200; // Radius of the circle
 
     for (let i = 0; i < numNodes; i++) {
-      const angle = (2 * Math.PI * i) / numNodes;
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
+      const angle = (2 * Math.PI * i) / numNodes;   // Angle in radians
+      const x = centerX + radius * Math.cos(angle); // X coordinate of the node
+      const y = centerY + radius * Math.sin(angle); // Y coordinate of the node
       coordinates.push({ x, y });
     }
-
     return coordinates;
   };
+
+  // Function to update adjacency matrix when number of nodes changes
+  const generateAdjacencyMatrix = () => {
+    const newMatrix = Array.from({ length: numNodes }, () => Array(numNodes).fill("NA")); // Initialize a 2D array of 0s
+    
+    // Loop through existing edges and update the matrix accordingly
+    for (const [edge, weight] of Object.entries(adjacencyMatrix)) {
+      const [node1, node2] = edge.split('-').map(Number);
+      
+      // Ensure newMatrix[node1] and newMatrix[node2] exist before modifying them
+      if (newMatrix[node1] && newMatrix[node2]) {
+        newMatrix[node1][node2] = weight;
+        newMatrix[node2][node1] = weight; // Symmetrically assign weight
+        newMatrix[node1][node1] = 0; // Set the diagonal to 0
+        newMatrix[node2][node2] = 0; // Set the diagonal to 0
+      }
+    }
+    
+    return newMatrix;
+  };
+  
 
   // Function to add a new node to the graph
   const addNode = () => {
     setNumNodes(numNodes + 1);
-
-    // Update adjacency matrix
-    const newMatrix = [...adjMatrix];
-    for (let i = 0; i < numNodes; i++) {
-      newMatrix[i].push(0);
-    }
-    newMatrix.push(new Array(numNodes + 1).fill(0));
-    setAdjMatrix(newMatrix);
   };
 
   // Function to remove the last node from the graph
@@ -41,32 +52,61 @@ function Graph() {
     if (numNodes > 0) {
       setNumNodes(numNodes - 1);
 
-      // Update adjacency matrix
-      const newMatrix = [...adjMatrix];
-      newMatrix.pop();
-      for (let i = 0; i < newMatrix.length; i++) {
-        newMatrix[i].pop();
+      // Remove all edges connected to the last node
+      const newAdjacencyMatrix = { ...adjacencyMatrix };
+      for (const key in newAdjacencyMatrix) {
+        const [node1, node2] = key.split('-').map(Number);
+        if (node1 === numNodes - 1 || node2 === numNodes - 1) {
+          delete newAdjacencyMatrix[key];
+        }
       }
-      setAdjMatrix(newMatrix);
+      setAdjacencyMatrix(newAdjacencyMatrix);
+
     }
+
   };
 
   // Function to reset the graph
   const resetGraph = () => {
     setNumNodes(0);
-    setAdjMatrix([]);
-    setEdgeWeights({});
+    setAdjacencyMatrix({});
+  };
+
+  // Function to log edge weights and adjacency matrix dimensions
+  const logWeights = () => {
+    console.log("Number of Nodes: " + numNodes)
+    console.log("Adjacency Matrix:");
+    console.log(generateAdjacencyMatrix());
+    console.log("Node Coordinates:");
+    console.log(generateNodeCoordinates(numNodes));
   };
 
   // Function to update edge weight
   const updateEdgeWeight = (node1, node2, weight) => {
-    const newWeights = { ...edgeWeights };
-    newWeights[`${node1}-${node2}`] = weight;
-    newWeights[`${node2}-${node1}`] = weight; // Symmetrically assign weight
-    setEdgeWeights(newWeights);
+    const newWeights = { ...adjacencyMatrix }; // Shallow copy of the adjacency matrix
+    newWeights[`${node1}-${node2}`] = Number(weight);
+    newWeights[`${node2}-${node1}`] = Number(weight); // Symmetrically assign weight
+    // if weight empty put NA
+    if (weight === "") {
+      newWeights[`${node1}-${node2}`] = "NA";
+      newWeights[`${node2}-${node1}`] = "NA"; // Symmetrically assign weight
+    }
+    setAdjacencyMatrix(newWeights);
   };
 
-  // Function to render node numbers next to each node
+  // Function to generate random weights for the edge weights
+  const generateRandomWeights = () => {
+    const newWeights = {};
+    for (let i = 0; i < numNodes; i++) {
+      for (let j = i + 1; j < numNodes; j++) {
+        const weight = Math.floor(Math.random() * 10) + 1; // Generate a random weight between 1 and 10
+        newWeights[`${i}-${j}`] = weight;
+        newWeights[`${j}-${i}`] = weight; // Symmetrically assign weight
+      }
+    }
+    setAdjacencyMatrix(newWeights);
+  };
+
   // Function to render node numbers around the circle
   const renderNodeNumbers = () => {
     const nodeCoordinates = generateNodeCoordinates(numNodes);
@@ -80,6 +120,7 @@ function Graph() {
           const y = node.y + radius * Math.sin(angle);
           
           return (
+            // Tag representing node number
             <text
               key={index}
               x={x}
@@ -89,8 +130,6 @@ function Graph() {
               fontWeight="bold"
               textAnchor="middle" // Center align the text
               alignmentBaseline="central" // Vertically align the text
-              // aadd padding to make numbers far from node
-
             >
               {index + 1}
             </text>
@@ -100,45 +139,33 @@ function Graph() {
     );
   };
 
-  // Function to generate random weights for the adjacency matrix
-  const generateRandomWeights = () => {
-    const newWeights = {};
-    for (let i = 0; i < numNodes; i++) {
-      for (let j = i + 1; j < numNodes; j++) {
-        const weight = Math.floor(Math.random() * 10) + 1; // Generate a random weight between 1 and 10
-        newWeights[`${i}-${j}`] = weight;
-        newWeights[`${j}-${i}`] = weight; // Symmetrically assign weight
-      }
-    }
-    setEdgeWeights(newWeights);
-  };
-
-
-
   // Function to render the adjacency matrix
   const renderAdjacencyMatrix = () => {
+    const adjacencyMatrix = generateAdjacencyMatrix();
+
+
     return (
       <table className="adjacency-matrix">
         <thead>
           <tr>
-            <th></th>
+            <th>Vertex</th>
             {[...Array(numNodes).keys()].map((node) => (
               <th key={node}>Node {node + 1}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {adjMatrix.map((row, rowIndex) => (
+          {adjacencyMatrix.map((row, rowIndex) => (
             <tr key={rowIndex}>
               <td>Node {rowIndex + 1}</td>
-              {row.map((_, columnIndex) => (
+              {row.map((weight, columnIndex) => (
                 <td key={columnIndex}>
                   {columnIndex === rowIndex ? (
                     0 // Display 0 for the node to itself
                   ) : (
                     <input
                       type="number"
-                      value={edgeWeights[`${rowIndex}-${columnIndex}`] || ''}
+                      value={weight || ''}
                       onChange={(e) =>
                         updateEdgeWeight(rowIndex, columnIndex, e.target.value)
                       }
@@ -153,39 +180,83 @@ function Graph() {
     );
   };
 
+  const factorial = (n) => {
+    if (n === 0) {
+      return 1;
+    }
+    return n * factorial(n - 1);
+  }
+
+  // Given TSP tour return weight , input looks like [x1, x2 ,x3 x4, x1]
+  const tourWeight = (tour) => {
+    let weight = 0;
+    for (let i = 0; i < tour.length - 1; i++) {
+      const node1 = tour[i];
+      const node2 = tour[i + 1];
+      weight += adjacencyMatrix[`${node1}-${node2}`];
+    }
+    return weight;
+  }
+
+
+
+
   // Generate coordinates for nodes
   const nodeCoordinates = generateNodeCoordinates(numNodes);
+  const AdjMatrix = generateAdjacencyMatrix()
 
   return (
     <div className="Graph">
-      <h2>Graph Visualization</h2>
+      <h2>TSP Graph Visualization</h2>
       <svg width="500" height="500">
-        {/* Render connections */}
-        {nodeCoordinates.map((node, index) => {
-          return (
-            nodeCoordinates.slice(index + 1).map((nextNode, nextIndex) => {
-              const node1 = index;
-              const node2 = index + nextIndex + 1;
-              return (
+
+      {/* Render connections */}
+      {nodeCoordinates.map((node, index) => {
+        // Go through each node
+        return (
+          // For each node, find its connections to other nodes
+          nodeCoordinates.slice(index + 1).map((nextNode, nextIndex) => {
+            // Define the current node and the node it's connected to
+            const node1 = index;
+            const node2 = index + nextIndex + 1;
+            // Draw a line between the current node and the connected node
+            const result = AdjMatrix[node1][node2] === "NA"; // Check if the value is not "NA"
+            return (
+              // Check if node-node2 in the adjacency matrix has a value not "NA"
+              result ? (
                 <line
-                  key={`${node1}-${node2}`}
-                  x1={node.x}
-                  y1={node.y}
-                  x2={nextNode.x}
-                  y2={nextNode.y}
-                  stroke="black"
+                  key={`${node1}-${node2}`} // Line with undefined weight
+                  x1={node.x} 
+                  y1={node.y} 
+                  x2={nextNode.x} 
+                  y2={nextNode.y} 
+                  stroke="gray" 
                 />
-              );
-            })
-          );
-        })}
-        {/* Render nodes */}
-        {nodeCoordinates.map((node, index) => (
-          <circle key={index} cx={node.x} cy={node.y} r="10" fill="blue" />
-        ))}
-        {/* Render node numbers */}
-        {renderNodeNumbers()}
-    
+              ) : (
+              <line
+                key={`${node1}-${node2}`} // Line with defined weight
+                x1={node.x} 
+                y1={node.y} 
+                x2={nextNode.x} 
+                y2={nextNode.y} 
+                stroke="black"
+                strokeWidth="2"
+              />
+              ) // Show line differently if the value is "NA"
+            );
+            
+          })
+        );
+      })}
+
+      {/* Render nodes */}
+      {nodeCoordinates.map((node, index) => (
+        <circle key={index} cx={node.x} cy={node.y} r="10" fill="blue" />
+      ))}
+
+      {/* Render node numbers */}
+      {renderNodeNumbers()}
+        
       </svg>
       <div className="buttons">
         <button onClick={addNode}>Add Node</button>
@@ -194,7 +265,12 @@ function Graph() {
         </button>
         <button onClick={resetGraph}>Reset Graph</button>
         <button onClick={generateRandomWeights}>Random Weight</button>
+        <button onClick={logWeights}>Log Weights</button>
+        {/* <button onClick={tspBruteForce}>Brute Force</button> */}
+
+
       </div>
+      
       <div className="adjacency-matrix-container">
         <h3>Adjacency Matrix</h3>
         {renderAdjacencyMatrix()}
