@@ -23,7 +23,7 @@ function Graph() {
 
   // Function to update adjacency matrix when number of nodes changes
   const generateAdjacencyMatrix = () => {
-    const newMatrix = Array.from({ length: numNodes }, () => Array(numNodes).fill("NA")); // Initialize a 2D array of 0s
+    const newMatrix = Array.from({ length: numNodes }, () => Array(numNodes).fill(0)); // Initialize a 2D array of 0s
     
     // Loop through existing edges and update the matrix accordingly
     for (const [edge, weight] of Object.entries(adjacencyMatrix)) {
@@ -81,6 +81,39 @@ function Graph() {
     console.log(generateNodeCoordinates(numNodes));
   };
 
+  // Function to save the graph
+  const saveGraph = () => {
+    const graph = {
+      numNodes,
+      adjacencyMatrix
+    };
+    const json = JSON.stringify(graph);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "graph.json";
+    a.click();
+  };
+
+  // Function to load the graph
+  const loadGraph = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.readAsText(file, "UTF-8");
+      reader.onload = (readerEvent) => {
+        const content = readerEvent.target.result;
+        const graph = JSON.parse(content);
+        setNumNodes(graph.numNodes);
+        setAdjacencyMatrix(graph.adjacencyMatrix);
+      };
+    };
+    input.click();
+  };
+
   // Function to update edge weight
   const updateEdgeWeight = (node1, node2, weight) => {
     const newWeights = { ...adjacencyMatrix }; // Shallow copy of the adjacency matrix
@@ -88,10 +121,12 @@ function Graph() {
     newWeights[`${node2}-${node1}`] = Number(weight); // Symmetrically assign weight
     // if weight empty put NA
     if (weight === "") {
-      newWeights[`${node1}-${node2}`] = "NA";
-      newWeights[`${node2}-${node1}`] = "NA"; // Symmetrically assign weight
+      newWeights[`${node1}-${node2}`] = 0;
+      newWeights[`${node2}-${node1}`] = 0; // Symmetrically assign weight
     }
     setAdjacencyMatrix(newWeights);
+
+    
   };
 
   // Function to generate random weights for the edge weights
@@ -141,9 +176,8 @@ function Graph() {
 
   // Function to render the adjacency matrix
   const renderAdjacencyMatrix = () => {
+
     const adjacencyMatrix = generateAdjacencyMatrix();
-
-
     return (
       <table className="adjacency-matrix">
         <thead>
@@ -164,10 +198,13 @@ function Graph() {
                     0 // Display 0 for the node to itself
                   ) : (
                     <input
+                      id={`${rowIndex}-${columnIndex}`}
                       type="number"
+                      placeholder = '0'
                       value={weight || ''}
-                      onChange={(e) =>
+                      onChange={(e) =>{
                         updateEdgeWeight(rowIndex, columnIndex, e.target.value)
+                      }
                       }
                     />
                   )}
@@ -198,13 +235,41 @@ function Graph() {
     return weight;
   }
 
+  const showWeight = (e, node1, node2) => {
+    const weight = adjacencyMatrix[`${node1}-${node2}`];
+    let displayText;
+    if (typeof weight === "undefined") {
+      displayText = "Selected weight: Click to input weight";
+    } else {
+      displayText = "Selected weight: " + weight + "   " + "  (" + (node1 + 1) + "-" + (node2 + 1) + ")";
+    }
+    document.getElementById("weight").innerHTML = displayText;
+  }
+  
+
+  const showWeightedEdges = (e, node1, node2) => {
+    e.target.style.stroke = "lightblue";
+    showWeight(e, node1, node2);
+  }
+
+  const showUnweightedEdges = (e, node1, node2) => {
+    e.target.style.stroke = "orange";
+    showWeight(e, node1, node2);
+  }
 
 
+  const SelectAdjMatrix = (node1, node2) => {
+    const inputId = `${node1}-${node2}`;
+    const inputElement = document.getElementById(inputId);
+    if (inputElement) {
+      inputElement.focus(); // Focus on the input element
+    }
+  };
+  
 
   // Generate coordinates for nodes
   const nodeCoordinates = generateNodeCoordinates(numNodes);
   const AdjMatrix = generateAdjacencyMatrix()
-
   return (
     <div className="Graph">
       <h2>TSP Graph Visualization</h2>
@@ -220,7 +285,9 @@ function Graph() {
             const node1 = index;
             const node2 = index + nextIndex + 1;
             // Draw a line between the current node and the connected node
-            const result = AdjMatrix[node1][node2] === "NA"; // Check if the value is not "NA"
+            const result = AdjMatrix[node1][node2] === 0; // Check if the value is not "NA"
+            
+            const hover = false;
             return (
               // Check if node-node2 in the adjacency matrix has a value not "NA"
               result ? (
@@ -230,7 +297,10 @@ function Graph() {
                   y1={node.y} 
                   x2={nextNode.x} 
                   y2={nextNode.y} 
-                  stroke="gray" 
+                  stroke="black" 
+                  onMouseMove={(e) => { showUnweightedEdges(e,node1,node2)}}
+                  onClick = {(e) => { SelectAdjMatrix(node1,node2); }}
+                  onMouseOut={(e) => { e.target.style.stroke = "black"; }}
                 />
               ) : (
               <line
@@ -240,7 +310,10 @@ function Graph() {
                 x2={nextNode.x} 
                 y2={nextNode.y} 
                 stroke="black"
-                strokeWidth="2"
+                strokeWidth="3"
+                onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
+                onClick = {(e) => { SelectAdjMatrix(node1,node2); }}
+                onMouseOut={(e) => { e.target.style.stroke = "black"; }}
               />
               ) // Show line differently if the value is "NA"
             );
@@ -266,7 +339,13 @@ function Graph() {
         <button onClick={resetGraph}>Reset Graph</button>
         <button onClick={generateRandomWeights}>Random Weight</button>
         <button onClick={logWeights}>Log Weights</button>
+        <button onClick={saveGraph}>Save Graph</button>
+        <button onClick={loadGraph}>Load Graph</button>
+
+        <br/> <br/>
+        <p1 id = "weight">Selected weight: NA </p1>
         {/* <button onClick={tspBruteForce}>Brute Force</button> */}
+
 
 
       </div>
