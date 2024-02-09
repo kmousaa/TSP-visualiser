@@ -252,7 +252,7 @@ function Graph() {
   }
 
   const showUnweightedEdges = (e, node1, node2) => {
-    e.target.style.stroke = "orange";
+    e.target.style.stroke = "blue";
     showWeight(e, node1, node2);
   }
 
@@ -317,7 +317,7 @@ function Graph() {
                 stroke="black"
                 strokeWidth="3"
                 onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
-                onClick = {(e) => { SelectAdjMatrix(node1,node2); }}
+                onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
                 onMouseOut={(e) => { e.target.style.stroke = "black"; }}
               />
               </a>
