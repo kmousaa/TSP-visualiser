@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Button from 'react-bootstrap/Button';
+
 
 function Graph() {
   const [numNodes, setNumNodes] = useState(0); // Number of nodes
@@ -61,9 +64,7 @@ function Graph() {
         }
       }
       setAdjacencyMatrix(newAdjacencyMatrix);
-
     }
-
   };
 
   // Function to reset the graph
@@ -125,10 +126,8 @@ function Graph() {
       newWeights[`${node2}-${node1}`] = 0; // Symmetrically assign weight
     }
     setAdjacencyMatrix(newWeights);
-
-    
   };
-
+  
   // Function to generate random weights for the edge weights
   const generateRandomWeights = () => {
     const newWeights = {};
@@ -258,11 +257,12 @@ function Graph() {
   }
 
 
-  const SelectAdjMatrix = (node1, node2) => {
+  const SelectAdjMatrix = (e,node1, node2) => {
     const inputId = `${node1}-${node2}`;
     const inputElement = document.getElementById(inputId);
     if (inputElement) {
       inputElement.focus(); // Focus on the input element
+      // make color green
     }
   };
   
@@ -291,18 +291,23 @@ function Graph() {
             return (
               // Check if node-node2 in the adjacency matrix has a value not "NA"
               result ? (
+                <a href="#" class="pe-auto  stretched-link d-inline-block p-2">
                 <line
                   key={`${node1}-${node2}`} // Line with undefined weight
                   x1={node.x} 
                   y1={node.y} 
                   x2={nextNode.x} 
                   y2={nextNode.y} 
-                  stroke="black" 
+                  stroke= "black"
+                  strokeOpacity="0.15"
+                  strokeWidth="2"
                   onMouseMove={(e) => { showUnweightedEdges(e,node1,node2)}}
-                  onClick = {(e) => { SelectAdjMatrix(node1,node2); }}
+                  onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
                   onMouseOut={(e) => { e.target.style.stroke = "black"; }}
                 />
+                </a>
               ) : (
+              <a href="#" class="pe-auto">
               <line
                 key={`${node1}-${node2}`} // Line with defined weight
                 x1={node.x} 
@@ -315,6 +320,7 @@ function Graph() {
                 onClick = {(e) => { SelectAdjMatrix(node1,node2); }}
                 onMouseOut={(e) => { e.target.style.stroke = "black"; }}
               />
+              </a>
               ) // Show line differently if the value is "NA"
             );
             
@@ -342,9 +348,12 @@ function Graph() {
         <button onClick={saveGraph}>Save Graph</button>
         <button onClick={loadGraph}>Load Graph</button>
 
+
         <br/> <br/>
         <p1 id = "weight">Selected weight: NA </p1>
         {/* <button onClick={tspBruteForce}>Brute Force</button> */}
+
+
 
 
 
