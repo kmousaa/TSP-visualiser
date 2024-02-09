@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Button from 'react-bootstrap/Button';
-
 
 function Graph() {
+
+  // State of the Graph
   const [numNodes, setNumNodes] = useState(0); // Number of nodes
   const [adjacencyMatrix, setAdjacencyMatrix] = useState({}); // Edge weights
 
@@ -40,11 +40,9 @@ function Graph() {
         newMatrix[node2][node2] = 0; // Set the diagonal to 0
       }
     }
-    
     return newMatrix;
   };
   
-
   // Function to add a new node to the graph
   const addNode = () => {
     setNumNodes(numNodes + 1);
@@ -70,6 +68,11 @@ function Graph() {
   // Function to reset the graph
   const resetGraph = () => {
     setNumNodes(0);
+    setAdjacencyMatrix({});
+  };
+
+  // Function to clear all edge weights
+  const clearWeights = () => {
     setAdjacencyMatrix({});
   };
 
@@ -140,6 +143,7 @@ function Graph() {
     }
     setAdjacencyMatrix(newWeights);
   };
+
 
   // Function to render node numbers around the circle
   const renderNodeNumbers = () => {
@@ -247,7 +251,7 @@ function Graph() {
   
 
   const showWeightedEdges = (e, node1, node2) => {
-    e.target.style.stroke = "lightblue";
+    e.target.style.stroke = "blue";
     showWeight(e, node1, node2);
   }
 
@@ -299,7 +303,7 @@ function Graph() {
                   x2={nextNode.x} 
                   y2={nextNode.y} 
                   stroke= "black"
-                  strokeOpacity="0.15"
+                  strokeOpacity="0.25"
                   strokeWidth="2"
                   onMouseMove={(e) => { showUnweightedEdges(e,node1,node2)}}
                   onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
@@ -343,26 +347,21 @@ function Graph() {
           Remove Node
         </button>
         <button onClick={resetGraph}>Reset Graph</button>
+        <button onClick={clearWeights} >ClearWeights</button>
         <button onClick={generateRandomWeights}>Random Weight</button>
         <button onClick={logWeights}>Log Weights</button>
         <button onClick={saveGraph}>Save Graph</button>
         <button onClick={loadGraph}>Load Graph</button>
-
-
         <br/> <br/>
         <p1 id = "weight">Selected weight: NA </p1>
         {/* <button onClick={tspBruteForce}>Brute Force</button> */}
-
-
-
-
-
       </div>
       
       <div className="adjacency-matrix-container">
         <h3>Adjacency Matrix</h3>
         {renderAdjacencyMatrix()}
       </div>
+      
     </div>
   );
 }
