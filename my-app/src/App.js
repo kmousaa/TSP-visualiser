@@ -253,6 +253,7 @@ function Graph() {
     );
   };
 
+  // Fix up the 0 weighted stuff
   const bruteForceTSP = () => {
     var possible_tours = permutations([...Array(numNodes).keys()]);
     var best_tour = [];
@@ -299,7 +300,6 @@ function Graph() {
     const inputElement = document.getElementById(inputId);
     if (inputElement) {
       inputElement.focus(); // Focus on the input element
-      // make color green
     }
   };
   
