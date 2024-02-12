@@ -1,6 +1,7 @@
-import { generateNodeCoordinates , tourWeight} from "./GraphUtil";
+import { generateNodeCoordinates , tourWeight} from "../utils/GraphUtil";
+import { bruteForceTSP } from "./TspAlgorithims";
 
-
+// Represents the graph and its adjacency matrix
 function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight}) {
 
     // Reset the best tours
@@ -8,7 +9,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setBestTour([]);
       setBestWeight(Number.MAX_VALUE);
     }
-
 
     // Function to update adjacency matrix when number of nodes changes
     const generateAdjacencyMatrix = () => {
@@ -137,7 +137,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
       setAdjacencyMatrix(newWeights);
     };
-  
 
     // Function to render node numbers around the circle
     const renderNodeNumbers = () => {
@@ -214,42 +213,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       );
     };
 
-    // From: https://www.30secondsofcode.org/js/s/array-permutations/
-    const permutations = arr => {
-      if (arr.length <= 2) return arr.length === 2 ? [arr, [arr[1], arr[0]]] : arr;
-      return arr.reduce(
-        (acc, item, i) =>
-          acc.concat(
-            permutations([...arr.slice(0, i), ...arr.slice(i + 1)]).map(val => [
-              item,
-              ...val,
-            ])
-          ),
-        []
-      );
-    };
-  
-    // Fix up the 0 weighted stuff
-    const bruteForceTSP = () => {
-      resetBestTour();
-      var possible_tours = permutations([...Array(numNodes).keys()]);
-      var best_tour = [];
-      var best_weight = Number.MAX_VALUE;
-      for (let i = 0; i < possible_tours.length; i++) {
-        possible_tours[i].push(possible_tours[i][0]);
-        const tour = possible_tours[i];
-        var weight = tourWeight(tour, adjacencyMatrix);
-        if (weight < best_weight) {
-          best_tour = tour;
-          best_weight = weight;
-        }
-      }
-      console.log("Best Tour: " + best_tour + " Weight: " + best_weight);
-      setBestTour(best_tour);
-      setBestWeight(best_weight);
-      return best_weight; // Return the weight of the best tour
-    };
-    
     const showWeight = (e, node1, node2) => {
       const weight = adjacencyMatrix[`${node1}-${node2}`];
       let displayText;
@@ -282,6 +245,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Generate coordinates for nodes
     const nodeCoordinates = generateNodeCoordinates(numNodes);
     const AdjMatrix = generateAdjacencyMatrix()
+
+    const generateTSPHandler = (tspAlgorithm) => {
+      return () => {
+        tspAlgorithm(resetBestTour, numNodes, tourWeight, adjacencyMatrix, setBestTour, setBestWeight);
+      };
+    };
+
 
     return (
       <div className="Graph">
@@ -350,7 +320,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             const y1 = nodeCoordinates[node1].y;
             const x2 = nodeCoordinates[node2].x;
             const y2 = nodeCoordinates[node2].y;
-             const result = AdjMatrix[node1][node2] === 0; // Check if the value is not "NA"
+            const result = AdjMatrix[node1][node2] === 0; // Check if the value is not "NA"
             
             return (
               result ? (
@@ -382,8 +352,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
             )
             );
-
-
             
           }
         })}
@@ -395,21 +363,28 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
   
         {/* Render node numbers */}
         {renderNodeNumbers()}
+        
+        {/* // Higher-order function to generate TSP algorithm handlers */}
           
         </svg>
         <div className="buttons">
-          <button onClick={addNode}>Add Node</button>
-          <button onClick={removeNode} disabled={numNodes === 0}> Remove Node </button>
-          <button onClick={resetGraph}>Reset Graph</button>
-          <button onClick={clearWeights} >ClearWeights</button>
-          <button onClick={generateRandomWeights}>Random Weight</button>
-          <button onClick={logWeights}>Log Weights</button>
-          <button onClick={saveGraph}>Save Graph</button>
-          <button onClick={loadGraph}>Load Graph</button>
-          <button onClick={bruteForceTSP}>TSP</button>
+          
+          {/* Graph Operations */}
+          <button onClick={() => addNode()}>Add Node</button>
+          <button onClick={() => removeNode()} disabled={numNodes === 0}> Remove Node </button>
+          <button onClick={() => resetGraph()}>Reset Graph</button>
+          <button onClick={() => clearWeights()}>ClearWeights</button>
+          <button onClick={() => generateRandomWeights()}>Random Weight</button>
+          <button onClick={() => logWeights()}>Log Weights</button>
+          <button onClick={() => saveGraph()}>Save Graph</button>
+          <button onClick={() => loadGraph()}>Load Graph</button>
+          {/* TSP algorithms */}
+          <button onClick={generateTSPHandler(bruteForceTSP)}>TSP</button>
+          
           <br/> <br/>
+
           <p1 id = "weight">Selected weight: NA </p1>
-          {/* <button onClick={tspBruteForce}>Brute Force</button> */}
+
         </div>
         
         <div className="adjacency-matrix-container">
