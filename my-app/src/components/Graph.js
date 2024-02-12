@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { generateNodeCoordinates , tourWeight} from "../utils/GraphUtil";
-import { bruteForceTSP } from "./TspAlgorithims";
+import { NearestNeighborTSP, bruteForceTSP } from "./TspAlgorithims";
+
 
 // Represents the graph and its adjacency matrix
 function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight}) {
@@ -379,12 +381,20 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           <button onClick={() => saveGraph()}>Save Graph</button>
           <button onClick={() => loadGraph()}>Load Graph</button>
           {/* TSP algorithms */}
-          <button onClick={generateTSPHandler(bruteForceTSP)}>TSP</button>
+          <button onClick={generateTSPHandler(bruteForceTSP)}>Brute Force</button>
+          <button onClick={generateTSPHandler(NearestNeighborTSP)}>Nearest Neighbor - NW</button>
+
           
           <br/> <br/>
 
           <p1 id = "weight">Selected weight: NA </p1>
-
+          <br/>
+          <p1>Best Tour: {bestTour} </p1>
+          <br/>
+          <p1> Tour length: {bestTour.length} </p1>
+          <br/>
+          <p1>Best Weight: {bestWeight} </p1>
+          
         </div>
         
         <div className="adjacency-matrix-container">

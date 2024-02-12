@@ -45,5 +45,26 @@ export const permutations = arr => {
         []
     );
 };
+
+
+// Function to obtain adjacent nodes for a specific node
+export const getAdjacentNodes = (nodeIndex, adjacencyMatrix) => {
+    const adjNodes = [];
+    for (const key in adjacencyMatrix) {
+      const [node1, node2] = key.split('-').map(Number);
+      if (node1 === nodeIndex) {
+        adjNodes.push(node2);
+      } else if (node2 === nodeIndex) {
+        adjNodes.push(node1);
+      }
+    }
+    const adjacentNodes = [...new Set(adjNodes)];
+    return adjacentNodes;
+  };
+
+// Function that returns degree of a node
+export const getDegree = (nodeIndex, adjacencyMatrix) => {
+    return getAdjacentNodes(nodeIndex, adjacencyMatrix).length;
+};
     
     
