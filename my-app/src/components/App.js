@@ -14,6 +14,10 @@ function App() {
   const [bestTour, setBestTour] = useState([]);
   const [bestWeight, setBestWeight] = useState(Number.MAX_VALUE);
 
+  // Stores state of the steps of the algorithm
+  const [currentStep, setCurrentStep] = useState(1); 
+  const [steps, setSteps] = useState([]);
+  
   return (
     <div className="App">
       <Graph 
@@ -25,6 +29,10 @@ function App() {
         setBestTour={setBestTour}
         bestWeight={bestWeight}
         setBestWeight={setBestWeight}
+        currentStep={currentStep}
+        setCurrentStep={setCurrentStep}
+        steps={steps}
+        setSteps={setSteps}
       />
     </div>
   );

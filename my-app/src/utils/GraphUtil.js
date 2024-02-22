@@ -1,7 +1,4 @@
 // GraphUtil.js
-// Contains utility functions for graph operations
-
-
 
 // Function to generate coordinates for equidistant nodes on a circle
 export const generateNodeCoordinates = (numNodes) => {
@@ -19,7 +16,7 @@ export const generateNodeCoordinates = (numNodes) => {
     return coordinates;
 };
 
-// Given TSP tour return weight , input looks like [x1, x2 ,x3 x4, x1]
+// Given TSP tour return weight , tour looks like [x1, x2 ,x3 x4, x1]
 export const tourWeight = (tour, adjacencyMatrix) => {
     let weight = 0;
     for (let i = 0; i < tour.length - 1; i++) {
@@ -30,8 +27,7 @@ export const tourWeight = (tour, adjacencyMatrix) => {
     return weight;
 };
 
-
-// From: https://www.30secondsofcode.org/js/s/array-permutations/
+// Helper function taken from source : https://www.30secondsofcode.org/js/s/array-permutations/
 export const permutations = arr => {
     if (arr.length <= 2) return arr.length === 2 ? [arr, [arr[1], arr[0]]] : arr;
     return arr.reduce(
@@ -46,7 +42,6 @@ export const permutations = arr => {
     );
 };
 
-
 // Function to obtain adjacent nodes for a specific node
 export const getAdjacentNodes = (nodeIndex, adjacencyMatrix) => {
     const adjNodes = [];
@@ -60,11 +55,6 @@ export const getAdjacentNodes = (nodeIndex, adjacencyMatrix) => {
     }
     const adjacentNodes = [...new Set(adjNodes)];
     return adjacentNodes;
-  };
-
-// Function that returns degree of a node
-export const getDegree = (nodeIndex, adjacencyMatrix) => {
-    return getAdjacentNodes(nodeIndex, adjacencyMatrix).length;
 };
-    
+
     

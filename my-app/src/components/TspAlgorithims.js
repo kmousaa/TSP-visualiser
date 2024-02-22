@@ -1,9 +1,8 @@
 // Contains TSP algorithms 
-import { permutations, getAdjacentNodes, getDegree } from "../utils/GraphUtil";
-
+import { permutations, getAdjacentNodes , tourWeight} from "../utils/GraphUtil";
   
-// Fix up the 0 weighted stuff
-export const bruteForceTSP = (resetBestTour,numNodes , tourWeight, adjacencyMatrix, setBestTour, setBestWeight) => {
+
+export const bruteForceTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight) => {
     resetBestTour();
     
     var possible_tours = permutations([...Array(numNodes).keys()]); // Generate all possible tours
@@ -20,70 +19,55 @@ export const bruteForceTSP = (resetBestTour,numNodes , tourWeight, adjacencyMatr
         best_weight = weight;
         }
     }
-
+        
     setBestTour(best_tour);
     setBestWeight(best_weight);
     return best_weight; // Return the weight of the best tour
 };
 
 
-// NOT WORKING
-export const NearestNeighborTSP = (resetBestTour,numNodes , tourWeight, adjacencyMatrix, setBestTour, setBestWeight) => {
+export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight, setSteps , setCurrentStep) => {
     resetBestTour();
-    
-    // Initialize variables
-    var visited = new Array(numNodes).fill(false);
-    var tour = [];
 
-    // Randomly select a starting vertex
-    const starting_vertex = Math.floor(Math.random() * numNodes);
-    let current_vertex = Math.floor(Math.random() * numNodes); 
-    console.log("starting_vertex",starting_vertex);
-    tour.push(starting_vertex);
+    // Pick a random starting node
+    var start = Math.floor(Math.random() * numNodes);
 
-    // Repeat until all nodes are visited
-    while (visited.includes(false)) {
-        const adjacentNodes = getAdjacentNodes(current_vertex, adjacencyMatrix);
+    var tour = [start];
+    var weight = 0;
 
+    // Find the nearest neighbor for each node
+    for (let i = 0; i < numNodes - 1; i++) {
         
-        // add closest node to tour
-        let closestNode = -1;
-        let closestDistance = Number.MAX_VALUE;
+        var current = tour[tour.length - 1];
+        var adjNodes = getAdjacentNodes(current, adjacencyMatrix);
+        var minWeight = Number.MAX_VALUE;
+        var minNode = -1;
 
-        for (let i = 0; i < adjacentNodes.length; i++) {
-            if (!visited[adjacentNodes[i]] && adjacencyMatrix[`${current_vertex}-${adjacentNodes[i]}`] < closestDistance) {
-                // Can't complete cycle (go to start) until all nodes are visited
-                closestNode = adjacentNodes[i];
-
-                console.log("closestNode ",closestNode + " =?= " + starting_vertex );
-
-                if (closestNode === starting_vertex && visited.includes(false) ){
-                    console.log("NOT OVER YET")
-                    closestDistance = Number.MAX_VALUE;
-                }
-
-                else{
-                    closestDistance = adjacencyMatrix[`${current_vertex}-${adjacentNodes[i]}`];
-                }
-                
+        // Find the nearest neighbor
+        for (let j = 0; j < adjNodes.length; j++) {
+            if (!tour.includes(adjNodes[j]) && adjacencyMatrix[`${current}-${adjNodes[j]}`] < minWeight) {
+                minWeight = adjacencyMatrix[`${current}-${adjNodes[j]}`];
+                minNode = adjNodes[j];
             }
+            
         }
-
-        // Mark the closest node as visited and add it to the tour
-        tour.push(closestNode);
-        console.log("tour",tour);
-        visited[closestNode] = true;
-        current_vertex = closestNode;
+        weight += minWeight;
+        tour.push(minNode);
     }
-    // Add the starting vertex to the end of the tour
-    tour.push(tour[0]);
-    console.log("final tour",tour);
 
-    // Set the best tour and weight
+    // Add the weight of the last edge
+    weight += adjacencyMatrix[`${tour[tour.length - 1]}-${start}`];
+    tour.push(start);
+
+    // add first element to setSteps
+
     setBestTour(tour);
-    setBestWeight(tourWeight(tour, adjacencyMatrix));
+    setBestWeight(weight);
 
-    // Return the weight of the tour
-    return tourWeight(tour, adjacencyMatrix);
+    setSteps([tour[0]]);
+    console.log("UPDATING CURRENT")
+    setCurrentStep(1);
 
+    return weight;
 };
+

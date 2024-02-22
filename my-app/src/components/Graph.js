@@ -1,26 +1,32 @@
-import { useEffect } from "react";
-import { generateNodeCoordinates , tourWeight} from "../utils/GraphUtil";
-import { NearestNeighborTSP, bruteForceTSP } from "./TspAlgorithims";
+import { generateNodeCoordinates } from "../utils/GraphUtil";
+import { NearestNeighborTSP, bruteForceTSP  } from "./TspAlgorithims";
+import { useState } from "react";
 
 
 // Represents the graph and its adjacency matrix
-function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight}) {
+function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , currentStep, setCurrentStep, steps, setSteps}) {
 
+    // Keeps track of steps
+    const [stepNum, setStepNum] = useState(0); 
+  
     // Reset the best tours
     const resetBestTour = () => {
       setBestTour([]);
       setBestWeight(Number.MAX_VALUE);
+      setSteps([]);
+      setStepNum(1);
+      
     }
 
-    // Function to update adjacency matrix when number of nodes changes
+    // Generate the adjacency matrix 
     const generateAdjacencyMatrix = () => {
+      
       const newMatrix = Array.from({ length: numNodes }, () => Array(numNodes).fill(0)); // Initialize a 2D array of 0s
       
       // Loop through existing edges and update the matrix accordingly
       for (const [edge, weight] of Object.entries(adjacencyMatrix)) {
         const [node1, node2] = edge.split('-').map(Number);
-        
-        // Ensure newMatrix[node1] and newMatrix[node2] exist before modifying them
+
         if (newMatrix[node1] && newMatrix[node2]) {
           newMatrix[node1][node2] = weight;
           newMatrix[node2][node1] = weight; // Symmetrically assign weight
@@ -68,18 +74,24 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setAdjacencyMatrix({});
     };
   
-    // Function to log edge weights and adjacency matrix dimensions
+    // DELETE LATER - Function to log edge weights and adjacency matrix dimensions
     const logWeights = () => {
+      console.log(" --------------- LOG --------------- ")
       console.log("Number of Nodes: " + numNodes)
       console.log("Adjacency Matrix:");
-      console.log(generateAdjacencyMatrix());
-      console.log("Node Coordinates:");
-      console.log(generateNodeCoordinates(numNodes));
-      console.log("BEST TOUR: " + bestTour);
-      console.log("BEST WEIGHT: " + bestWeight);
+      console.log(adjacencyMatrix);
+      console.log("BEST TOUR: ");
+      console.log(bestTour)
+      console.log("BEST WEIGHT: ");
+      console.log(bestWeight)
+      console.log("STEPS: ");
+      console.log(steps)
+      console.log("STEP NUM: ");
+      console.log(stepNum)
+      console.log(" --------------- END LOG --------------- ")
     };
   
-    // Function to save the graph
+    // Function to save the graph as a JSON file
     const saveGraph = () => {
       const graph = {
         numNodes,
@@ -94,7 +106,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       a.click();
     };
   
-    // Function to load the graph
+    // Function to load the graph from a JSON file
     const loadGraph = () => {
       const input = document.createElement("input");
       input.type = "file";
@@ -112,21 +124,22 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       input.click();
     };
   
-    // Function to update edge weight
+    // Function to update edge weight in the adjacency matrix
     const updateEdgeWeight = (node1, node2, weight) => {
       resetBestTour();
       const newWeights = { ...adjacencyMatrix }; // Shallow copy of the adjacency matrix
       newWeights[`${node1}-${node2}`] = Number(weight);
       newWeights[`${node2}-${node1}`] = Number(weight); // Symmetrically assign weight
-      // if weight empty put NA
+      
+      // if weight empty put 0
       if (weight === "") {
         newWeights[`${node1}-${node2}`] = 0;
-        newWeights[`${node2}-${node1}`] = 0; // Symmetrically assign weight
+        newWeights[`${node2}-${node1}`] = 0; 
       }
       setAdjacencyMatrix(newWeights);
     };
     
-    // Function to generate random weights for the edge weights
+    // Function to add random weights to the adjacency matrix
     const generateRandomWeights = () => {
       resetBestTour();
       const newWeights = {};
@@ -144,7 +157,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const renderNodeNumbers = () => {
       const nodeCoordinates = generateNodeCoordinates(numNodes);
       const radius = 15; // Radius for positioning node numbers
-      
       return (
         <svg>
           {nodeCoordinates.map((node, index) => {
@@ -172,7 +184,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       );
     };
   
-    // Function to render the adjacency matrix
+    // Function to render the adjacency matrix as a table
     const renderAdjacencyMatrix = () => {
   
       const adjacencyMatrix = generateAdjacencyMatrix();
@@ -215,6 +227,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       );
     };
 
+    // Display the weight of the selected edge
     const showWeight = (e, node1, node2) => {
       const weight = adjacencyMatrix[`${node1}-${node2}`];
       let displayText;
@@ -227,12 +240,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     }
     
     const showWeightedEdges = (e, node1, node2) => {
-      e.target.style.stroke = "blue";
+      e.target.style.stroke = "#00aeff";
       showWeight(e, node1, node2);
     }
   
     const showUnweightedEdges = (e, node1, node2) => {
-      e.target.style.stroke = "blue";
+      e.target.style.stroke = "#00aeff";
       showWeight(e, node1, node2);
     }
   
@@ -244,18 +257,62 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
     };
 
+    // Functions for simulation
+    const nextStep = () => {
+      if (stepNum < bestTour.length) { 
+        setSteps([...steps, bestTour[stepNum]]);
+        setStepNum(stepNum + 1);
+        console.log(steps)
+      } else {
+        console.log("Reached maximum step.");
+      }
+    };
+
+    const prevStep = () => {
+      if (stepNum > 0) {
+        setSteps(steps.slice(0, -1));
+        setStepNum(stepNum - 1);
+      } else {
+        console.log("Reached minimum step.");
+      }
+    };
+
+    const restart = () => {
+      setSteps([]);
+      setStepNum(0);
+    };
+
+    // Function to render nodes
+    const renderNodes = () => {
+      let nodeCoordinates = generateNodeCoordinates(numNodes);
+      return nodeCoordinates.map((node, index) => (
+
+        // Check if best tour is there then make the first node in best tour red
+        console.log("Index: " + index + "Steps: " + steps),
+
+        index === steps[steps.length - 1] ? (
+          console.log("HMphh"),
+          <circle key={index} cx={node.x} cy={node.y} r="10" fill="red" />
+        ) : (
+          console.log("No red circle yet"),
+          <circle key={index} cx={node.x} cy={node.y} r="10" fill="#00aeff" />
+        )
+      ));
+    };
+
     // Generate coordinates for nodes
     const nodeCoordinates = generateNodeCoordinates(numNodes);
     const AdjMatrix = generateAdjacencyMatrix()
 
+    // Helper function to generate TSP algorithm handlers
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
-        tspAlgorithm(resetBestTour, numNodes, tourWeight, adjacencyMatrix, setBestTour, setBestWeight);
+        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setCurrentStep);
       };
     };
 
-
     return (
+      
       <div className="Graph">
         <h2>TSP Graph Visualization</h2>
         <svg width="500" height="500">
@@ -312,18 +369,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           );
         })}
 
+        console.log(steps)
         {/* make every line inside best tour red */}
-        
-        {bestTour.map((node, index) => {
-          if (index < bestTour.length - 1) {
-            const node1 = bestTour[index];
-            const node2 = bestTour[index + 1];
+        { steps.map((node, index) => {
+          if (index < steps.length - 1) {
+            const node1 = steps[index];
+            const node2 = steps[index + 1];
             const x1 = nodeCoordinates[node1].x;
             const y1 = nodeCoordinates[node1].y;
             const x2 = nodeCoordinates[node2].x;
             const y2 = nodeCoordinates[node2].y;
             const result = AdjMatrix[node1][node2] === 0; // Check if the value is not "NA"
-            
+
             return (
               result ? (
               <line
@@ -354,14 +411,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
             )
             );
-            
           }
         })}
+
+
   
         {/* Render nodes */}
-        {nodeCoordinates.map((node, index) => (
-          <circle key={index} cx={node.x} cy={node.y} r="10" fill="blue" />
-        ))}
+        {renderNodes()}
   
         {/* Render node numbers */}
         {renderNodeNumbers()}
@@ -380,13 +436,23 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           <button onClick={() => logWeights()}>Log Weights</button>
           <button onClick={() => saveGraph()}>Save Graph</button>
           <button onClick={() => loadGraph()}>Load Graph</button>
+
           {/* TSP algorithms */}
           <button onClick={generateTSPHandler(bruteForceTSP)}>Brute Force</button>
           <button onClick={generateTSPHandler(NearestNeighborTSP)}>Nearest Neighbor - NW</button>
-
-          
           <br/> <br/>
+          <button onClick={nextStep} > Next Step</button>
+          <button onClick={prevStep} > Previous Step</button>
+          <button> Play </button>
+          <button> Stop </button>
+          <button onClick={restart} > BB </button>
+          <button> FF </button>
 
+          <br/> <br/> <br/> <br/>
+
+  
+
+          {/* Display the best tour and its weight */}
           <p1 id = "weight">Selected weight: NA </p1>
           <br/>
           <p1>Best Tour: {bestTour} </p1>
@@ -404,6 +470,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         
       </div>
     );
+
+    
   }
 
   export default Graph;
