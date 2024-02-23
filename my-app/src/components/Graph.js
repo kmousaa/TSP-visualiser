@@ -1,7 +1,10 @@
-import { generateNodeCoordinates , renderCustomNode } from "../utils/GraphUtil";
-import { NearestNeighborTSP, bruteForceTSP  } from "./TspAlgorithims";
-import { FaSave, FaDownload } from 'react-icons/fa'; // Import icons
+import { useEffect, useState } from "react";
+import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
+import { NearestNeighborTSP, bruteForceTSP } from "./TspAlgorithims";
+import { FaSave, FaDownload, FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward } from 'react-icons/fa';
 import { FaPersonHiking } from "react-icons/fa6";
+import "../utils/Graph.css";
+
 
 // Represents the graph and its adjacency matrix
 function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep}) {
@@ -159,47 +162,55 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
 
     // Function to render the adjacency matrix as a table onto the screen
+    
+    // Function to render the adjacency matrix as a table onto the screen
     const renderAdjacencyMatrix = () => {
-  
       const adjacencyMatrix = generateAdjacencyMatrix();
       return (
-        <table className="adjacency-matrix">
-          <thead>
-            <tr>
-              <th>Vertex</th>
-              {[...Array(numNodes).keys()].map((node) => (
-                <th key={node}>Node {node + 1}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {adjacencyMatrix.map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                <td>Node {rowIndex + 1}</td>
-                {row.map((weight, columnIndex) => (
-                  <td key={columnIndex}>
-                    {columnIndex === rowIndex ? (
-                      0 // Display 0 for the node to itself
-                    ) : (
-                      <input
-                        id={`${rowIndex}-${columnIndex}`}
-                        type="number"
-                        placeholder = '0'
-                        value={weight || ''}
-                        onChange={(e) =>{
-                          updateEdgeWeight(rowIndex, columnIndex, e.target.value)
-                        }
-                        }
-                      />
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          <div className="table-responsive">
+              <table id="adjMatrix" className="table  table-sm adjacency-matrix">
+                  <thead>
+                      <tr>
+                          <th>Node</th>
+                          {[...Array(numNodes).keys()].map((node) => (
+                              <th key={node}>{node + 1}</th>
+                          ))}
+                      </tr>
+                  </thead>
+                  <tbody>
+                    
+                      {adjacencyMatrix.map((row, rowIndex) => (
+                          <tr key={rowIndex}>
+                              <td>{rowIndex + 1}</td>
+                              {row.map((weight, columnIndex) => (
+                                  <td key={columnIndex}>
+                                      {columnIndex === rowIndex ? (
+                                           <div className="bg-secondary rounded bg-dark " style={{ width: '100%', height: '100%' }}></div> // Gray box for the node itself
+                                      ) : (
+                                              <input
+                                                  className="form-control form-control-sm"
+                                                  inputMode="numeric" 
+                                                  id={`${rowIndex}-${columnIndex}`}
+                                                
+                                                  placeholder='0'
+                                                  value={weight || ''}
+                                                  onChange={(e) => {
+                                                      updateEdgeWeight(rowIndex, columnIndex, e.target.value)
+                                                  }
+                                           
+                                                  }
+                                              />
+                                          )}
+                                  </td>
+                              ))}
+                          </tr>
+                      ))}
+                  </tbody>
+              </table>
+          </div>
       );
     };
+
 
     // TEMPORARY - Display the weight of the selected edge onto the screen
     const showWeight = (e, node1, node2) => {
@@ -301,7 +312,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       
       <div className="Graph">
         {/* Title bar */}
-        <div className="title-bar bg-dark p-3 d-flex align-items-center justify-content-between">
+        <div className="title-bar bg-dark p-3 px-4 d-flex align-items-center justify-content-between">
             <div>
                 {/* Styled title */}
                 <h2 className="text-white fw-bold d-flex align-items-center">
@@ -325,8 +336,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         </div>
 
 
-        {/* Graph */}
-        <svg width="700" height="700"  style={{ border: "1px solid black" }} >
+        <div className="container-fluid">
+        <div className="row">
+          {/* Graph */}
+          <div className="col-lg-8">
+             <svg width="700" height="700">
         {/* Render connections */}
         {nodeCoordinates.map((node, index) => {
           // Go through each node
@@ -438,7 +452,32 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         {/* Render nodes */}
         {renderNodes()}
         
-        </svg>
+      
+
+            </svg>
+          </div>
+          
+          {/* Adjacency Matrix */}
+          <div className="col-lg-4 py-5">
+            <div className="adjacency-matrix-containe">
+              {renderAdjacencyMatrix()}
+            </div>
+          </div>
+        </div>
+
+        <div className="col-lg-4"/>
+        
+
+
+        <div className="title-bar bg-dark d-flex align-items-center " style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', padding: '10px', backgroundColor: 'black' }}>
+                <button className="btn btn-light mx-1" onClick={prevStep}><FaStepBackward /></button>
+                <button className="btn btn-light mx-1" ><FaPause /></button>
+                <button className="btn btn-light mx-1" onClick={nextStep}><FaStepForward /></button>
+                <button className="btn btn-light mx-1" onClick={restart}><FaRedo /></button>
+                <button className="btn btn-light mx-1" onClick={fastForward}><FaFastForward /></button>
+        </div>
+
+        </div>
 
         <br/> <br/> <br/> <br/>
         <div className="buttons">
@@ -475,12 +514,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           <p1>Best Weight: {bestWeight} </p1>
           
         </div>
-        
-        <div className="adjacency-matrix-container">
-          <h3>Adjacency Matrix</h3>
-          {renderAdjacencyMatrix()}
-        </div>
-        
+
       </div>
     );
 

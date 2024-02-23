@@ -1,0 +1,20 @@
+.table-responsive {
+  max-width: 600px; /* Set the maximum width of the container */
+  max-height: 400px; /* Set the maximum height of the container */
+  overflow-x: auto; /* Enable horizontal scrolling */
+}
+
+.adjacency-matrix {
+  width: max-content; /* Set the width based on content */
+  min-width: 100%; /* Ensure a minimum width for the table */
+  table-layout: fixed; /* Ensure fixed layout for consistent column width */
+}
+
+.adjacency-matrix th,
+.adjacency-matrix td {
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflowing content */
+  text-overflow: ellipsis; /* Display ellipsis for overflowed content */
+  padding: 8px; /* Add padding for better readability */
+  min-width: 80px; /* Set minimum width for columns */
+}

@@ -26,9 +26,9 @@ export const renderCustomNode = (node, index, isColorA, isLatest, tourFound) => 
 // Function to generate coordinates for equidistant nodes on a circle
 export const generateNodeCoordinates = (numNodes) => {
     const coordinates = [];
-    const centerX = 350; // X coordinate of the center of the circle
-    const centerY = 350; // Y coordinate of the center of the circle
-    const radius = 300; // Radius of the circle
+    const centerX = 330; // X coordinate of the center of the circle
+    const centerY = 330; // Y coordinate of the center of the circle
+    const radius = 295; // Radius of the circle
 
     for (let i = 0; i < numNodes; i++) {
         const angle = (2 * Math.PI * i) / numNodes;   // Angle in radians
