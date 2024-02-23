@@ -17,6 +17,7 @@ function App() {
   // Stores state of the steps of the algorithm
   const [currentStep, setCurrentStep] = useState(1); 
   const [steps, setSteps] = useState([]);
+  const [presentTour, setPresentTour] = useState(false);
   
   return (
     <div className="App">
@@ -33,6 +34,8 @@ function App() {
         setCurrentStep={setCurrentStep}
         steps={steps}
         setSteps={setSteps}
+        presentTour={presentTour}
+        setPresentTour={setPresentTour}
       />
     </div>
   );

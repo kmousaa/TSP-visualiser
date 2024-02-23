@@ -4,7 +4,7 @@ import { useState } from "react";
 
 
 // Represents the graph and its adjacency matrix
-function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , currentStep, setCurrentStep, steps, setSteps}) {
+function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , currentStep, setCurrentStep, steps, setSteps , presentTour, setPresentTour}) {
 
     // Keeps track of steps
     const [stepNum, setStepNum] = useState(0); 
@@ -286,13 +286,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const renderNodes = () => {
       let nodeCoordinates = generateNodeCoordinates(numNodes);
       return nodeCoordinates.map((node, index) => (
-
-        renderCustomNode(node, index, steps.includes(index))
-        // index === steps[steps.length - 1] ? (
-        //   renderCustomNode(node, index, true)
-        // ) : (
-        //   renderCustomNode(node, index, false)
-        // )
+        console.log(steps[steps.length - 1] === index),
+        renderCustomNode(node, index, steps.includes(index) , steps[steps.length - 1] === index)
       ));
     };
 
@@ -365,7 +360,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     y2={nextNode.y} 
                     stroke= "black"
                     strokeOpacity="0.1"
-                    strokeWidth="2"
+                    strokeWidth="3"
                     onMouseMove={(e) => { showUnweightedEdges(e,node1,node2)}}
                     onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
                     onMouseOut={(e) => { e.target.style.stroke = "black"; }}
@@ -379,8 +374,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   y1={node.y} 
                   x2={nextNode.x} 
                   y2={nextNode.y} 
-                  stroke="black"
-                  strokeOpacity="1"
+                  stroke= "black"
+                  strokeOpacity="0.5"
                   strokeWidth="3"
                   onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
                   onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
@@ -428,7 +423,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 x2={x2}
                 y2={y2}
                 stroke="#ff8a27"
-                strokeWidth="3"
+                strokeWidth="4"
                 onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
                 onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
                 onMouseOut={(e) => { e.target.style.stroke = "#ff8a27"; }}

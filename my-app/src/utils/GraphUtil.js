@@ -1,11 +1,13 @@
 // GraphUtil.js
 
 
-export const renderCustomNode = (node, index, isColorA) => {
+export const renderCustomNode = (node, index, isColorA, isLatest) => {
     // Define the color based on the boolean value
-    const nodeColor = isColorA ? "#ff8a27" : "#FFFFFF"; // Color A or Color B
-    const borderColor = isColorA ? "#ff8a27" : "#000000"; // Border color A or Border color B
-    const textColor = isColorA ? "#FFFFFF" : "#000000"; // Text color A or Text color B
+    console.log("isLatest")
+    const nodeColor = isLatest ? "#30bbd1" : isColorA ? "#ff8a27" : "#FFFFFF"; // Blue, Color A, or Color B
+    const borderColor = isLatest ? "#30bbd1" : isColorA ? "#ff8a27" : "#000000"; // Blue, Border color A, or Border color B
+    const textColor = isLatest ? "#FFFFFF" : isColorA ? "#FFFFFF" : "#000000"; // Text color White, Text color A, or Text color B
+
     
     return (
       <g key={index}>
