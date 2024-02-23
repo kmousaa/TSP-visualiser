@@ -1,21 +1,23 @@
 import { generateNodeCoordinates , renderCustomNode } from "../utils/GraphUtil";
 import { NearestNeighborTSP, bruteForceTSP  } from "./TspAlgorithims";
-import { useState } from "react";
+import { useState , useEffect} from "react";
 
 
 // Represents the graph and its adjacency matrix
-function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , currentStep, setCurrentStep, steps, setSteps , presentTour, setPresentTour}) {
+function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum, steps, setSteps , presentTour, setPresentTour , consideredStep, setConsideredStep}) {
+    
 
-    // Keeps track of steps
-    const [stepNum, setStepNum] = useState(0); 
-  
+
+  // const [stop, setStop] = useState(true);
+
+
     // Reset the best tours
     const resetBestTour = () => {
       setBestTour([]);
       setBestWeight(Number.MAX_VALUE);
       setSteps([]);
-      setStepNum(1);
-      
+      setStepNum(0);
+      setPresentTour(false);
     }
 
     // Generate the adjacency matrix 
@@ -88,6 +90,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log(steps)
       console.log("STEP NUM: ");
       console.log(stepNum)
+      console.log("PRESENT TOUR: ");
+      console.log(presentTour)
       console.log(" --------------- END LOG --------------- ")
     };
   
@@ -153,37 +157,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setAdjacencyMatrix(newWeights);
     };
 
-    // Function to render node numbers around the circle
-    const renderNodeNumbers = () => {
-      const nodeCoordinates = generateNodeCoordinates(numNodes);
-      const radius = 15; // Radius for positioning node numbers
-      return (
-        <svg>
-          {nodeCoordinates.map((node, index) => {
-            const angle = (2 * Math.PI * index) / numNodes;
-            const x = node.x + radius * Math.cos(angle);
-            const y = node.y + radius * Math.sin(angle);
-            
-            return (
-              // Tag representing node number
-              <text
-                key={index}
-                x={x}
-                y={y}
-                fill="black"
-                fontSize="12"
-                fontWeight="bold"
-                textAnchor="middle" // Center align the text
-                alignmentBaseline="central" // Vertically align the text
-              >
-                {index + 1}
-              </text>
-            );
-          })}
-        </svg>
-      );
-    };
-  
+
     // Function to render the adjacency matrix as a table
     const renderAdjacencyMatrix = () => {
   
@@ -259,17 +233,23 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // Functions for simulation
     const nextStep = () => {
+      console.log("Next step.");
       if (stepNum < bestTour.length) { 
-        setSteps([...steps, bestTour[stepNum]]);
-        setStepNum(stepNum + 1);
-        console.log(steps)
+        console.log("LEts increment step.");
+        setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
+        setStepNum(prevStepNum => prevStepNum + 1);
       } else {
+        if (!(steps.length === 0)) {
+          setPresentTour(true);
+        }
         console.log("Reached maximum step.");
       }
     };
+    
 
     const prevStep = () => {
       if (stepNum > 0) {
+        setPresentTour(false);
         setSteps(steps.slice(0, -1));
         setStepNum(stepNum - 1);
       } else {
@@ -277,57 +257,45 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
     };
 
+    const fastForward = () => {
+      setSteps(bestTour);
+      setStepNum(bestTour.length);
+      setPresentTour(true);
+    };
+
+      
+    // const stopSteps = () => {
+    //   setStop(true);
+    // };
+
     const restart = () => {
       setSteps([]);
       setStepNum(0);
+      setPresentTour(false);
     };
 
     // Function to render nodes
     const renderNodes = () => {
       let nodeCoordinates = generateNodeCoordinates(numNodes);
       return nodeCoordinates.map((node, index) => (
-        console.log(steps[steps.length - 1] === index),
-        renderCustomNode(node, index, steps.includes(index) , steps[steps.length - 1] === index)
+        renderCustomNode(node, index, steps.includes(index) , steps[steps.length - 1] === index , presentTour)
       ));
     };
-
-    // const renderNodes = () => {
-    //   let nodeCoordinates = generateNodeCoordinates(numNodes);
-    //   return nodeCoordinates.map((node, index) => (
-
-    //     <g key={index}>
-    //       {/* Node outline */}
-    //       <circle cx={node.x} cy={node.y} r="20" fill="none" stroke="#000000" strokeWidth="2" />
-    //       {/* Node body */}
-    //       <circle cx={node.x} cy={node.y} r="18" fill="#ffffff" />
-    //       {/* Bold number inside the node */}
-    //       <text x={node.x} y={node.y} fill="#000000" fontSize="14" fontWeight="bold" textAnchor="middle" alignmentBaseline="central">
-    //         {index + 1}
-    //       </text>
-    //     </g>
-    //   ));
-    // };
-
-    
-
-    
-    
-
-    
-    
-
 
 
     // Generate coordinates for nodes
     const nodeCoordinates = generateNodeCoordinates(numNodes);
     const AdjMatrix = generateAdjacencyMatrix()
 
+
     // Helper function to generate TSP algorithm handlers
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
-        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setCurrentStep);
+        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setStepNum , consideredStep, setConsideredStep);
+        logWeights();
       };
     };
+
 
     return (
       
@@ -389,7 +357,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           );
         })}
 
-        console.log(steps)
+       
+
         {/* make every line inside best tour red */}
         { steps.map((node, index) => {
           if (index < steps.length - 1) {
@@ -399,21 +368,20 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             const y1 = nodeCoordinates[node1].y;
             const x2 = nodeCoordinates[node2].x;
             const y2 = nodeCoordinates[node2].y;
-            const result = AdjMatrix[node1][node2] === 0; // Check if the value is not "NA"
-
+            
             return (
-              result ? (
+              presentTour ? (
               <line
                 key={`${node1}-${node2}`}
                 x1={x1}
                 y1={y1}
                 x2={x2}
                 y2={y2}
-                stroke="blue"
-                strokeWidth="3"
+                stroke="#ff0000"
+                strokeWidth="4"
                 onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
                 onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
-                onMouseOut={(e) => { e.target.style.stroke = "red"; }}
+                onMouseOut={(e) => { e.target.style.stroke = "#ff0000"; }}
               />
               ) : (
               <line
@@ -428,8 +396,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
                 onMouseOut={(e) => { e.target.style.stroke = "#ff8a27"; }}
               />
+              )
 
-            )
             );
           }
         })}
@@ -464,10 +432,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           <br/> <br/>
           <button onClick={nextStep} > Next Step</button>
           <button onClick={prevStep} > Previous Step</button>
-          <button> Play </button>
+          <button > Play </button>
           <button> Stop </button>
           <button onClick={restart} > BB </button>
-          <button> FF </button>
+          <button onClick ={fastForward}> FF </button>
 
           <br/> <br/> <br/> <br/>
 

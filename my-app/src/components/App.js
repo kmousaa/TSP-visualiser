@@ -15,9 +15,12 @@ function App() {
   const [bestWeight, setBestWeight] = useState(Number.MAX_VALUE);
 
   // Stores state of the steps of the algorithm
-  const [currentStep, setCurrentStep] = useState(1); 
+  const [stepNum, setStepNum] = useState(0); 
   const [steps, setSteps] = useState([]);
   const [presentTour, setPresentTour] = useState(false);
+
+  // Considered steps
+  const [consideredStep, setConsideredStep] = useState([]);
   
   return (
     <div className="App">
@@ -30,12 +33,14 @@ function App() {
         setBestTour={setBestTour}
         bestWeight={bestWeight}
         setBestWeight={setBestWeight}
-        currentStep={currentStep}
-        setCurrentStep={setCurrentStep}
+        stepNum={stepNum}
+        setStepNum={setStepNum}
         steps={steps}
         setSteps={setSteps}
         presentTour={presentTour}
         setPresentTour={setPresentTour}
+        consideredStep={consideredStep}
+        setConsideredStep={setConsideredStep}
       />
     </div>
   );

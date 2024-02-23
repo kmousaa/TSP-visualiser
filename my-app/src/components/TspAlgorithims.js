@@ -26,12 +26,11 @@ export const bruteForceTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestT
 };
 
 
-export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight, setSteps , setCurrentStep) => {
+export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight, setSteps , setCurrentStep, setConsideredStep) => {
     resetBestTour();
 
     // Pick a random starting node
     var start = Math.floor(Math.random() * numNodes);
-
     var tour = [start];
     var weight = 0;
 
@@ -42,6 +41,9 @@ export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, set
         var adjNodes = getAdjacentNodes(current, adjacencyMatrix);
         var minWeight = Number.MAX_VALUE;
         var minNode = -1;
+
+        //  Considered nodes: adjcent nodes that are not in tour already and do not break conditions
+        var considered = adjNodes.filter(node => !tour.includes(node));
 
         // Find the nearest neighbor
         for (let j = 0; j < adjNodes.length; j++) {
@@ -58,6 +60,8 @@ export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, set
     // Add the weight of the last edge
     weight += adjacencyMatrix[`${tour[tour.length - 1]}-${start}`];
     tour.push(start);
+    console.log("UPDATING BEST TOUR")
+    setBestTour(tour);
 
     // add first element to setSteps
 
