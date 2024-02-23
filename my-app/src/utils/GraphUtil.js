@@ -1,11 +1,33 @@
 // GraphUtil.js
 
+
+export const renderCustomNode = (node, index, isColorA) => {
+    // Define the color based on the boolean value
+    const nodeColor = isColorA ? "#ff8a27" : "#FFFFFF"; // Color A or Color B
+    const borderColor = isColorA ? "#ff8a27" : "#000000"; // Border color A or Border color B
+    const textColor = isColorA ? "#FFFFFF" : "#000000"; // Text color A or Text color B
+    
+    return (
+      <g key={index}>
+        {/* Node outline */}
+        <circle cx={node.x} cy={node.y} r="20" fill="none" stroke={borderColor} strokeWidth="4" />
+        {/* Node body */}
+        <circle cx={node.x} cy={node.y} r="18" fill={nodeColor} />
+        {/* Bold number inside the node */}
+        <text x={node.x} y={node.y} fill={textColor} fontSize="20" fontWeight="bold" textAnchor="middle" alignmentBaseline="central">
+          {index + 1}
+        </text>
+      </g>
+    );
+  };
+  
+
 // Function to generate coordinates for equidistant nodes on a circle
 export const generateNodeCoordinates = (numNodes) => {
     const coordinates = [];
-    const centerX = 250; // X coordinate of the center of the circle
-    const centerY = 250; // Y coordinate of the center of the circle
-    const radius = 200; // Radius of the circle
+    const centerX = 350; // X coordinate of the center of the circle
+    const centerY = 350; // Y coordinate of the center of the circle
+    const radius = 300; // Radius of the circle
 
     for (let i = 0; i < numNodes; i++) {
         const angle = (2 * Math.PI * i) / numNodes;   // Angle in radians

@@ -1,4 +1,4 @@
-import { generateNodeCoordinates } from "../utils/GraphUtil";
+import { generateNodeCoordinates , renderCustomNode } from "../utils/GraphUtil";
 import { NearestNeighborTSP, bruteForceTSP  } from "./TspAlgorithims";
 import { useState } from "react";
 
@@ -287,18 +287,41 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       let nodeCoordinates = generateNodeCoordinates(numNodes);
       return nodeCoordinates.map((node, index) => (
 
-        // Check if best tour is there then make the first node in best tour red
-        console.log("Index: " + index + "Steps: " + steps),
-
-        index === steps[steps.length - 1] ? (
-          console.log("HMphh"),
-          <circle key={index} cx={node.x} cy={node.y} r="10" fill="red" />
-        ) : (
-          console.log("No red circle yet"),
-          <circle key={index} cx={node.x} cy={node.y} r="10" fill="#00aeff" />
-        )
+        renderCustomNode(node, index, steps.includes(index))
+        // index === steps[steps.length - 1] ? (
+        //   renderCustomNode(node, index, true)
+        // ) : (
+        //   renderCustomNode(node, index, false)
+        // )
       ));
     };
+
+    // const renderNodes = () => {
+    //   let nodeCoordinates = generateNodeCoordinates(numNodes);
+    //   return nodeCoordinates.map((node, index) => (
+
+    //     <g key={index}>
+    //       {/* Node outline */}
+    //       <circle cx={node.x} cy={node.y} r="20" fill="none" stroke="#000000" strokeWidth="2" />
+    //       {/* Node body */}
+    //       <circle cx={node.x} cy={node.y} r="18" fill="#ffffff" />
+    //       {/* Bold number inside the node */}
+    //       <text x={node.x} y={node.y} fill="#000000" fontSize="14" fontWeight="bold" textAnchor="middle" alignmentBaseline="central">
+    //         {index + 1}
+    //       </text>
+    //     </g>
+    //   ));
+    // };
+
+    
+
+    
+    
+
+    
+    
+
+
 
     // Generate coordinates for nodes
     const nodeCoordinates = generateNodeCoordinates(numNodes);
@@ -315,7 +338,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       
       <div className="Graph">
         <h2>TSP Graph Visualization</h2>
-        <svg width="500" height="500">
+      
+        <svg width="700" height="700"  style={{ border: "1px solid black" }} >
   
         {/* Render connections */}
         {nodeCoordinates.map((node, index) => {
@@ -340,7 +364,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     x2={nextNode.x} 
                     y2={nextNode.y} 
                     stroke= "black"
-                    strokeOpacity="0.25"
+                    strokeOpacity="0.1"
                     strokeWidth="2"
                     onMouseMove={(e) => { showUnweightedEdges(e,node1,node2)}}
                     onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
@@ -356,6 +380,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   x2={nextNode.x} 
                   y2={nextNode.y} 
                   stroke="black"
+                  strokeOpacity="1"
                   strokeWidth="3"
                   onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
                   onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
@@ -402,11 +427,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 y1={y1}
                 x2={x2}
                 y2={y2}
-                stroke="red"
+                stroke="#ff8a27"
                 strokeWidth="3"
                 onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
                 onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
-                onMouseOut={(e) => { e.target.style.stroke = "red"; }}
+                onMouseOut={(e) => { e.target.style.stroke = "#ff8a27"; }}
               />
 
             )
@@ -414,17 +439,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           }
         })}
 
-
-  
         {/* Render nodes */}
         {renderNodes()}
   
         {/* Render node numbers */}
-        {renderNodeNumbers()}
+        {/* {renderNodeNumbers()} */}
         
         {/* // Higher-order function to generate TSP algorithm handlers */}
           
         </svg>
+
+
+        <br/> <br/> <br/> <br/>
         <div className="buttons">
           
           {/* Graph Operations */}
