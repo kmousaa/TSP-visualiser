@@ -6,24 +6,28 @@ import Graph from './Graph';
 // Root of the application
 function App() {
 
-  // State of the Graph
-  const [numNodes, setNumNodes] = useState(0); // Number of nodes
-  const [adjacencyMatrix, setAdjacencyMatrix] = useState({}); // Edge weights
+  // Stores instance of the graph
+  const [numNodes, setNumNodes] = useState(0); // Number of nodes in the graph
+  const [adjacencyMatrix, setAdjacencyMatrix] = useState({}); // Edge weights dictionary
 
-  // State of the best tour
+  // Stores the best tour and its weight found by the TSP algorithm
   const [bestTour, setBestTour] = useState([]);
   const [bestWeight, setBestWeight] = useState(Number.MAX_VALUE);
 
-  // Stores state of the steps of the algorithm
+  // Stores the intermediate steps of the TSP algorithm
   const [stepNum, setStepNum] = useState(0); 
   const [steps, setSteps] = useState([]);
   const [presentTour, setPresentTour] = useState(false);
 
-  // Considered steps
+  // Keeps track of the edges considered by the TSP algorithm
+  // There are denoted by a different color in the graph
+  const [altSteps, setAltSteps] = useState([]);
   const [consideredStep, setConsideredStep] = useState([]);
-  
+
   return (
     <div className="App">
+
+      {/* Consists of the graph and the adjacency matrix */}
       <Graph 
         numNodes={numNodes} 
         setNumNodes={setNumNodes} 
@@ -37,6 +41,8 @@ function App() {
         setStepNum={setStepNum}
         steps={steps}
         setSteps={setSteps}
+        altSteps={altSteps}
+        setAltSteps={setAltSteps}
         presentTour={presentTour}
         setPresentTour={setPresentTour}
         consideredStep={consideredStep}

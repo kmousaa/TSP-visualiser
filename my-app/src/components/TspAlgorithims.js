@@ -26,13 +26,19 @@ export const bruteForceTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestT
 };
 
 
-export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight, setSteps , setCurrentStep, setConsideredStep) => {
+export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight, setSteps , setAltSteps ,setCurrentStep, setConsideredStep) => {
     resetBestTour();
 
     // Pick a random starting node
     var start = Math.floor(Math.random() * numNodes);
     var tour = [start];
     var weight = 0;
+
+    var considered = [];
+    var current = tour[tour.length - 1];
+    var adjNodes = getAdjacentNodes(current, adjacencyMatrix)
+    considered.push(adjNodes.filter(node => !tour.includes(node)));
+
 
     // Find the nearest neighbor for each node
     for (let i = 0; i < numNodes - 1; i++) {
@@ -41,9 +47,7 @@ export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, set
         var adjNodes = getAdjacentNodes(current, adjacencyMatrix);
         var minWeight = Number.MAX_VALUE;
         var minNode = -1;
-
-        //  Considered nodes: adjcent nodes that are not in tour already and do not break conditions
-        var considered = adjNodes.filter(node => !tour.includes(node));
+ 
 
         // Find the nearest neighbor
         for (let j = 0; j < adjNodes.length; j++) {
@@ -55,21 +59,35 @@ export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, set
         }
         weight += minWeight;
         tour.push(minNode);
+
+       
+        // if we are in 2nd last node
+        if(i === numNodes - 2){
+            // put back to start into concidred 
+            considered.push([start]);
+            
+        }
+        else{
+            considered.push(adjNodes.filter(node => !tour.includes(node)));
+        }
     }
 
     // Add the weight of the last edge
     weight += adjacencyMatrix[`${tour[tour.length - 1]}-${start}`];
     tour.push(start);
-    console.log("UPDATING BEST TOUR")
+
+    var current = tour[tour.length - 1];
+    var adjNodes = getAdjacentNodes(current, adjacencyMatrix)
+    considered.push(adjNodes.filter(node => !tour.includes(node)));
+
+
+    setConsideredStep(considered);
     setBestTour(tour);
-
-    // add first element to setSteps
-
     setBestTour(tour);
     setBestWeight(weight);
-
     setSteps([tour[0]]);
-    console.log("UPDATING CURRENT")
+   
+    setAltSteps(prevSteps => [...prevSteps, considered[0]]);
     setCurrentStep(1);
 
     return weight;

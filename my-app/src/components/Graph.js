@@ -1,39 +1,33 @@
 import { generateNodeCoordinates , renderCustomNode } from "../utils/GraphUtil";
 import { NearestNeighborTSP, bruteForceTSP  } from "./TspAlgorithims";
-import { useState , useEffect} from "react";
-
+import { FaSave, FaDownload } from 'react-icons/fa'; // Import icons
+import { FaPersonHiking } from "react-icons/fa6";
 
 // Represents the graph and its adjacency matrix
-function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum, steps, setSteps , presentTour, setPresentTour , consideredStep, setConsideredStep}) {
+function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep}) {
     
-
-
-  // const [stop, setStop] = useState(true);
-
-
-    // Reset the best tours
+    // Function to restart states
     const resetBestTour = () => {
       setBestTour([]);
       setBestWeight(Number.MAX_VALUE);
       setSteps([]);
       setStepNum(0);
       setPresentTour(false);
+      setConsideredStep([]);
+      setAltSteps([]);
     }
 
-    // Generate the adjacency matrix 
+    // Function to generate the adjacency matrix
     const generateAdjacencyMatrix = () => {
-      
       const newMatrix = Array.from({ length: numNodes }, () => Array(numNodes).fill(0)); // Initialize a 2D array of 0s
-      
       // Loop through existing edges and update the matrix accordingly
       for (const [edge, weight] of Object.entries(adjacencyMatrix)) {
         const [node1, node2] = edge.split('-').map(Number);
-
         if (newMatrix[node1] && newMatrix[node2]) {
           newMatrix[node1][node2] = weight;
-          newMatrix[node2][node1] = weight; // Symmetrically assign weight
-          newMatrix[node1][node1] = 0; // Set the diagonal to 0
-          newMatrix[node2][node2] = 0; // Set the diagonal to 0
+          newMatrix[node2][node1] = weight; // Symmetrically assign weight [e.g 1-2 and 2-1 have the same weight]
+          newMatrix[node1][node1] = 0; // Set the diagonal to 0 [e.g 0-0 has no weight]
+          newMatrix[node2][node2] = 0; // Set the diagonal to 0 [e.g 0-0 has no weight] 
         }
       }
       return newMatrix;
@@ -63,7 +57,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
     };
   
-    // Function to reset the graph
+    // Function to reset the graphs state
     const resetGraph = () => {
       resetBestTour();
       setNumNodes(0);
@@ -82,12 +76,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log("Number of Nodes: " + numNodes)
       console.log("Adjacency Matrix:");
       console.log(adjacencyMatrix);
+      console.log("Adj matrix generated: ");
+      console.log(generateAdjacencyMatrix());
       console.log("BEST TOUR: ");
       console.log(bestTour)
+      console.log("CONSIDERED STEP: ");
+      console.log(consideredStep)
       console.log("BEST WEIGHT: ");
       console.log(bestWeight)
       console.log("STEPS: ");
       console.log(steps)
+      console.log("ALT STEPS: ");
+      console.log(altSteps)
       console.log("STEP NUM: ");
       console.log(stepNum)
       console.log("PRESENT TOUR: ");
@@ -158,7 +158,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
 
 
-    // Function to render the adjacency matrix as a table
+    // Function to render the adjacency matrix as a table onto the screen
     const renderAdjacencyMatrix = () => {
   
       const adjacencyMatrix = generateAdjacencyMatrix();
@@ -201,7 +201,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       );
     };
 
-    // Display the weight of the selected edge
+    // TEMPORARY - Display the weight of the selected edge onto the screen
     const showWeight = (e, node1, node2) => {
       const weight = adjacencyMatrix[`${node1}-${node2}`];
       let displayText;
@@ -223,6 +223,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       showWeight(e, node1, node2);
     }
   
+    // When clicking an edge in the graph, select the adjacnecy matrix input
     const SelectAdjMatrix = (e,node1, node2) => {
       const inputId = `${node1}-${node2}`;
       const inputElement = document.getElementById(inputId);
@@ -231,13 +232,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
     };
 
-    // Functions for simulation
+    // Move forwards in the TSP simulation
     const nextStep = () => {
-      console.log("Next step.");
       if (stepNum < bestTour.length) { 
-        console.log("LEts increment step.");
         setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
         setStepNum(prevStepNum => prevStepNum + 1);
+        setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
       } else {
         if (!(steps.length === 0)) {
           setPresentTour(true);
@@ -246,28 +246,28 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
     };
     
-
+    // Move backwards in the TSP simulation
     const prevStep = () => {
       if (stepNum > 0) {
         setPresentTour(false);
         setSteps(steps.slice(0, -1));
         setStepNum(stepNum - 1);
+        setAltSteps(altSteps.slice(0, -1));
       } else {
         console.log("Reached minimum step.");
       }
     };
 
+    // Show the answer of the TSP simulation
     const fastForward = () => {
       setSteps(bestTour);
       setStepNum(bestTour.length);
       setPresentTour(true);
+      setAltSteps(consideredStep);
+
     };
 
-      
-    // const stopSteps = () => {
-    //   setStop(true);
-    // };
-
+    // Restart the TSP simulation
     const restart = () => {
       setSteps([]);
       setStepNum(0);
@@ -283,27 +283,50 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
 
 
-    // Generate coordinates for nodes
-    const nodeCoordinates = generateNodeCoordinates(numNodes);
-    const AdjMatrix = generateAdjacencyMatrix()
-
-
     // Helper function to generate TSP algorithm handlers
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
-        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setStepNum , consideredStep, setConsideredStep);
+        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep);
         logWeights();
       };
     };
 
 
+    const nodeCoordinates = generateNodeCoordinates(numNodes);
+    const AdjMatrix = generateAdjacencyMatrix();
+    const currentAltStep = altSteps[altSteps.length - 1];
+
+    // Render the graph and adjacency matrix
     return (
       
       <div className="Graph">
-        <h2>TSP Graph Visualization</h2>
-      
+        {/* Title bar */}
+        <div className="title-bar bg-dark p-3 d-flex align-items-center justify-content-between">
+            <div>
+                {/* Styled title */}
+                <h2 className="text-white fw-bold d-flex align-items-center">
+                    <FaPersonHiking className="me-2" />
+                    <span>TSP Heuristic Algorithim Visualiser</span>
+                </h2>
+            </div>
+ 
+            <div>
+                {/* Save button with icon */}
+                <button className="btn btn-light mx-4" onClick={saveGraph}>
+                    <FaSave className="me-1" />
+                    <span className="fw-bold">Save</span>
+                </button>
+                {/* Load button with icon */}
+                <button className="btn btn-light" onClick={loadGraph} >
+                    <FaDownload className="me-1" />
+                    <span className="fw-bold">Load</span>
+                </button>
+            </div>
+        </div>
+
+
+        {/* Graph */}
         <svg width="700" height="700"  style={{ border: "1px solid black" }} >
-  
         {/* Render connections */}
         {nodeCoordinates.map((node, index) => {
           // Go through each node
@@ -357,7 +380,31 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           );
         })}
 
-       
+        {/* Render all alternate connections */}
+        {currentAltStep && currentAltStep.map((altNode, index) => {
+          console.log("ALT STEPS: ", altSteps, "INDEX: ", index);
+          const currentNode = steps[steps.length - 1]; // Get the current node
+          const x1 = nodeCoordinates[currentNode].x;
+          const y1 = nodeCoordinates[currentNode].y;
+          const x2 = nodeCoordinates[altNode].x;
+          const y2 = nodeCoordinates[altNode].y;
+          const color = "#30bbd1";
+          return (
+            <line
+              key={`${currentNode}-${altNode}`}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke={color}
+              strokeOpacity="0.5"
+              strokeWidth="4"
+              onMouseMove={(e) => { showWeightedEdges(e, currentNode, altNode) }}
+              onClick={(e) => { SelectAdjMatrix(e, currentNode, altNode); }}
+              onMouseOut={(e) => { e.target.style.stroke = color; }}
+            />
+          );
+      })}
 
         {/* make every line inside best tour red */}
         { steps.map((node, index) => {
@@ -368,35 +415,21 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             const y1 = nodeCoordinates[node1].y;
             const x2 = nodeCoordinates[node2].x;
             const y2 = nodeCoordinates[node2].y;
+            const color = presentTour ? "#ff0000" : "#ff8a27";
             
             return (
-              presentTour ? (
               <line
                 key={`${node1}-${node2}`}
                 x1={x1}
                 y1={y1}
                 x2={x2}
                 y2={y2}
-                stroke="#ff0000"
+                stroke={color}
                 strokeWidth="4"
                 onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
-                onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
-                onMouseOut={(e) => { e.target.style.stroke = "#ff0000"; }}
+                onClick={(e) => { SelectAdjMatrix(e,node1,node2); }}
+                onMouseOut={(e) => { e.target.style.stroke = color; }}
               />
-              ) : (
-              <line
-                key={`${node1}-${node2}`}
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                stroke="#ff8a27"
-                strokeWidth="4"
-                onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
-                onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
-                onMouseOut={(e) => { e.target.style.stroke = "#ff8a27"; }}
-              />
-              )
 
             );
           }
@@ -404,14 +437,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
         {/* Render nodes */}
         {renderNodes()}
-  
-        {/* Render node numbers */}
-        {/* {renderNodeNumbers()} */}
         
-        {/* // Higher-order function to generate TSP algorithm handlers */}
-          
         </svg>
-
 
         <br/> <br/> <br/> <br/>
         <div className="buttons">
@@ -423,8 +450,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           <button onClick={() => clearWeights()}>ClearWeights</button>
           <button onClick={() => generateRandomWeights()}>Random Weight</button>
           <button onClick={() => logWeights()}>Log Weights</button>
-          <button onClick={() => saveGraph()}>Save Graph</button>
-          <button onClick={() => loadGraph()}>Load Graph</button>
+
 
           {/* TSP algorithms */}
           <button onClick={generateTSPHandler(bruteForceTSP)}>Brute Force</button>
@@ -438,8 +464,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           <button onClick ={fastForward}> FF </button>
 
           <br/> <br/> <br/> <br/>
-
-  
 
           {/* Display the best tour and its weight */}
           <p1 id = "weight">Selected weight: NA </p1>
