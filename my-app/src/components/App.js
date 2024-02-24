@@ -24,6 +24,9 @@ function App() {
   const [altSteps, setAltSteps] = useState([]);
   const [consideredStep, setConsideredStep] = useState([]);
 
+  // Keeps track if we sould show or hide adj matrix
+  const [showAdjacencyMatrix, setShowAdjacencyMatrix] = useState(false);
+
   return (
     <div className="App">
 
@@ -47,6 +50,8 @@ function App() {
         setPresentTour={setPresentTour}
         consideredStep={consideredStep}
         setConsideredStep={setConsideredStep}
+        showAdjacencyMatrix={showAdjacencyMatrix}
+        setShowAdjacencyMatrix={setShowAdjacencyMatrix}
       />
     </div>
   );

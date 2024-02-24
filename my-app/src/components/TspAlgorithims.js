@@ -1,8 +1,8 @@
 // Contains TSP algorithms 
-import { permutations, getAdjacentNodes , tourWeight} from "../utils/GraphUtil";
+import { permutations, getAdjacentNodes , tourWeight, sortDictionary, removeDupeDict} from "../utils/GraphUtil";
   
 
-export const bruteForceTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight) => {
+export const BruteForceTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight) => {
     resetBestTour();
     
     var possible_tours = permutations([...Array(numNodes).keys()]); // Generate all possible tours
@@ -34,6 +34,7 @@ export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, set
     var tour = [start];
     var weight = 0;
 
+    // Consider the nodes we can visit
     var considered = [];
     var current = tour[tour.length - 1];
     var adjNodes = getAdjacentNodes(current, adjacencyMatrix)
@@ -61,11 +62,9 @@ export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, set
         tour.push(minNode);
 
        
-        // if we are in 2nd last node
         if(i === numNodes - 2){
-            // put back to start into concidred 
+            // We can only consider the last node in the last step
             considered.push([start]);
-            
         }
         else{
             considered.push(adjNodes.filter(node => !tour.includes(node)));
@@ -75,21 +74,124 @@ export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, set
     // Add the weight of the last edge
     weight += adjacencyMatrix[`${tour[tour.length - 1]}-${start}`];
     tour.push(start);
+    
 
-    var current = tour[tour.length - 1];
-    var adjNodes = getAdjacentNodes(current, adjacencyMatrix)
-    considered.push(adjNodes.filter(node => !tour.includes(node)));
-
-
-    setConsideredStep(considered);
-    setBestTour(tour);
+    // Show the sequence of nodes in the tour
     setBestTour(tour);
     setBestWeight(weight);
+    // In every step of the tour, show what nodes we considered along the way
+    setConsideredStep(considered);
+
+    // Initialise the steps to 1 in order to show the first step of simulating the algorithim
     setSteps([tour[0]]);
-   
     setAltSteps(prevSteps => [...prevSteps, considered[0]]);
     setCurrentStep(1);
 
     return weight;
 };
+
+
+
+export const GreedyTSP= (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight, setSteps , setAltSteps ,setCurrentStep, setConsideredStep) => {
+    resetBestTour();
+    
+    // Remove duplicates and sort the adjacency matrix by weight (smallest weight first)
+    var adjMarixNoDupes = removeDupeDict(adjacencyMatrix);
+    var sortedAdjMatrix = sortDictionary(adjMarixNoDupes);
+    console.log("Sorted Adjacency Matrix: ");
+    console.log(sortedAdjMatrix);
+
+    var tour = [];
+    var stop = false;
+
+    while (!stop) {
+
+        console.log("Tour: ");
+        console.log(tour);
+
+        console.log("sorted Adj Matrix")
+        console.log(sortedAdjMatrix);
+
+        let smallestEdge = null;
+        let smallestWeight = Infinity;
+
+        // Find the smallest edge in sortedAdjMatrix
+        for (const [edge, weight] of Object.entries(sortedAdjMatrix)) {
+            if (weight < smallestWeight) {
+                smallestWeight = weight;
+                smallestEdge = edge;
+            }
+        }
+
+        if (smallestEdge) {
+
+            // split into two nodes
+            let smallNode1 = parseInt(smallestEdge.split('-')[0]);
+            let smallnode2 = parseInt(smallestEdge.split('-')[1]);
+            
+            if (tour.length + 1 === numNodes) {
+                console.log("LIT")
+               // That signafies that we have complete tour
+               console.log("NAMBER ONE: ", tour[0][0])
+                console.log("NAMBER TWO: ", smallNode1)
+
+
+               if (tour[0][0] === smallNode1) {
+
+                    const [node1, node2] = smallestEdge.split('-').map(Number);
+                    tour.push([ node1, node2 ]);
+                    delete sortedAdjMatrix[smallestEdge];
+                    stop = true; // Stop the loop if we hae valid tour
+
+                    console.log("We have a valid tour");
+               }
+               else{
+                    delete sortedAdjMatrix[smallestEdge]; // This is not the node we want
+                    console.log("This aint what we want pt 1");
+               }
+            }
+
+            else{
+
+                if (tour.length > 2 && tour[0].node1 === smallnode2) {
+                    delete sortedAdjMatrix[smallestEdge]; // This is not the node we want
+                    
+                    console.log("TOUR: ", tour);
+                    console.log("NODE 1: ", tour[0][0]);
+                    console.log("NODE 2: ", tour[tour.length - 1][1]);
+                    console.log("This aint what we want pt 2");
+                }
+                else{
+                    const [node1, node2] = smallestEdge.split('-').map(Number);
+                    tour.push([ node1, node2 ]);
+                    delete sortedAdjMatrix[smallestEdge];
+                    console.log("This is what we want ");
+                }
+            }
+
+        } else {
+            stop = true; // Stop the loop if no smallest edge is found
+        }
+    }
+
+    console.log("Tour: ");
+    console.log(tour);
+    console.log("sorted Adj Matrix")
+    console.log(sortedAdjMatrix);
+
+    // Show the sequence of nodes in the tour
+    setBestTour(tour);
+    // setBestWeight(weight);
+    // In every step of the tour, show what nodes we considered along the way
+    // setConsideredStep(considered);
+    // Initialise the steps to 1 in order to show the first step of simulating the algorithim
+    setSteps([tour[0]]);
+    // setAltSteps(prevSteps => [...prevSteps, considered[0]]);
+    setCurrentStep(1);
+
+
+
+
+};
+
 

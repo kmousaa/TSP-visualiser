@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
-import { NearestNeighborTSP, bruteForceTSP } from "./TspAlgorithims";
+import { NearestNeighborTSP, BruteForceTSP, GreedyTSP } from "./TspAlgorithims";
 import { FaSave, FaDownload, FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward } from 'react-icons/fa';
 import { FaPersonHiking } from "react-icons/fa6";
 import "../utils/Graph.css";
 
 
 // Represents the graph and its adjacency matrix
-function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep}) {
+function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep, showAdjacencyMatrix, setShowAdjacencyMatrix}) {
     
+  // USe ffect that updates when showAdjacencyMatrix changes
+
     // Function to restart states
     const resetBestTour = () => {
       setBestTour([]);
@@ -79,6 +81,19 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log("Number of Nodes: " + numNodes)
       console.log("Adjacency Matrix:");
       console.log(adjacencyMatrix);
+      
+      console.log("Adjacency Matrix with dupes removed: ");
+      // log an adjanecy matrix with duplicate weihts removed e.g for symetry 1-0 and 0-1 have the same weight
+      // 1-0 is same as 0-1 so we remove one of them
+      var adjMarixNoDupes = {};
+      for (const [edge, weight] of Object.entries(adjacencyMatrix)) {
+        const [node1, node2] = edge.split('-').map(Number);
+        if (node1 < node2) {
+          adjMarixNoDupes[`${node1}-${node2}`] = weight;
+        }
+      }
+      console.log(adjMarixNoDupes);
+
       console.log("Adj matrix generated: ");
       console.log(generateAdjacencyMatrix());
       console.log("BEST TOUR: ");
@@ -95,6 +110,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log(stepNum)
       console.log("PRESENT TOUR: ");
       console.log(presentTour)
+      console.log("SHOW ADJ MATRIX: ");
+      console.log(showAdjacencyMatrix)
       console.log(" --------------- END LOG --------------- ")
     };
   
@@ -160,6 +177,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setAdjacencyMatrix(newWeights);
     };
 
+    const showAdjMatrix = () => {
+      setShowAdjacencyMatrix(!showAdjacencyMatrix);
+    };
+
 
     // Function to render the adjacency matrix as a table onto the screen
     
@@ -167,6 +188,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const renderAdjacencyMatrix = () => {
       const adjacencyMatrix = generateAdjacencyMatrix();
       return (
+          showAdjacencyMatrix ? (
           <div className="table-responsive">
               <table id="adjMatrix" className="table  table-sm adjacency-matrix">
                   <thead>
@@ -208,6 +230,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   </tbody>
               </table>
           </div>
+      ) : <div> ok </div>
       );
     };
 
@@ -235,13 +258,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     }
   
     // When clicking an edge in the graph, select the adjacnecy matrix input
-    const SelectAdjMatrix = (e,node1, node2) => {
-      const inputId = `${node1}-${node2}`;
-      const inputElement = document.getElementById(inputId);
-      if (inputElement) {
-        inputElement.focus(); // Focus on the input element
-      }
+    const SelectAdjMatrix = (e, node1, node2) => {
+      setShowAdjacencyMatrix(true);
+      setTimeout(() => {
+        const inputId = `${node1}-${node2}`;
+        const inputElement = document.getElementById(inputId);
+        if (inputElement) {
+          inputElement.focus(); // Focus on the input element
+        }
+      }, 1); // Delay to make sure adjancecy matrix shown if hidden 
+
     };
+
 
     // Move forwards in the TSP simulation
     const nextStep = () => {
@@ -298,7 +326,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
         tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep);
-        logWeights();
+
       };
     };
 
@@ -309,216 +337,232 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // Render the graph and adjacency matrix
     return (
-      
       <div className="Graph">
         {/* Title bar */}
-        <div className="title-bar bg-dark p-3 px-4 d-flex align-items-center justify-content-between">
-            <div>
-                {/* Styled title */}
-                <h2 className="text-white fw-bold d-flex align-items-center">
-                    <FaPersonHiking className="me-2" />
-                    <span>TSP Heuristic Algorithim Visualiser</span>
-                </h2>
-            </div>
- 
-            <div>
-                {/* Save button with icon */}
-                <button className="btn btn-light mx-4" onClick={saveGraph}>
-                    <FaSave className="me-1" />
-                    <span className="fw-bold">Save</span>
-                </button>
-                {/* Load button with icon */}
-                <button className="btn btn-light" onClick={loadGraph} >
-                    <FaDownload className="me-1" />
-                    <span className="fw-bold">Load</span>
-                </button>
-            </div>
+        <div className="title-bar bg-dark p-3 px-4 d-flex justify-content-between">
+          <div>
+            {/* Styled title */}
+            <h2 className="text-white fw-bold d-flex align-items-center justify-content-between">
+              <FaPersonHiking className="me-2" />
+              <span>TSP Heuristic Algorithm Visualizer</span>
+            </h2>
+          </div>
+          <div>
+            {/* Save and load buttons with icons */}
+            <button className="btn btn-light mx-4" onClick={saveGraph}>
+              <FaSave className="me-1" />
+              <span className="fw-bold">Save</span>
+            </button>
+            <button className="btn btn-light" onClick={loadGraph} >
+              <FaDownload className="me-1" />
+              <span className="fw-bold">Load</span>
+            </button>
+          </div>
         </div>
 
-
-        <div className="container-fluid">
-        <div className="row">
-          {/* Graph */}
-          <div className="col-lg-8">
+        <div className="container-fluid d-flex flex-column">
+          <div className="row flex-grow-1">
+            {/* Graph */}
+            <div className="col-lg-8">
              <svg width="700" height="700">
-        {/* Render connections */}
-        {nodeCoordinates.map((node, index) => {
-          // Go through each node
-          return (
-            // For each node, find its connections to other nodes
-            nodeCoordinates.slice(index + 1).map((nextNode, nextIndex) => {
+          {/* Render connections */}
+          {nodeCoordinates.map((node, index) => {
+            // Go through each node
+            return (
+              // For each node, find its connections to other nodes
+              nodeCoordinates.slice(index + 1).map((nextNode, nextIndex) => {
 
-              // Define the current node and the node it's connected to
-              const node1 = index;
-              const node2 = index + nextIndex + 1;
-              const result = AdjMatrix[node1][node2] === 0; // Check if the value is not "NA"
-              
-              return (
-                // Check if node-node2 in the adjacency matrix has a value not "NA"
-                result ? (
-                  <a href="#" class="pe-auto  stretched-link d-inline-block p-2">
+                // Define the current node and the node it's connected to
+                const node1 = index;
+                const node2 = index + nextIndex + 1;
+                const result = AdjMatrix[node1][node2] === 0; // Check if the value is not "NA"
+     
+                return (
+                  // Check if node-node2 in the adjacency matrix has a value not "NA"
+                  result ? (
+                    <a href="#" class="pe-auto  stretched-link d-inline-block p-2">
+                    <line
+                      key={`${node1}-${node2}`} // Line with undefined weight
+                      x1={node.x} 
+                      y1={node.y} 
+                      x2={nextNode.x} 
+                      y2={nextNode.y} 
+                      stroke= "black"
+                      strokeOpacity="0.1"
+                      strokeWidth="3"
+                      onMouseMove={(e) => { showUnweightedEdges(e,node1,node2)}}
+                      onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
+                      onMouseOut={(e) => { e.target.style.stroke = "black"; }}
+                    />
+                    </a>
+                  ) : (
+                  <a href="#" class="pe-auto">
                   <line
-                    key={`${node1}-${node2}`} // Line with undefined weight
+                    key={`${node1}-${node2}`} // Line with defined weight
                     x1={node.x} 
                     y1={node.y} 
                     x2={nextNode.x} 
                     y2={nextNode.y} 
                     stroke= "black"
-                    strokeOpacity="0.1"
+                    strokeOpacity="0.5"
                     strokeWidth="3"
-                    onMouseMove={(e) => { showUnweightedEdges(e,node1,node2)}}
+                    onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
                     onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
                     onMouseOut={(e) => { e.target.style.stroke = "black"; }}
                   />
                   </a>
-                ) : (
-                <a href="#" class="pe-auto">
-                <line
-                  key={`${node1}-${node2}`} // Line with defined weight
-                  x1={node.x} 
-                  y1={node.y} 
-                  x2={nextNode.x} 
-                  y2={nextNode.y} 
-                  stroke= "black"
-                  strokeOpacity="0.5"
-                  strokeWidth="3"
-                  onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
-                  onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
-                  onMouseOut={(e) => { e.target.style.stroke = "black"; }}
-                />
-                </a>
-                ) // Show line differently if the value is "NA"
-              );
-              
-            })
-          );
-        })}
+                  ) // Show line differently if the value is "NA"
+                );
+                
+              })
+            );
+          })}
 
-        {/* Render all alternate connections */}
-        {currentAltStep && currentAltStep.map((altNode, index) => {
-          console.log("ALT STEPS: ", altSteps, "INDEX: ", index);
-          const currentNode = steps[steps.length - 1]; // Get the current node
-          const x1 = nodeCoordinates[currentNode].x;
-          const y1 = nodeCoordinates[currentNode].y;
-          const x2 = nodeCoordinates[altNode].x;
-          const y2 = nodeCoordinates[altNode].y;
-          const color = "#30bbd1";
-          return (
-            <line
-              key={`${currentNode}-${altNode}`}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke={color}
-              strokeOpacity="0.5"
-              strokeWidth="4"
-              onMouseMove={(e) => { showWeightedEdges(e, currentNode, altNode) }}
-              onClick={(e) => { SelectAdjMatrix(e, currentNode, altNode); }}
-              onMouseOut={(e) => { e.target.style.stroke = color; }}
-            />
-          );
-      })}
-
-        {/* make every line inside best tour red */}
-        { steps.map((node, index) => {
-          if (index < steps.length - 1) {
-            const node1 = steps[index];
-            const node2 = steps[index + 1];
-            const x1 = nodeCoordinates[node1].x;
-            const y1 = nodeCoordinates[node1].y;
-            const x2 = nodeCoordinates[node2].x;
-            const y2 = nodeCoordinates[node2].y;
-            const color = presentTour ? "#ff0000" : "#ff8a27";
+          {/* Render all alternate connections */}
+          {currentAltStep && currentAltStep.map((altNode, index) => {
+ 
+            const currentNode = steps[steps.length - 1]; // Get the current node
+            const x1 = nodeCoordinates[currentNode].x;
+            const y1 = nodeCoordinates[currentNode].y;
+            const x2 = nodeCoordinates[altNode].x;
+            const y2 = nodeCoordinates[altNode].y;
+            const color = "#30bbd1";
             
             return (
               <line
-                key={`${node1}-${node2}`}
+                key={`${currentNode}-${altNode}`}
                 x1={x1}
                 y1={y1}
                 x2={x2}
                 y2={y2}
                 stroke={color}
+                strokeOpacity="0.5"
                 strokeWidth="4"
-                onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
-                onClick={(e) => { SelectAdjMatrix(e,node1,node2); }}
+                onMouseMove={(e) => { showWeightedEdges(e, currentNode, altNode) }}
+                onClick={(e) => { SelectAdjMatrix(e, currentNode, altNode); }}
                 onMouseOut={(e) => { e.target.style.stroke = color; }}
               />
-
             );
-          }
         })}
 
-        {/* Render nodes */}
-        {renderNodes()}
-        
-      
-
-            </svg>
-          </div>
-          
-          {/* Adjacency Matrix */}
-          <div className="col-lg-4 py-5">
-            <div className="adjacency-matrix-containe">
-              {renderAdjacencyMatrix()}
-            </div>
-          </div>
-        </div>
-
-        <div className="col-lg-4"/>
-        
 
 
-        <div className="title-bar bg-dark d-flex align-items-center " style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', padding: '10px', backgroundColor: 'black' }}>
-                <button className="btn btn-light mx-1" onClick={prevStep}><FaStepBackward /></button>
-                <button className="btn btn-light mx-1" ><FaPause /></button>
-                <button className="btn btn-light mx-1" onClick={nextStep}><FaStepForward /></button>
-                <button className="btn btn-light mx-1" onClick={restart}><FaRedo /></button>
-                <button className="btn btn-light mx-1" onClick={fastForward}><FaFastForward /></button>
-        </div>
-
-        </div>
-
-        <br/> <br/> <br/> <br/>
-        <div className="buttons">
-          
-          {/* Graph Operations */}
-          <button onClick={() => addNode()}>Add Node</button>
-          <button onClick={() => removeNode()} disabled={numNodes === 0}> Remove Node </button>
-          <button onClick={() => resetGraph()}>Reset Graph</button>
-          <button onClick={() => clearWeights()}>ClearWeights</button>
-          <button onClick={() => generateRandomWeights()}>Random Weight</button>
-          <button onClick={() => logWeights()}>Log Weights</button>
-
-
-          {/* TSP algorithms */}
-          <button onClick={generateTSPHandler(bruteForceTSP)}>Brute Force</button>
-          <button onClick={generateTSPHandler(NearestNeighborTSP)}>Nearest Neighbor - NW</button>
-          <br/> <br/>
-          <button onClick={nextStep} > Next Step</button>
-          <button onClick={prevStep} > Previous Step</button>
-          <button > Play </button>
-          <button> Stop </button>
-          <button onClick={restart} > BB </button>
-          <button onClick ={fastForward}> FF </button>
-
-          <br/> <br/> <br/> <br/>
-
-          {/* Display the best tour and its weight */}
-          <p1 id = "weight">Selected weight: NA </p1>
-          <br/>
-          <p1>Best Tour: {bestTour} </p1>
-          <br/>
-          <p1> Tour length: {bestTour.length} </p1>
-          <br/>
-          <p1>Best Weight: {bestWeight} </p1>
-          
-        </div>
-
-      </div>
-    );
+          {/* make every line inside best tour red */}
+          { steps.map((node, index) => {
 
     
+
+
+              // if tour is a set [node1: 1, node2: 2] then we can use node1 and node2 to get the x and y coordinates
+              if (Array.isArray(node)) {
+                const node1 = node[0];
+                const node2 = node[1];
+                const x1 = nodeCoordinates[node1].x;
+                const y1 = nodeCoordinates[node1].y;
+                const x2 = nodeCoordinates[node2].x;
+                const y2 = nodeCoordinates[node2].y;
+                 const color = presentTour ? "#ff0000" : "#ff8a27";
+                return (
+                  <line
+                    key={`${node1}-${node2}`}
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke={color}
+                    strokeWidth="4"
+                    onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
+                    onClick={(e) => { SelectAdjMatrix(e,node1,node2); }}
+                    onMouseOut={(e) => { e.target.style.stroke = color; }}
+                  />
+                );
+              }
+              else{
+
+                if (index < steps.length - 1) {
+                  const node1 = steps[index];
+                  const node2 = steps[index + 1];
+                  const x1 = nodeCoordinates[node1].x;
+                  const y1 = nodeCoordinates[node1].y;
+                  const x2 = nodeCoordinates[node2].x;
+                  const y2 = nodeCoordinates[node2].y;
+                  const color = presentTour ? "#ff0000" : "#ff8a27";
+                  return (
+                    <line
+                      key={`${node1}-${node2}`}
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke={color}
+                      strokeWidth="4"
+                      onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
+                      onClick={(e) => { SelectAdjMatrix(e,node1,node2); }}
+                      onMouseOut={(e) => { e.target.style.stroke = color; }}
+                    />
+                  );
+
+                }
+              }
+
+            
+          })}
+
+          {/* Render nodes */}
+          {renderNodes()}
+          
+             </svg>
+            </div>
+            
+            {/* Adjacency Matrix */}
+            <div className="col-lg-4 py-5 d-flex flex-column justify-content-between">
+              <div className="adjacency-matrix-container">
+              {renderAdjacencyMatrix()}
+              </div>
+
+              {/* Additional buttons */}
+              <div className="buttons mt-auto">
+                {/* Graph Operations */}
+                <div>
+                  <button onClick={() => addNode()} className="btn btn-light mx-1">Add Node</button>
+                  <button onClick={() => removeNode()} disabled={numNodes === 0} className="btn btn-light mx-1">Remove Node</button>
+                  <button onClick={() => resetGraph()} className="btn btn-light mx-1">Reset Graph</button>
+                  <button onClick={() => clearWeights()} className="btn btn-light mx-1">Clear Weights</button>
+                  <button onClick={() => generateRandomWeights()} className="btn btn-light mx-1">Random Weight</button>
+                  <button onClick={() => logWeights()} className="btn btn-light mx-1">Log Weights</button>
+                  <button onClick={() => showAdjMatrix()} className="btn btn-light mx-1">Show Adj Matrix</button>
+                </div>
+
+                {/* TSP algorithms */}
+                <div>
+                  <button onClick={generateTSPHandler(BruteForceTSP)} className="btn btn-light mx-1">Brute Force</button>
+                  <button onClick={generateTSPHandler(NearestNeighborTSP)} className="btn btn-light mx-1">Nearest Neighbor</button>
+                  <button onClick={generateTSPHandler(GreedyTSP)} className="btn btn-light mx-1">Greedy</button>
+                </div>
+
+                {/* Display the best tour and its weight */}
+                <div>
+                  <p1 id="weight" className="text-white mx-1">Selected weight: NA</p1>
+                  <p1 className="text-white mx-1">Best Tour: {bestTour}</p1>
+                  <p1 className="text-white mx-1">Tour length: {bestTour.length}</p1>
+                  <p1 className="text-white mx-1">Best Weight: {bestWeight}</p1>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Control buttons */}
+          <div className="title-bar bg-dark d-flex align-items-center justify-content-center fixed-bottom w-100 p-3">
+            <button className="btn btn-light mx-1" onClick={prevStep}><FaStepBackward /></button>
+            <button className="btn btn-light mx-1"><FaPause /></button>
+            <button className="btn btn-light mx-1" onClick={nextStep}><FaStepForward /></button>
+            <button className="btn btn-light mx-1" onClick={restart}><FaRedo /></button>
+            <button className="btn btn-light mx-1" onClick={fastForward}><FaFastForward /></button>
+          </div>
+        </div>
+      </div>
+    );
   }
+
 
   export default Graph;

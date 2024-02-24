@@ -81,3 +81,44 @@ export const getAdjacentNodes = (nodeIndex, adjacencyMatrix) => {
 };
 
     
+
+
+// Sort the adjacency matrix dictionary by weight src: https://www.educative.io/answers/how-can-we-sort-a-dictionary-by-value-in-javascript
+export const sortDictionary = (dict) => {
+
+  // Step - 1
+  // Create the array of key-value pairs
+  var items = Object.keys(dict).map(
+    (key) => { return [key, dict[key]] });
+  
+  // Step - 2
+  // Sort the array based on the second element (i.e. the value)
+  items.sort(
+      (first, second) => { return first[1] - second[1] }
+  );
+    
+  // Step - 3
+  // Obtain the sorted dictionary
+
+  var sorted_dict = {};
+  for (var i = 0; i < items.length; i++) {
+    var key = items[i][0];
+    var value = items[i][1];
+    sorted_dict[key] = value;
+  }
+
+  return sorted_dict;
+
+};
+
+// Remove duplicate edges from the adjacency matrix
+export const removeDupeDict = (dict) => {
+  var dictNoDupe = {};
+  for (const [edge, weight] of Object.entries(dict)) {
+    const [node1, node2] = edge.split('-').map(Number);
+    if (node1 < node2) {
+      dictNoDupe[`${node1}-${node2}`] = weight;
+    }
+  }
+  return dictNoDupe;
+};
