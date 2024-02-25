@@ -131,35 +131,69 @@ export const GreedyTSP= (resetBestTour,numNodes , adjacencyMatrix, setBestTour, 
             
             if (tour.length + 1 === numNodes) {
                 console.log("LIT")
-               // That signafies that we have complete tour
-               console.log("NAMBER ONE: ", tour[0][0])
+                console.log("NAMBER ONE: ", tour[0][0])
                 console.log("NAMBER TWO: ", smallNode1)
 
-
-               if (tour[0][0] === smallNode1) {
-
+                if (sortedAdjMatrix.length === 1){
                     const [node1, node2] = smallestEdge.split('-').map(Number);
                     tour.push([ node1, node2 ]);
                     delete sortedAdjMatrix[smallestEdge];
-                    stop = true; // Stop the loop if we hae valid tour
 
-                    console.log("We have a valid tour");
-               }
-               else{
+                    console.log("We have a valid low it but kkkkkkk");
+                }
+                else{
+            
+                    var smallNode1Count = 0;
+                    var smallNode2Count = 0;
+                    for (let i = 0; i < tour.length; i++) {
+                        if (tour[i][0] === smallNode1) {
+                            smallNode1Count++;
+                        }
+                    }
+
+                    if ( smallNode1Count != 1 && smallNode2Count != 1){
+                        const [node1, node2] = smallestEdge.split('-').map(Number);
+                        tour.push([ node1, node2 ]);
+                        delete sortedAdjMatrix[smallestEdge];
+
+                        console.log("We have a valid low it but kkkkkkk");
+
+                    }
                     delete sortedAdjMatrix[smallestEdge]; // This is not the node we want
                     console.log("This aint what we want pt 1");
-               }
+                }
+
+               
             }
 
             else{
 
-                if (tour.length > 2 && tour[0].node1 === smallnode2) {
-                    delete sortedAdjMatrix[smallestEdge]; // This is not the node we want
-                    
-                    console.log("TOUR: ", tour);
-                    console.log("NODE 1: ", tour[0][0]);
-                    console.log("NODE 2: ", tour[tour.length - 1][1]);
-                    console.log("This aint what we want pt 2");
+                
+                if (tour.length > 1) {
+
+                    var smallNode1Count = 0;
+                    var smallNode2Count = 0;
+                    for (let i = 0; i < tour.length; i++) {
+                        for (let j = 0; j < tour[i].length; j++) {
+                            if (tour[i][j] === smallNode1) {
+                                smallNode1Count++;
+                            }
+                            if (tour[i][j] === smallnode2) {
+                                smallNode2Count++;
+                            }
+                        }
+                    }
+
+                    if ( smallNode1Count > 1 || smallNode2Count > 1){
+                        delete sortedAdjMatrix[smallestEdge]; // This is not the node we want
+                        console.log("This aint what we want pt 2");
+                    }
+                    else{
+                        const [node1, node2] = smallestEdge.split('-').map(Number);
+                        tour.push([ node1, node2 ]);
+                        delete sortedAdjMatrix[smallestEdge];
+                        console.log("This is what we want ");
+                    }
                 }
                 else{
                     const [node1, node2] = smallestEdge.split('-').map(Number);
@@ -171,6 +205,15 @@ export const GreedyTSP= (resetBestTour,numNodes , adjacencyMatrix, setBestTour, 
 
         } else {
             stop = true; // Stop the loop if no smallest edge is found
+        }
+
+        if (tour.length === numNodes) {
+            console.log("OIIIII");
+            console.log("Tour: ");
+            console.log(tour);
+            console.log("node num")
+            console.log(numNodes);
+            stop = true; // Stop the loop if we have a valid tour
         }
     }
 
