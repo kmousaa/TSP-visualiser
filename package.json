@@ -2,6 +2,7 @@
   "dependencies": {
     "bootstrap": "^3.4.1",
     "fortawesome": "^0.0.1-security",
+    "munkres-js": "^1.2.2",
     "react-bootstrap": "^2.10.0",
     "react-icons": "^5.0.1"
   }

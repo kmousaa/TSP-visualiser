@@ -1,8 +1,12 @@
 // Contains TSP algorithms 
 import { permutations, getAdjacentNodes , tourWeight, sortDictionary, removeDupeDict} from "../utils/GraphUtil";
-  
+import { Munkres } from 'munkres-js';
 
-export const BruteForceTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight) => {
+// Import the Munkres library
+
+
+
+export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight) => {
     resetBestTour();
     
     var possible_tours = permutations([...Array(numNodes).keys()]); // Generate all possible tours
@@ -15,18 +19,21 @@ export const BruteForceTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestT
         const tour = possible_tours[i];
         var weight = tourWeight(tour, adjacencyMatrix);
         if (weight < best_weight) {
-        best_tour = tour;
-        best_weight = weight;
+            best_tour = tour;
+            best_weight = weight;
         }
     }
         
     setBestTour(best_tour);
     setBestWeight(best_weight);
+
+    console.log("Total weight:", best_weight); // Log the total weight
+
     return best_weight; // Return the weight of the best tour
 };
 
 
-export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight, setSteps , setAltSteps ,setCurrentStep, setConsideredStep) => {
+export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep) => {
     resetBestTour();
 
     // Pick a random starting node
@@ -87,154 +94,385 @@ export const NearestNeighborTSP = (resetBestTour,numNodes , adjacencyMatrix, set
     setAltSteps(prevSteps => [...prevSteps, considered[0]]);
     setCurrentStep(1);
 
+    console.log("Total weight:", weight); // Log the total weight
+
     return weight;
 };
 
 
+export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep) => {
 
-export const GreedyTSP= (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight, setSteps , setAltSteps ,setCurrentStep, setConsideredStep) => {
     resetBestTour();
-    
-    // Remove duplicates and sort the adjacency matrix by weight (smallest weight first)
-    var adjMarixNoDupes = removeDupeDict(adjacencyMatrix);
-    var sortedAdjMatrix = sortDictionary(adjMarixNoDupes);
-    console.log("Sorted Adjacency Matrix: ");
-    console.log(sortedAdjMatrix);
 
     var tour = [];
+    var weight = 0;
     var stop = false;
+
+    // Dictionary that stores every node as well as the number of degree it has
+    var degreeDict = {};
+    for (let i = 0; i < numNodes; i++) {
+        degreeDict[i] = 0;
+    }
+
+    // Remove duplicates from adjacency matrix
+    var adjMatrixNoDupes = removeDupeDict(adjacencyMatrix);
 
     while (!stop) {
 
-        console.log("Tour: ");
-        console.log(tour);
+        // Sort the current adjacency matrix to make the smallest edge come first
+        var sortedAdjMatrix = sortDictionary(adjMatrixNoDupes);
+        var sortedAdjMatrixLength = Object.keys(sortedAdjMatrix).length;
+        
 
-        console.log("sorted Adj Matrix")
-        console.log(sortedAdjMatrix);
+        // If adding the last edge completes the cycle 
+        if (tour.length + 1 === numNodes) {
 
-        let smallestEdge = null;
-        let smallestWeight = Infinity;
+            // Find the node that causes both edges to be 2-2 from remaining sorted edges
+            for (let i = 0; i < sortedAdjMatrixLength; i++) {
 
-        // Find the smallest edge in sortedAdjMatrix
-        for (const [edge, weight] of Object.entries(sortedAdjMatrix)) {
-            if (weight < smallestWeight) {
-                smallestWeight = weight;
-                smallestEdge = edge;
+                var edge = Object.keys(sortedAdjMatrix)[i];
+                var nodes = edge.split('-');
+                var node1 = parseInt(nodes[0]);
+                var node2 = parseInt(nodes[1]);
+
+                // Add the edge if it does not cause the degree to increase over 2
+                var entry1 = degreeDict[node1];
+                var entry2 = degreeDict[node2];
+
+                if (entry1 === 1 && entry2 === 1) {
+                    // That means we can add this final edge to the tour
+                    tour.push([node1, node2]);
+                    weight += adjacencyMatrix[edge];
+                    degreeDict[node1] += 1;
+                    degreeDict[node2] += 1;
+                    delete adjMatrixNoDupes[edge];
+
+                    break;
+                } else {
+
+                    // This means it is not the node we want and remove it from the adjMatrixNoDupe
+                    delete adjMatrixNoDupes[edge];
+                }
+
+
             }
-        }
-
-        if (smallestEdge) {
-
-            // split into two nodes
-            let smallNode1 = parseInt(smallestEdge.split('-')[0]);
-            let smallnode2 = parseInt(smallestEdge.split('-')[1]);
-            
-            if (tour.length + 1 === numNodes) {
-                console.log("LIT")
-                console.log("NAMBER ONE: ", tour[0][0])
-                console.log("NAMBER TWO: ", smallNode1)
-
-                if (sortedAdjMatrix.length === 1){
-                    const [node1, node2] = smallestEdge.split('-').map(Number);
-                    tour.push([ node1, node2 ]);
-                    delete sortedAdjMatrix[smallestEdge];
-
-                    console.log("We have a valid low it but kkkkkkk");
-                }
-                else{
-            
-                    var smallNode1Count = 0;
-                    var smallNode2Count = 0;
-                    for (let i = 0; i < tour.length; i++) {
-                        if (tour[i][0] === smallNode1) {
-                            smallNode1Count++;
-                        }
-                    }
-
-                    if ( smallNode1Count != 1 && smallNode2Count != 1){
-                        const [node1, node2] = smallestEdge.split('-').map(Number);
-                        tour.push([ node1, node2 ]);
-                        delete sortedAdjMatrix[smallestEdge];
-
-                        console.log("We have a valid low it but kkkkkkk");
-
-                    }
-                    delete sortedAdjMatrix[smallestEdge]; // This is not the node we want
-                    console.log("This aint what we want pt 1");
-                }
-
-               
-            }
-
-            else{
-
-                
-                if (tour.length > 1) {
-
-                    var smallNode1Count = 0;
-                    var smallNode2Count = 0;
-                    for (let i = 0; i < tour.length; i++) {
-                        for (let j = 0; j < tour[i].length; j++) {
-                            if (tour[i][j] === smallNode1) {
-                                smallNode1Count++;
-                            }
-                            if (tour[i][j] === smallnode2) {
-                                smallNode2Count++;
-                            }
-                        }
-                    }
-
-                    if ( smallNode1Count > 1 || smallNode2Count > 1){
-                        delete sortedAdjMatrix[smallestEdge]; // This is not the node we want
-                        console.log("This aint what we want pt 2");
-                    }
-                    else{
-                        const [node1, node2] = smallestEdge.split('-').map(Number);
-                        tour.push([ node1, node2 ]);
-                        delete sortedAdjMatrix[smallestEdge];
-                        console.log("This is what we want ");
-                    }
-                }
-                else{
-                    const [node1, node2] = smallestEdge.split('-').map(Number);
-                    tour.push([ node1, node2 ]);
-                    delete sortedAdjMatrix[smallestEdge];
-                    console.log("This is what we want ");
-                }
-            }
-
         } else {
-            stop = true; // Stop the loop if no smallest edge is found
+
+            for (let i = 0; i < sortedAdjMatrixLength; i++) {
+
+                // Split up the currently considered edge  {1-2: 1, 0-2: 2, 1-3: 3, 2-3: 5, 0-1: 6, …}
+                var edge = Object.keys(sortedAdjMatrix)[i];
+                var nodes = edge.split('-');
+                var node1 = parseInt(nodes[0]);
+                var node2 = parseInt(nodes[1]);
+
+                // Add the edge if it does not cause the degree to increase over 2
+                var entry1 = degreeDict[node1];
+                var entry2 = degreeDict[node2];
+
+                // This shall increase degree more than 2
+                if (entry1 === 2 || entry2 === 2) {
+                    // Skip that entry then - remove it from the adjMatrixNoDupe
+                    delete adjMatrixNoDupes[edge];
+
+                } else {
+                    tour.push([node1, node2]);
+                    weight += adjacencyMatrix[edge];
+                    degreeDict[node1] += 1;
+                    degreeDict[node2] += 1;
+                    delete adjMatrixNoDupes[edge];
+
+                    break;
+                }
+
+            }
+
         }
 
-        if (tour.length === numNodes) {
-            console.log("OIIIII");
-            console.log("Tour: ");
-            console.log(tour);
-            console.log("node num")
-            console.log(numNodes);
-            stop = true; // Stop the loop if we have a valid tour
+        // If the tour is complete, stop
+        if (tour.length >= numNodes) {
+            stop = true;
         }
+
     }
 
-    console.log("Tour: ");
+    // Ensure the tour is properly closed for odd number of vertices
+    if (tour.length % 2 !== 0) {
+        const lastEdge = tour[tour.length - 1];
+        const firstNode = lastEdge[1];
+        const secondNode = tour[0][0];
+        tour.push([firstNode, secondNode]);
+        weight += adjacencyMatrix[`${firstNode}-${secondNode}`];
+    }
+
     console.log(tour);
-    console.log("sorted Adj Matrix")
-    console.log(sortedAdjMatrix);
 
-    // Show the sequence of nodes in the tour
     setBestTour(tour);
-    // setBestWeight(weight);
-    // In every step of the tour, show what nodes we considered along the way
-    // setConsideredStep(considered);
-    // Initialise the steps to 1 in order to show the first step of simulating the algorithim
     setSteps([tour[0]]);
-    // setAltSteps(prevSteps => [...prevSteps, considered[0]]);
     setCurrentStep(1);
-
-
-
+    
+    console.log("Total weight:", weight); // Log the total weight
 
 };
 
+
+
+
+
+// Function to find the Minimum Spanning Tree using Prim's algorithm [Chat GPT]
+const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep) => {
+    resetBestTour();
+
+    // Initialize an empty set to store included nodes and an array to store MST edges
+    const includedNodes = new Set();
+    const mstEdges = [];
+
+    // Start with an arbitrary node (0)
+    let currentNode = 0;
+    includedNodes.add(currentNode);
+
+    // Dictionary that stores every node as well as the number of degree it has
+    var degreeDict = {};
+    for (let i = 0; i < numNodes; i++) {
+        degreeDict[i] = 0;
+    }
+
+    // Continue until all nodes are included in the MST
+    while (includedNodes.size < numNodes) {
+        let minWeight = Infinity;
+        let nextNode = null;
+        let edge = null;
+
+        // Find the minimum weight edge connecting an included node to a not-yet-included node
+        for (let node of includedNodes) {
+            for (let adjacentNode = 0; adjacentNode < numNodes; adjacentNode++) {
+                if (!includedNodes.has(adjacentNode) && adjacencyMatrix[`${node}-${adjacentNode}`] < minWeight) {
+                    minWeight = adjacencyMatrix[`${node}-${adjacentNode}`];
+                    nextNode = adjacentNode;
+                    edge = [node, adjacentNode];
+                }
+            }
+        }
+
+        // Add the next node and edge to the MST
+        includedNodes.add(nextNode);
+        mstEdges.push(edge);
+        
+        degreeDict[edge[0]] += 1;
+        degreeDict[edge[1]] += 1;
+
+        // Update the current node for the next iteration
+        currentNode = nextNode;
+    }
+
+    return {mstEdges, degreeDict};
+};
+
+export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep) => {
+    resetBestTour();
+
+    var considered = [];
+
+    // Step 1 - Find the Minimum Spanning Tree
+    var mst = PrimsMST(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep);
+    console.log("MST")
+    console.log(mst);
+
+    // Step 2 - Find the odd-degree nodes
+    var oddDegreeNodes = [];
+    for (let node in mst.degreeDict) {
+        if (mst.degreeDict[node] % 2 !== 0) {
+            oddDegreeNodes.push(parseInt(node));
+        }
+    }
+    console.log("ODD DEGREE NODES");
+    console.log(oddDegreeNodes);
+
+    // Step 3 - Find the Minimum Weight Perfect Matching
+
+    // Build adjancecy matrix for the odd degree nodes, we will find the best mmacthing from that. Remeber we have symetry in the matrix, as well as the diagonal is 0
+    var oddMatrix = [];
+    for (let i = 0; i < oddDegreeNodes.length; i++) {
+        var row = [];
+        for (let j = 0; j < oddDegreeNodes.length; j++) {
+            if (i === j) {
+                row.push(Infinity);
+            } else {
+                row.push(adjacencyMatrix[`${oddDegreeNodes[i]}-${oddDegreeNodes[j]}`]);
+            }
+        }
+        oddMatrix.push(row);
+    }
+
+    // Find the minimum weight perfect matching
+    var munkres = require('munkres-js');
+    var bestMatch = munkres(oddMatrix)
+    // Remove symetry from the best match for example [1,0] and [0,1] are the same, so we only need one of them
+    var bestMatchNoSym = [];
+    for (let i = 0; i < bestMatch.length; i++) {
+        if (bestMatch[i][0] < bestMatch[i][1]) {
+            bestMatchNoSym.push([oddDegreeNodes[bestMatch[i][0]], oddDegreeNodes[bestMatch[i][1]]]);
+        }
+    }
+
+    console.log("Best Match");
+    console.log(bestMatchNoSym);
+
+    // Step 4 - Combine the MST and the minimum weight perfect matching to form a multigraph
+    var multigraph = mst.mstEdges.concat(bestMatchNoSym);
+
+    console.log("Multigraph");
+    console.log(multigraph);
+
+    // Step 5 - Find an Eulerian Tour
+    const findEulerianTour = (graph, currentVertex, eulerianTour) => {
+        while (graph[currentVertex].length > 0) {
+            const nextVertex = graph[currentVertex].shift();
+            // Remove the corresponding edge from the graph
+            graph[nextVertex].splice(graph[nextVertex].indexOf(currentVertex), 1);
+            findEulerianTour(graph, nextVertex, eulerianTour);
+        }
+        eulerianTour.push(currentVertex);
+    };
+
+    // Construct adjacency list representation of the multigraph
+    const adjacencyList = {};
+    for (const [u, v] of multigraph) {
+        if (!adjacencyList[u]) adjacencyList[u] = [];
+        if (!adjacencyList[v]) adjacencyList[v] = [];
+        adjacencyList[u].push(v);
+        adjacencyList[v].push(u);
+    }
+
+    const eulerianTour = [];
+    findEulerianTour(adjacencyList, multigraph[0][0], eulerianTour);
+    console.log("Eulerian Tour");
+    console.log(eulerianTour);
+
+    // Step 6 - Generate the TSP tour from the Eulerian tour
+    const tspTour = [];
+    for (let vertex of eulerianTour) {
+        if (!tspTour.includes(vertex)) {
+            tspTour.push(vertex);
+        }
+    }
+
+    // Add the first vertex to the end of the tour
+    tspTour.push(tspTour[0]);
+    console.log("TSP Tour");
+
+    setBestTour(tspTour);
+    setSteps([tspTour[0]]);
+    setCurrentStep(1);
+
+    
+
+    console.log("Total weight:", tourWeight(tspTour, adjacencyMatrix)); // Log the total weight
+};
+
+
+
+
+// export const GreedyTSP= (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight, setSteps , setAltSteps ,setCurrentStep, setConsideredStep) => {
+    
+//     resetBestTour();
+    
+//     var tour = [];
+//     var stop = false;
+
+//     // Dictionary that stores every node as well as the number of degree it has
+//     var degreeDict = {};
+//     for (let i = 0; i < numNodes; i++) {
+//         degreeDict[i] = 0;
+//     }
+
+//     // Remove duplicates from adjacency matrix
+//     var adjMatrixNoDupes = removeDupeDict(adjacencyMatrix);
+
+//     while (!stop){
+
+//         // Sort the current adjacency matrix to make the smallest edge come first
+//         var sortedAdjMatrix = sortDictionary(adjMatrixNoDupes);
+//         var sortedAdjMatrixLength =  Object.keys(sortedAdjMatrix).length;
+        
+//         // If adding the last edge completes the cycle 
+//         if (tour.length + 1 === numNodes){
+
+//             // Find the node that causes both edges to be 2-2 from remaining sorted edges
+//             for (let i = 0; i < sortedAdjMatrixLength; i++) {
+
+//                 var edge = Object.keys(sortedAdjMatrix)[i];
+//                 var nodes = edge.split('-');
+//                 var node1 = parseInt(nodes[0]);
+//                 var node2 = parseInt(nodes[1]);
+            
+//                 // Add the edge if it does not cause the degree to increase over 2
+//                 var entry1 = degreeDict[node1];
+//                 var entry2 = degreeDict[node2];
+            
+    
+//                 if (entry1 === 1 && entry2 === 1) {
+//                     // That means we can add this final edge to the tour
+//                     tour.push([node1,node2]);
+//                     degreeDict[node1] += 1;
+//                     degreeDict[node2] += 1;
+//                     delete adjMatrixNoDupes[edge];
+
+//                     break;
+//                 }
+//                 else{
+
+//                     // This means it is not the node we want and remove it from the adjMatrixNoDupe
+//                     delete adjMatrixNoDupes[edge];
+//                 }
+                
+                
+//             }           
+//         }
+//         else{
+
+//             for (let i = 0; i < sortedAdjMatrixLength; i++) {
+                
+//                 // Split up the currently considered edge  {1-2: 1, 0-2: 2, 1-3: 3, 2-3: 5, 0-1: 6, …}
+//                 var edge = Object.keys(sortedAdjMatrix)[i];
+//                 var nodes = edge.split('-');
+//                 var node1 = parseInt(nodes[0]);
+//                 var node2 = parseInt(nodes[1]);
+            
+//                 // Add the edge if it does not cause the degree to increase over 2
+//                 var entry1 = degreeDict[node1];
+//                 var entry2 = degreeDict[node2];
+            
+//                 // This shall increase degree more than 2
+//                 if (entry1 === 2 || entry2 === 2) {
+//                     // Skip that entry then - remove it from the adjMatrixNoDupe
+//                     delete adjMatrixNoDupes[edge];
+
+//                 }
+//                 else{
+//                     tour.push([node1,node2]);
+//                     degreeDict[node1] += 1;
+//                     degreeDict[node2] += 1;
+//                     delete adjMatrixNoDupes[edge];
+         
+//                     break;
+//                 }
+                
+//             }
+
+//         }
+
+//         // If the tour is complete, stop
+//         if (tour.length === numNodes){
+//             stop = true;
+//         }
+
+//     }
+//     console.log(tour);
+
+//     setBestTour(tour);
+//     setSteps([tour[0]]);
+//     setCurrentStep(1);
+
+// };
 

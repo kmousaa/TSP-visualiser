@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
-import { NearestNeighborTSP, BruteForceTSP, GreedyTSP } from "./TspAlgorithims";
+import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP } from "./TspAlgorithims";
 import { FaSave, FaDownload, FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward } from 'react-icons/fa';
 import { FaPersonHiking } from "react-icons/fa6";
 import "../utils/Graph.css";
@@ -20,7 +20,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setPresentTour(false);
       setConsideredStep([]);
       setAltSteps([]);
+
+
     }
+
 
     // Function to generate the adjacency matrix
     const generateAdjacencyMatrix = () => {
@@ -316,11 +319,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Function to render nodes
     const renderNodes = () => {
       let nodeCoordinates = generateNodeCoordinates(numNodes);
+      const flattenedSteps = steps.flat(); // Flatten the steps array if it's 2D
       return nodeCoordinates.map((node, index) => (
-        renderCustomNode(node, index, steps.includes(index) , steps[steps.length - 1] === index , presentTour)
+        
+        renderCustomNode(node, index, flattenedSteps.includes(index)  , steps[steps.length - 1] === index , presentTour)
       ));
     };
-
 
     // Helper function to generate TSP algorithm handlers
     const generateTSPHandler = (tspAlgorithm) => {
@@ -538,6 +542,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   <button onClick={generateTSPHandler(BruteForceTSP)} className="btn btn-light mx-1">Brute Force</button>
                   <button onClick={generateTSPHandler(NearestNeighborTSP)} className="btn btn-light mx-1">Nearest Neighbor</button>
                   <button onClick={generateTSPHandler(GreedyTSP)} className="btn btn-light mx-1">Greedy</button>
+                  <button onClick={generateTSPHandler(ChristofidesTSP)} className="btn btn-light mx-1">Christofides</button>
                 </div>
 
                 {/* Display the best tour and its weight */}
