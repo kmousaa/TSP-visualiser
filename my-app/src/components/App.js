@@ -27,6 +27,11 @@ function App() {
   // Keeps track if we sould show or hide adj matrix
   const [showAdjacencyMatrix, setShowAdjacencyMatrix] = useState(false);
 
+  // Keep track of christodies algorithm
+  const [christofidesAlgorithim, setChristofidesAlgorithim] = useState(false);
+  const [christofidesStepNum, setChristofidesStepNum] = useState(0);
+
+
   return (
     <div className="App">
 
@@ -52,6 +57,11 @@ function App() {
         setConsideredStep={setConsideredStep}
         showAdjacencyMatrix={showAdjacencyMatrix}
         setShowAdjacencyMatrix={setShowAdjacencyMatrix}
+        christofidesAlgorithim={christofidesAlgorithim}
+        setChristofidesAlgorithim={setChristofidesAlgorithim}
+        christofidesStepNum={christofidesStepNum}
+        setChristofidesStepNum={setChristofidesStepNum}
+        
       />
     </div>
   );

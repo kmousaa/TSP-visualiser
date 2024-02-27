@@ -7,7 +7,7 @@ import "../utils/Graph.css";
 
 
 // Represents the graph and its adjacency matrix
-function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep, showAdjacencyMatrix, setShowAdjacencyMatrix}) {
+function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep, showAdjacencyMatrix, setShowAdjacencyMatrix , christofidesAlgorithim, setChristofidesAlgorithim, setChristofidesStepNum, christofidesStepNum}) {
     
   // USe ffect that updates when showAdjacencyMatrix changes
 
@@ -20,8 +20,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setPresentTour(false);
       setConsideredStep([]);
       setAltSteps([]);
-
-
+      setChristofidesAlgorithim(false);
+      setChristofidesStepNum(0);
     }
 
 
@@ -88,7 +88,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log("Adjacency Matrix with dupes removed: ");
       // log an adjanecy matrix with duplicate weihts removed e.g for symetry 1-0 and 0-1 have the same weight
       // 1-0 is same as 0-1 so we remove one of them
-      var adjMarixNoDupes = {};
+      let adjMarixNoDupes = {};
       for (const [edge, weight] of Object.entries(adjacencyMatrix)) {
         const [node1, node2] = edge.split('-').map(Number);
         if (node1 < node2) {
@@ -115,6 +115,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log(presentTour)
       console.log("SHOW ADJ MATRIX: ");
       console.log(showAdjacencyMatrix)
+      console.log("SOLO STEPPIN CHRITOFIDES LOG BOI: ");
+      console.log(christofidesAlgorithim);
+      console.log(lastStep);
+      console.log("CHRISTOFIDES STEP NUM: ");
+      console.log(christofidesStepNum);
       console.log(" --------------- END LOG --------------- ")
     };
   
@@ -277,11 +282,19 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Move forwards in the TSP simulation
     const nextStep = () => {
       if (stepNum < bestTour.length) { 
+
         setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
+
         setStepNum(prevStepNum => prevStepNum + 1);
+        setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+
         setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+
+
+
       } else {
         if (!(steps.length === 0)) {
+          // setChristofidesStepNum(prevStepNum => prevStepNum + 1);
           setPresentTour(true);
         }
         console.log("Reached maximum step.");
@@ -294,6 +307,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         setPresentTour(false);
         setSteps(steps.slice(0, -1));
         setStepNum(stepNum - 1);
+        setChristofidesStepNum(christofidesStepNum - 1);
         setAltSteps(altSteps.slice(0, -1));
       } else {
         console.log("Reached minimum step.");
@@ -320,16 +334,16 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const renderNodes = () => {
       let nodeCoordinates = generateNodeCoordinates(numNodes);
       const flattenedSteps = steps.flat(); // Flatten the steps array if it's 2D
+      const flattendedLastStep = (christofidesAlgorithim && lastStep) ? lastStep.flat() : []; // Flatten the last step array if it's 2D
       return nodeCoordinates.map((node, index) => (
-        
-        renderCustomNode(node, index, flattenedSteps.includes(index)  , steps[steps.length - 1] === index , presentTour)
+        renderCustomNode(node, index, (flattenedSteps.includes(index) || flattendedLastStep.includes(index))  , (steps[steps.length - 1] === index), presentTour , christofidesAlgorithim, christofidesStepNum)
       ));
     };
 
     // Helper function to generate TSP algorithm handlers
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
-        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep);
+        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
 
       };
     };
@@ -338,6 +352,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const nodeCoordinates = generateNodeCoordinates(numNodes);
     const AdjMatrix = generateAdjacencyMatrix();
     const currentAltStep = altSteps[altSteps.length - 1];
+
+    const lastStep = steps[steps.length - 1];
 
     // Render the graph and adjacency matrix
     return (
@@ -424,7 +440,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
           {/* Render all alternate connections */}
           {currentAltStep && currentAltStep.map((altNode, index) => {
- 
+            
             const currentNode = steps[steps.length - 1]; // Get the current node
             const x1 = nodeCoordinates[currentNode].x;
             const y1 = nodeCoordinates[currentNode].y;
@@ -452,65 +468,161 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
 
           {/* make every line inside best tour red */}
-          { steps.map((node, index) => {
+          {/* first case a lil different for chritofies */}
+          {christofidesAlgorithim ? (
 
-    
+              console.log("BOI"),
+              lastStep && lastStep.map((node, index) => {
+                 console.log(index)
+
+        
+                  if (Array.isArray(node)) {
+                      const node1 = node[0];
+                      const node2 = node[1];
+
+                      const x1 = nodeCoordinates[node1].x;
+                      const y1 = nodeCoordinates[node1].y;
+                      const x2 = nodeCoordinates[node2].x;
+                      const y2 = nodeCoordinates[node2].y;
+                      let color = "#ff8a27"
 
 
-              // if tour is a set [node1: 1, node2: 2] then we can use node1 and node2 to get the x and y coordinates
-              if (Array.isArray(node)) {
-                const node1 = node[0];
-                const node2 = node[1];
-                const x1 = nodeCoordinates[node1].x;
-                const y1 = nodeCoordinates[node1].y;
-                const x2 = nodeCoordinates[node2].x;
-                const y2 = nodeCoordinates[node2].y;
-                 const color = presentTour ? "#ff0000" : "#ff8a27";
-                return (
-                  <line
-                    key={`${node1}-${node2}`}
-                    x1={x1}
-                    y1={y1}
-                    x2={x2}
-                    y2={y2}
-                    stroke={color}
-                    strokeWidth="4"
-                    onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
-                    onClick={(e) => { SelectAdjMatrix(e,node1,node2); }}
-                    onMouseOut={(e) => { e.target.style.stroke = color; }}
-                  />
-                );
-              }
-              else{
+      
 
-                if (index < steps.length - 1) {
-                  const node1 = steps[index];
-                  const node2 = steps[index + 1];
-                  const x1 = nodeCoordinates[node1].x;
-                  const y1 = nodeCoordinates[node1].y;
-                  const x2 = nodeCoordinates[node2].x;
-                  const y2 = nodeCoordinates[node2].y;
-                  const color = presentTour ? "#ff0000" : "#ff8a27";
-                  return (
-                    <line
-                      key={`${node1}-${node2}`}
-                      x1={x1}
-                      y1={y1}
-                      x2={x2}
-                      y2={y2}
-                      stroke={color}
-                      strokeWidth="4"
-                      onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
-                      onClick={(e) => { SelectAdjMatrix(e,node1,node2); }}
-                      onMouseOut={(e) => { e.target.style.stroke = color; }}
-                    />
-                  );
 
-                }
-              }
+                      if (christofidesStepNum === 0) {
+                        color = "#2730ff";
+                      }
+                      else if (christofidesStepNum === 1) {
+                        color = "#ff2730";
+                      }
+                      else if (christofidesStepNum === 2){
+                        console.log(steps)
+                        color = "#e100ff";
+                      
+                        // Check if [1, 3] is in secondLast
+                        // const secondLast = steps[steps.length - 3];
+                        // const isPresent = secondLast.some(step => step[0] === node1 && step[1] === node2);
 
-            
-          })}
+                        // if (isPresent) {
+                        //     color = "#2730ff"; // Set color to pink if [1, 3] is present
+                        // } else {
+                        //     color = "#ff2730" ; // Set color to orange if [1, 3] is not present
+                        // }
+   
+                      }
+                      
+                      return (
+                          <line
+                              key={`${node1}-${node2}`}
+                              x1={x1}
+                              y1={y1}
+                              x2={x2}
+                              y2={y2}
+                              stroke={color}
+                              strokeWidth="4"
+                              onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                              onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+                              onMouseOut={(e) => { e.target.style.stroke = color; }}
+                          />
+                      );
+                  } else {
+         
+
+                      if (index < lastStep.length - 1) {
+                          const node1 = lastStep[index];
+                          const node2 = lastStep[index + 1];
+                          const x1 = nodeCoordinates[node1].x;
+                          const y1 = nodeCoordinates[node1].y;
+                          const x2 = nodeCoordinates[node2].x;
+                          const y2 = nodeCoordinates[node2].y;
+                          let color = "#ff8a27"
+
+                          if (christofidesStepNum === 3) {
+                            color = presentTour ? "#ff0000" : "#ff8a27";
+                          }
+                          
+
+
+                          return (
+                              <line
+                                  key={`${node1}-${node2}`}
+                                  x1={x1}
+                                  y1={y1}
+                                  x2={x2}
+                                  y2={y2}
+                                  stroke={color}
+                                  strokeWidth="4"
+                                  onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                                  onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+                                  onMouseOut={(e) => { e.target.style.stroke = color; }}
+                              />
+                          );
+                      }
+                  }
+
+                  
+
+
+              })
+
+          ) : (
+              // Render normally if Christofides algorithm is false
+
+              steps.map((node, index) => {
+
+                  console.log(index)
+                  if (Array.isArray(node)) {
+                      const node1 = node[0];
+                      const node2 = node[1];
+   
+
+                      const x1 = nodeCoordinates[node1].x;
+                      const y1 = nodeCoordinates[node1].y;
+                      const x2 = nodeCoordinates[node2].x;
+                      const y2 = nodeCoordinates[node2].y;
+                      const color = presentTour ? "#ff0000" : "#ff8a27";
+                      return (
+                          <line
+                              key={`${node1}-${node2}`}
+                              x1={x1}
+                              y1={y1}
+                              x2={x2}
+                              y2={y2}
+                              stroke={color}
+                              strokeWidth="4"
+                              onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                              onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+                              onMouseOut={(e) => { e.target.style.stroke = color; }}
+                          />
+                      );
+                  } else {
+                      if (index < steps.length - 1) {
+                          const node1 = steps[index];
+                          const node2 = steps[index + 1];
+                          const x1 = nodeCoordinates[node1].x;
+                          const y1 = nodeCoordinates[node1].y;
+                          const x2 = nodeCoordinates[node2].x;
+                          const y2 = nodeCoordinates[node2].y;
+                          const color = presentTour ? "#ff0000" : "#ff8a27";
+                          return (
+                              <line
+                                  key={`${node1}-${node2}`}
+                                  x1={x1}
+                                  y1={y1}
+                                  x2={x2}
+                                  y2={y2}
+                                  stroke={color}
+                                  strokeWidth="4"
+                                  onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                                  onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+                                  onMouseOut={(e) => { e.target.style.stroke = color; }}
+                              />
+                          );
+                      }
+                  }
+              })
+          )}
 
           {/* Render nodes */}
           {renderNodes()}

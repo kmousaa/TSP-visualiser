@@ -1,13 +1,30 @@
 // GraphUtil.js
 
 
-export const renderCustomNode = (node, index, isColorA, isLatest, tourFound) => {
+export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, christofidesAlgorithim ,christofidesStepNum) => {
     // Define the color based on the boolean value
-    const nodeColor = tourFound ? "#ff0000" : isLatest ? "#30bbd1" : isColorA ? "#ff8a27" : "#FFFFFF"; // Red, Blue, Color A, or Color B
-    const borderColor = tourFound ? "#ff0000" : isLatest ? "#30bbd1" : isColorA ? "#ff8a27" : "#000000"; // Red, Blue, Border color A, or Border color B
-    const textColor = tourFound ? "#FFFFFF" : isLatest ? "#FFFFFF" : isColorA ? "#FFFFFF" : "#000000"; // Text color White, Blue, Text color A, or Text color B
-
     
+    let tempColor; // Define tempColor outside of the if-else blocks
+
+    if (christofidesAlgorithim && christofidesStepNum === 0){
+      tempColor = "#2730ff";
+    }
+    else if (christofidesAlgorithim && christofidesStepNum === 1){
+      tempColor = "#ff2730";
+    }
+    else if (christofidesAlgorithim && christofidesStepNum === 2){
+      tempColor = "#e100ff";
+    }
+
+    else{
+      tempColor = "#ff8a27";
+    }
+    
+    let nodeColor = tourFound ? "#ff0000" : isLatest ? "#30bbd1" : isColorA ? tempColor : "#FFFFFF"; // Red, Blue, Color A, or Color B
+    let borderColor = tourFound ? "#ff0000" : isLatest ? "#30bbd1" : isColorA ? tempColor : "#000000"; // Red, Blue, Border color A, or Border color B
+    let textColor = tourFound ? "#FFFFFF" : isLatest ? "#FFFFFF" : isColorA ? "#FFFFFF" : "#000000"; // Text color White, Blue, Text color A, or Text color B
+    
+
     return (
       <g key={index}>
         {/* Node outline */}
@@ -88,7 +105,7 @@ export const sortDictionary = (dict) => {
 
   // Step - 1
   // Create the array of key-value pairs
-  var items = Object.keys(dict).map(
+  let items = Object.keys(dict).map(
     (key) => { return [key, dict[key]] });
   
   // Step - 2
@@ -100,10 +117,10 @@ export const sortDictionary = (dict) => {
   // Step - 3
   // Obtain the sorted dictionary
 
-  var sorted_dict = {};
-  for (var i = 0; i < items.length; i++) {
-    var key = items[i][0];
-    var value = items[i][1];
+  let sorted_dict = {};
+  for (let i = 0; i < items.length; i++) {
+    let key = items[i][0];
+    let value = items[i][1];
     sorted_dict[key] = value;
   }
 
@@ -113,7 +130,7 @@ export const sortDictionary = (dict) => {
 
 // Remove duplicate edges from the adjacency matrix
 export const removeDupeDict = (dict) => {
-  var dictNoDupe = {};
+  let dictNoDupe = {};
   for (const [edge, weight] of Object.entries(dict)) {
     const [node1, node2] = edge.split('-').map(Number);
     if (node1 < node2) {

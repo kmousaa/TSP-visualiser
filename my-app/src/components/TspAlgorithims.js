@@ -5,19 +5,18 @@ import { Munkres } from 'munkres-js';
 // Import the Munkres library
 
 
-
 export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight) => {
     resetBestTour();
     
-    var possible_tours = permutations([...Array(numNodes).keys()]); // Generate all possible tours
-    var best_tour = [];
-    var best_weight = Number.MAX_VALUE;
+    let possible_tours = permutations([...Array(numNodes).keys()]); // Generate all possible tours
+    let best_tour = [];
+    let best_weight = Number.MAX_VALUE;
 
     // Find the tour with the smallest weight
     for (let i = 0; i < possible_tours.length; i++) {
         possible_tours[i].push(possible_tours[i][0]);
         const tour = possible_tours[i];
-        var weight = tourWeight(tour, adjacencyMatrix);
+        let weight = tourWeight(tour, adjacencyMatrix);
         if (weight < best_weight) {
             best_tour = tour;
             best_weight = weight;
@@ -37,24 +36,24 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
     resetBestTour();
 
     // Pick a random starting node
-    var start = Math.floor(Math.random() * numNodes);
-    var tour = [start];
-    var weight = 0;
+    let start = Math.floor(Math.random() * numNodes);
+    let tour = [start];
+    let weight = 0;
 
     // Consider the nodes we can visit
-    var considered = [];
-    var current = tour[tour.length - 1];
-    var adjNodes = getAdjacentNodes(current, adjacencyMatrix)
+    let considered = [];
+    let current = tour[tour.length - 1];
+    let adjNodes = getAdjacentNodes(current, adjacencyMatrix)
     considered.push(adjNodes.filter(node => !tour.includes(node)));
 
 
     // Find the nearest neighbor for each node
     for (let i = 0; i < numNodes - 1; i++) {
         
-        var current = tour[tour.length - 1];
-        var adjNodes = getAdjacentNodes(current, adjacencyMatrix);
-        var minWeight = Number.MAX_VALUE;
-        var minNode = -1;
+        let current = tour[tour.length - 1];
+        let adjNodes = getAdjacentNodes(current, adjacencyMatrix);
+        let minWeight = Number.MAX_VALUE;
+        let minNode = -1;
  
 
         // Find the nearest neighbor
@@ -100,28 +99,29 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
 };
 
 
-export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep) => {
+export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim) => {
 
     resetBestTour();
+    let considered = [];
 
-    var tour = [];
-    var weight = 0;
-    var stop = false;
+    let tour = [];
+    let weight = 0;
+    let stop = false;
 
     // Dictionary that stores every node as well as the number of degree it has
-    var degreeDict = {};
+    let degreeDict = {};
     for (let i = 0; i < numNodes; i++) {
         degreeDict[i] = 0;
     }
 
     // Remove duplicates from adjacency matrix
-    var adjMatrixNoDupes = removeDupeDict(adjacencyMatrix);
+    let adjMatrixNoDupes = removeDupeDict(adjacencyMatrix);
 
     while (!stop) {
 
         // Sort the current adjacency matrix to make the smallest edge come first
-        var sortedAdjMatrix = sortDictionary(adjMatrixNoDupes);
-        var sortedAdjMatrixLength = Object.keys(sortedAdjMatrix).length;
+        let sortedAdjMatrix = sortDictionary(adjMatrixNoDupes);
+        let sortedAdjMatrixLength = Object.keys(sortedAdjMatrix).length;
         
 
         // If adding the last edge completes the cycle 
@@ -130,18 +130,19 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
             // Find the node that causes both edges to be 2-2 from remaining sorted edges
             for (let i = 0; i < sortedAdjMatrixLength; i++) {
 
-                var edge = Object.keys(sortedAdjMatrix)[i];
-                var nodes = edge.split('-');
-                var node1 = parseInt(nodes[0]);
-                var node2 = parseInt(nodes[1]);
+                let edge = Object.keys(sortedAdjMatrix)[i];
+                let nodes = edge.split('-');
+                let node1 = parseInt(nodes[0]);
+                let node2 = parseInt(nodes[1]);
 
                 // Add the edge if it does not cause the degree to increase over 2
-                var entry1 = degreeDict[node1];
-                var entry2 = degreeDict[node2];
+                let entry1 = degreeDict[node1];
+                let entry2 = degreeDict[node2];
 
                 if (entry1 === 1 && entry2 === 1) {
                     // That means we can add this final edge to the tour
                     tour.push([node1, node2]);
+                    considered.push([node1, node2]);
                     weight += adjacencyMatrix[edge];
                     degreeDict[node1] += 1;
                     degreeDict[node2] += 1;
@@ -161,14 +162,14 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
             for (let i = 0; i < sortedAdjMatrixLength; i++) {
 
                 // Split up the currently considered edge  {1-2: 1, 0-2: 2, 1-3: 3, 2-3: 5, 0-1: 6, …}
-                var edge = Object.keys(sortedAdjMatrix)[i];
-                var nodes = edge.split('-');
-                var node1 = parseInt(nodes[0]);
-                var node2 = parseInt(nodes[1]);
+                let edge = Object.keys(sortedAdjMatrix)[i];
+                let nodes = edge.split('-');
+                let node1 = parseInt(nodes[0]);
+                let node2 = parseInt(nodes[1]);
 
                 // Add the edge if it does not cause the degree to increase over 2
-                var entry1 = degreeDict[node1];
-                var entry2 = degreeDict[node2];
+                let entry1 = degreeDict[node1];
+                let entry2 = degreeDict[node2];
 
                 // This shall increase degree more than 2
                 if (entry1 === 2 || entry2 === 2) {
@@ -232,7 +233,7 @@ const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBest
     includedNodes.add(currentNode);
 
     // Dictionary that stores every node as well as the number of degree it has
-    var degreeDict = {};
+    let degreeDict = {};
     for (let i = 0; i < numNodes; i++) {
         degreeDict[i] = 0;
     }
@@ -268,18 +269,21 @@ const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBest
     return {mstEdges, degreeDict};
 };
 
-export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep) => {
+export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim) => {
     resetBestTour();
 
-    var considered = [];
+    let finalTour = [];
 
     // Step 1 - Find the Minimum Spanning Tree
-    var mst = PrimsMST(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep);
+    let mst = PrimsMST(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep);
     console.log("MST")
     console.log(mst);
+    // {mstEdges: [[0, 2], [0, 3], [3, 1]], degreeDict: Object}
+    finalTour.push(mst.mstEdges);
+    
 
     // Step 2 - Find the odd-degree nodes
-    var oddDegreeNodes = [];
+    let oddDegreeNodes = [];
     for (let node in mst.degreeDict) {
         if (mst.degreeDict[node] % 2 !== 0) {
             oddDegreeNodes.push(parseInt(node));
@@ -288,12 +292,14 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     console.log("ODD DEGREE NODES");
     console.log(oddDegreeNodes);
 
+    // finalTour.push(oddDegreeNodes);
+
     // Step 3 - Find the Minimum Weight Perfect Matching
 
     // Build adjancecy matrix for the odd degree nodes, we will find the best mmacthing from that. Remeber we have symetry in the matrix, as well as the diagonal is 0
-    var oddMatrix = [];
+    let oddMatrix = [];
     for (let i = 0; i < oddDegreeNodes.length; i++) {
-        var row = [];
+        let row = [];
         for (let j = 0; j < oddDegreeNodes.length; j++) {
             if (i === j) {
                 row.push(Infinity);
@@ -305,10 +311,10 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     }
 
     // Find the minimum weight perfect matching
-    var munkres = require('munkres-js');
-    var bestMatch = munkres(oddMatrix)
+    let munkres = require('munkres-js');
+    let bestMatch = munkres(oddMatrix)
     // Remove symetry from the best match for example [1,0] and [0,1] are the same, so we only need one of them
-    var bestMatchNoSym = [];
+    let bestMatchNoSym = [];
     for (let i = 0; i < bestMatch.length; i++) {
         if (bestMatch[i][0] < bestMatch[i][1]) {
             bestMatchNoSym.push([oddDegreeNodes[bestMatch[i][0]], oddDegreeNodes[bestMatch[i][1]]]);
@@ -318,11 +324,20 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     console.log("Best Match");
     console.log(bestMatchNoSym);
 
+    finalTour.push(bestMatchNoSym);
+
+
+
     // Step 4 - Combine the MST and the minimum weight perfect matching to form a multigraph
-    var multigraph = mst.mstEdges.concat(bestMatchNoSym);
+    let multigraph = mst.mstEdges.concat(bestMatchNoSym);
+
+    // remove any duplicates such as [0,2] and [0,2]
+    multigraph = Array.from(new Set(multigraph.map(JSON.stringify)), JSON.parse);
 
     console.log("Multigraph");
     console.log(multigraph);
+
+    finalTour.push(multigraph);
 
     // Step 5 - Find an Eulerian Tour
     const findEulerianTour = (graph, currentVertex, eulerianTour) => {
@@ -334,6 +349,8 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         }
         eulerianTour.push(currentVertex);
     };
+
+
 
     // Construct adjacency list representation of the multigraph
     const adjacencyList = {};
@@ -361,11 +378,20 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     tspTour.push(tspTour[0]);
     console.log("TSP Tour");
 
-    setBestTour(tspTour);
-    setSteps([tspTour[0]]);
-    setCurrentStep(1);
+    finalTour.push(tspTour);
+    console.log(finalTour);
+
+    setBestTour(finalTour);
+    console.log("Final Tour", finalTour);
+    setSteps([finalTour[0]]);
 
     
+    console.log("Step", [finalTour[0]]);
+    setCurrentStep(1);
+
+    setChristofidesAlgorithim(true);
+    
+
 
     console.log("Total weight:", tourWeight(tspTour, adjacencyMatrix)); // Log the total weight
 };
@@ -377,23 +403,23 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     
 //     resetBestTour();
     
-//     var tour = [];
-//     var stop = false;
+//     let tour = [];
+//     let stop = false;
 
 //     // Dictionary that stores every node as well as the number of degree it has
-//     var degreeDict = {};
+//     let degreeDict = {};
 //     for (let i = 0; i < numNodes; i++) {
 //         degreeDict[i] = 0;
 //     }
 
 //     // Remove duplicates from adjacency matrix
-//     var adjMatrixNoDupes = removeDupeDict(adjacencyMatrix);
+//     let adjMatrixNoDupes = removeDupeDict(adjacencyMatrix);
 
 //     while (!stop){
 
 //         // Sort the current adjacency matrix to make the smallest edge come first
-//         var sortedAdjMatrix = sortDictionary(adjMatrixNoDupes);
-//         var sortedAdjMatrixLength =  Object.keys(sortedAdjMatrix).length;
+//         let sortedAdjMatrix = sortDictionary(adjMatrixNoDupes);
+//         let sortedAdjMatrixLength =  Object.keys(sortedAdjMatrix).length;
         
 //         // If adding the last edge completes the cycle 
 //         if (tour.length + 1 === numNodes){
@@ -401,14 +427,14 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
 //             // Find the node that causes both edges to be 2-2 from remaining sorted edges
 //             for (let i = 0; i < sortedAdjMatrixLength; i++) {
 
-//                 var edge = Object.keys(sortedAdjMatrix)[i];
-//                 var nodes = edge.split('-');
-//                 var node1 = parseInt(nodes[0]);
-//                 var node2 = parseInt(nodes[1]);
+//                 let edge = Object.keys(sortedAdjMatrix)[i];
+//                 let nodes = edge.split('-');
+//                 let node1 = parseInt(nodes[0]);
+//                 let node2 = parseInt(nodes[1]);
             
 //                 // Add the edge if it does not cause the degree to increase over 2
-//                 var entry1 = degreeDict[node1];
-//                 var entry2 = degreeDict[node2];
+//                 let entry1 = degreeDict[node1];
+//                 let entry2 = degreeDict[node2];
             
     
 //                 if (entry1 === 1 && entry2 === 1) {
@@ -434,14 +460,14 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
 //             for (let i = 0; i < sortedAdjMatrixLength; i++) {
                 
 //                 // Split up the currently considered edge  {1-2: 1, 0-2: 2, 1-3: 3, 2-3: 5, 0-1: 6, …}
-//                 var edge = Object.keys(sortedAdjMatrix)[i];
-//                 var nodes = edge.split('-');
-//                 var node1 = parseInt(nodes[0]);
-//                 var node2 = parseInt(nodes[1]);
+//                 let edge = Object.keys(sortedAdjMatrix)[i];
+//                 let nodes = edge.split('-');
+//                 let node1 = parseInt(nodes[0]);
+//                 let node2 = parseInt(nodes[1]);
             
 //                 // Add the edge if it does not cause the degree to increase over 2
-//                 var entry1 = degreeDict[node1];
-//                 var entry2 = degreeDict[node2];
+//                 let entry1 = degreeDict[node1];
+//                 let entry2 = degreeDict[node2];
             
 //                 // This shall increase degree more than 2
 //                 if (entry1 === 2 || entry2 === 2) {
