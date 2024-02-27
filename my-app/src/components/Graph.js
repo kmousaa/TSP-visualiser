@@ -345,6 +345,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       return () => {
         tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
 
+
       };
     };
 
@@ -641,6 +642,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 {/* Graph Operations */}
                 <div>
                   <button onClick={() => addNode()} className="btn btn-light mx-1">Add Node</button>
+                  {/* <input type="number" value={numNodes} onChange={(e) => {setNumNodes(Number(e.target.value))}} className="form-control form-control-sm mx-1" style={{ width: "80px" }} /> */}
                   <button onClick={() => removeNode()} disabled={numNodes === 0} className="btn btn-light mx-1">Remove Node</button>
                   <button onClick={() => resetGraph()} className="btn btn-light mx-1">Reset Graph</button>
                   <button onClick={() => clearWeights()} className="btn btn-light mx-1">Clear Weights</button>

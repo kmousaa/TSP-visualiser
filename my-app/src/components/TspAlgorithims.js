@@ -221,7 +221,7 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
 
 
 // Function to find the Minimum Spanning Tree using Prim's algorithm [Chat GPT]
-const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep) => {
+const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim) => {
     resetBestTour();
 
     // Initialize an empty set to store included nodes and an array to store MST edges
