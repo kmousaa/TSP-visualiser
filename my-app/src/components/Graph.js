@@ -472,9 +472,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           {/* first case a lil different for chritofies */}
           {christofidesAlgorithim ? (
 
-              console.log("BOI"),
+         
               lastStep && lastStep.map((node, index) => {
-                 console.log(index)
+           
 
         
                   if (Array.isArray(node)) {
@@ -488,9 +488,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       let color = "#ff8a27"
 
 
-      
-
-
                       if (christofidesStepNum === 0) {
                         color = "#2730ff";
                       }
@@ -498,7 +495,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                         color = "#ff2730";
                       }
                       else if (christofidesStepNum === 2){
-                        console.log(steps)
+      
                         color = "#e100ff";
                       
                         // Check if [1, 3] is in secondLast
@@ -572,7 +569,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
               steps.map((node, index) => {
 
-                  console.log(index)
                   if (Array.isArray(node)) {
                       const node1 = node[0];
                       const node2 = node[1];

@@ -101,154 +101,107 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
 
 
 // Its US - this does not work
+
+
+// Its US - this does not work
+
+// Its US - this does not work
 export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim) => {
-
-    resetBestTour();
-    let considered = [];
-
+    
     let tour = [];
-    let weight = 0;
-    let stop = false;
-
-    // Dictionary that stores every node as well as the number of degree it has
+    let adjacencyMatrixNoDupes = removeDupeDict(adjacencyMatrix);
+    let sortedAdjacencyMatrix = sortDictionary(adjacencyMatrixNoDupes);
     let degreeDict = {};
+
     for (let i = 0; i < numNodes; i++) {
         degreeDict[i] = 0;
     }
 
-    // Remove duplicates from adjacency matrix
-    let adjMatrixNoDupes = removeDupeDict(adjacencyMatrix);
+    // loop until we have all the nodes in the tour
+    while (tour.length < numNodes) {
+        console.log("Tour");
+        console.log(tour);  
+        // Get the first edge from the sorted adjacency matrix
+        let edge = Object.keys(sortedAdjacencyMatrix)[0];
+        let nodes = edge.split('-');
+        let node1 = parseInt(nodes[0]);
+        let node2 = parseInt(nodes[1]);
 
-    while (!stop) {
-
-        // Sort the current adjacency matrix to make the smallest edge come first
-        let sortedAdjMatrix = sortDictionary(adjMatrixNoDupes);
-        let sortedAdjMatrixLength = Object.keys(sortedAdjMatrix).length;
-        console.log(sortedAdjMatrix);
-        console.log(tour)
-        console.log(degreeDict);
-        console.log("----------")
-        
-
-        // If adding the last edge completes the cycle 
-        if (tour.length + 1 === numNodes) {
-
-            // Find the node that causes both edges to be 2-2 from remaining sorted edges
-            for (let i = 0; i < sortedAdjMatrixLength; i++) {
-
-                let edge = Object.keys(sortedAdjMatrix)[i];
-                let nodes = edge.split('-');
-                let node1 = parseInt(nodes[0]);
-                let node2 = parseInt(nodes[1]);
-
-                // Add the edge if it does not cause the degree to increase over 2
-                let entry1 = degreeDict[node1];
-                let entry2 = degreeDict[node2];
-
-                if (entry1 === 1 && entry2 === 1) {
-                    // That means we can add this final edge to the tour
-                    tour.push([node1, node2]);
-                    considered.push([node1, node2]);
-                    weight += adjacencyMatrix[edge];
-                    degreeDict[node1] += 1;
-                    degreeDict[node2] += 1;
-                    delete adjMatrixNoDupes[edge];
-
-                    break;
-                } else {
-
-                    // This means it is not the node we want and remove it from the adjMatrixNoDupe
-                    delete adjMatrixNoDupes[edge];
-                }
-
-
-            }
-        } else {
-
-            for (let i = 0; i < sortedAdjMatrixLength; i++) {
-
-                // Split up the currently considered edge  {1-2: 1, 0-2: 2, 1-3: 3, 2-3: 5, 0-1: 6, …}
-                let edge = Object.keys(sortedAdjMatrix)[i];
-                let nodes = edge.split('-');
-                let node1 = parseInt(nodes[0]);
-                let node2 = parseInt(nodes[1]);
-
-                // Add the edge if it does not cause the degree to increase over 2
-                let entry1 = degreeDict[node1];
-                let entry2 = degreeDict[node2];
-
-                // This shall increase degree more than 2 or create premature cycle
-                if ((entry1 === 2 || entry2 === 2) ) {
-                    // Skip that entry then - remove it from the adjMatrixNoDupe
-                    delete adjMatrixNoDupes[edge];
-
-                } else {
-
-                    let node1Count = 0;
-                    let node2Count = 0;
-                    let flattendTour = tour.flat();
-                    for (let i = 0; i < flattendTour.length; i++) {
-                        if (flattendTour[i] === node1) {
-                            node1Count += 1;
-                        }
-                        if (flattendTour[i] === node2) {
-                            node2Count += 1;
-                        }
-                    }
-                    if (node1Count === 1 && node2Count === 1) {
-   
-                        delete adjMatrixNoDupes[edge];
-                    }
-                    else{
-
-                        tour.push([node1, node2]);
-                        weight += adjacencyMatrix[edge];
-                        degreeDict[node1] += 1;
-                        degreeDict[node2] += 1;
-                        delete adjMatrixNoDupes[edge];
-                        break;
-
-
-                    }
-
-
-                }
-
-            }
-
+        // if we are adding the last edge to the tour
+        if (tour.length + 1 === numNodes && hasCycle(tour, [node1, node2]) && degreeDict[node1] < 2 && degreeDict[node2] < 2) {
+            // Add the last edge to the tour
+            tour.push([node1, node2]);
+            degreeDict[node1] += 1;
+            degreeDict[node2] += 1;
         }
 
-        // If the tour is complete, stop
-        if (tour.length >= numNodes) {
-            stop = true;
+        // If adding the edge does not create a cycle, add it to the tour
+        if (!hasCycle(tour, [node1, node2]) && degreeDict[node1] < 2 && degreeDict[node2] < 2) {
+            tour.push([node1, node2]);
+            degreeDict[node1] += 1;
+            degreeDict[node2] += 1;
         }
+
+        // Remove the edge from the sorted adjacency matrix
+        delete sortedAdjacencyMatrix[edge];
 
     }
 
-    // Ensure the tour is properly closed for odd number of vertices
-    if (tour.length % 2 !== 0) {
-        const lastEdge = tour[tour.length - 1];
-        const firstNode = lastEdge[1];
-        const secondNode = tour[0][0];
-        tour.push([firstNode, secondNode]);
-        weight += adjacencyMatrix[`${firstNode}-${secondNode}`];
-    }
-
-    console.log(tour);
-
+    // Show the sequence of nodes in the tour
     setBestTour(tour);
-    setSteps([tour[0]]);
-    setCurrentStep(1);
-    
-    console.log("Total weight:", weight); // Log the total weight
+
 
 };
 
+
+// Function that checks if adding a new edge to the graph creates a cycle [TICK]
+function hasCycle(graph, newNode) {
+    const adjacencyList = {};
+    
+    // Construct adjacency list
+    for (let [node1, node2] of graph) {
+        if (!adjacencyList[node1]) adjacencyList[node1] = [];
+        if (!adjacencyList[node2]) adjacencyList[node2] = [];
+        adjacencyList[node1].push(node2);
+        adjacencyList[node2].push(node1);
+    }
+    
+    const visited = {};
+    
+    function dfs(node, parent) {
+        visited[node] = true;
+        for (let neighbor of adjacencyList[node]) {
+            if (!visited[neighbor]) {
+                if (dfs(neighbor, node)) return true;
+            } else if (neighbor !== parent) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    // Check if adding the new edge creates a cycle
+    const [node1, node2] = newNode;
+    if (!adjacencyList[node1]) adjacencyList[node1] = [];
+    if (!adjacencyList[node2]) adjacencyList[node2] = [];
+    adjacencyList[node1].push(node2);
+    adjacencyList[node2].push(node1);
+    if (dfs(node1, null)) {
+        adjacencyList[node1].pop();
+        adjacencyList[node2].pop();
+        return true;
+    }
+    adjacencyList[node1].pop();
+    adjacencyList[node2].pop();
+    return false;
+}
 
 
 
 
 // Function to find the Minimum Spanning Tree using Prim's algorithm [Chat GPT]
+// Check logs we allow dupes
+
 const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim) => {
     resetBestTour();
 
@@ -423,8 +376,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
 
     console.log("Total weight:", tourWeight(tspTour, adjacencyMatrix)); // Log the total weight
 };
-
-
 
 
 // export const GreedyTSP= (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight, setSteps , setAltSteps ,setCurrentStep, setConsideredStep) => {
