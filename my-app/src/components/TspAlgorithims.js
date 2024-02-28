@@ -99,6 +99,8 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
 };
 
 
+
+// Its US - this does not work
 export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim) => {
 
     resetBestTour();
@@ -122,6 +124,10 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
         // Sort the current adjacency matrix to make the smallest edge come first
         let sortedAdjMatrix = sortDictionary(adjMatrixNoDupes);
         let sortedAdjMatrixLength = Object.keys(sortedAdjMatrix).length;
+        console.log(sortedAdjMatrix);
+        console.log(tour)
+        console.log(degreeDict);
+        console.log("----------")
         
 
         // If adding the last edge completes the cycle 
@@ -171,19 +177,41 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
                 let entry1 = degreeDict[node1];
                 let entry2 = degreeDict[node2];
 
-                // This shall increase degree more than 2
-                if (entry1 === 2 || entry2 === 2) {
+                // This shall increase degree more than 2 or create premature cycle
+                if ((entry1 === 2 || entry2 === 2) ) {
                     // Skip that entry then - remove it from the adjMatrixNoDupe
                     delete adjMatrixNoDupes[edge];
 
                 } else {
-                    tour.push([node1, node2]);
-                    weight += adjacencyMatrix[edge];
-                    degreeDict[node1] += 1;
-                    degreeDict[node2] += 1;
-                    delete adjMatrixNoDupes[edge];
 
-                    break;
+                    let node1Count = 0;
+                    let node2Count = 0;
+                    let flattendTour = tour.flat();
+                    for (let i = 0; i < flattendTour.length; i++) {
+                        if (flattendTour[i] === node1) {
+                            node1Count += 1;
+                        }
+                        if (flattendTour[i] === node2) {
+                            node2Count += 1;
+                        }
+                    }
+                    if (node1Count === 1 && node2Count === 1) {
+   
+                        delete adjMatrixNoDupes[edge];
+                    }
+                    else{
+
+                        tour.push([node1, node2]);
+                        weight += adjacencyMatrix[edge];
+                        degreeDict[node1] += 1;
+                        degreeDict[node2] += 1;
+                        delete adjMatrixNoDupes[edge];
+                        break;
+
+
+                    }
+
+
                 }
 
             }
