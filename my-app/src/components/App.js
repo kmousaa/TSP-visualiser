@@ -7,8 +7,8 @@ import Graph from './Graph';
 function App() {
 
   // Stores instance of the graph
-  const [numNodes, setNumNodes] = useState(0); // Number of nodes in the graph
-  const [adjacencyMatrix, setAdjacencyMatrix] = useState({}); // Edge weights dictionary
+  const [numNodes, setNumNodes] = useState(0); 
+  const [adjacencyMatrix, setAdjacencyMatrix] = useState({}); 
 
   // Stores the best tour and its weight found by the TSP algorithm
   const [bestTour, setBestTour] = useState([]);
@@ -20,11 +20,10 @@ function App() {
   const [presentTour, setPresentTour] = useState(false);
 
   // Keeps track of the edges considered by the TSP algorithm
-  // There are denoted by a different color in the graph
   const [altSteps, setAltSteps] = useState([]);
   const [consideredStep, setConsideredStep] = useState([]);
 
-  // Keeps track if we sould show or hide adj matrix
+  // Keeps track if we sould show or hide adj matrix on screen
   const [showAdjacencyMatrix, setShowAdjacencyMatrix] = useState(false);
 
   // Keep track of christodies algorithm
@@ -61,7 +60,6 @@ function App() {
         setChristofidesAlgorithim={setChristofidesAlgorithim}
         christofidesStepNum={christofidesStepNum}
         setChristofidesStepNum={setChristofidesStepNum}
-        
       />
     </div>
   );

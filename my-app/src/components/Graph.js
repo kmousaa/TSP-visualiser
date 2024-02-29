@@ -1,15 +1,13 @@
-import { useEffect, useState } from "react";
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
 import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP } from "./TspAlgorithims";
 import { FaSave, FaDownload, FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward } from 'react-icons/fa';
 import { FaPersonHiking } from "react-icons/fa6";
 import "../utils/Graph.css";
-
+import React from "react";
 
 // Represents the graph and its adjacency matrix
 function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep, showAdjacencyMatrix, setShowAdjacencyMatrix , christofidesAlgorithim, setChristofidesAlgorithim, setChristofidesStepNum, christofidesStepNum}) {
     
-  // USe ffect that updates when showAdjacencyMatrix changes
 
     // Function to restart states
     const resetBestTour = () => {
@@ -28,7 +26,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Function to generate the adjacency matrix
     const generateAdjacencyMatrix = () => {
       const newMatrix = Array.from({ length: numNodes }, () => Array(numNodes).fill(0)); // Initialize a 2D array of 0s
-      // Loop through existing edges and update the matrix accordingly
       for (const [edge, weight] of Object.entries(adjacencyMatrix)) {
         const [node1, node2] = edge.split('-').map(Number);
         if (newMatrix[node1] && newMatrix[node2]) {
@@ -52,7 +49,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       if (numNodes > 0) {
         resetBestTour();
         setNumNodes(numNodes - 1);
-  
         // Remove all edges connected to the last node
         const newAdjacencyMatrix = { ...adjacencyMatrix };
         for (const key in newAdjacencyMatrix) {
@@ -84,7 +80,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log("Number of Nodes: " + numNodes)
       console.log("Adjacency Matrix:");
       console.log(adjacencyMatrix);
-      
       console.log("Adjacency Matrix with dupes removed: ");
       // log an adjanecy matrix with duplicate weihts removed e.g for symetry 1-0 and 0-1 have the same weight
       // 1-0 is same as 0-1 so we remove one of them
@@ -96,7 +91,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         }
       }
       console.log(adjMarixNoDupes);
-
       console.log("Adj matrix generated: ");
       console.log(generateAdjacencyMatrix());
       console.log("BEST TOUR: ");
@@ -147,6 +141,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         const reader = new FileReader();
         reader.readAsText(file, "UTF-8");
         reader.onload = (readerEvent) => {
+          resetBestTour();
           const content = readerEvent.target.result;
           const graph = JSON.parse(content);
           setNumNodes(graph.numNodes);
@@ -190,9 +185,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
 
 
-    // Function to render the adjacency matrix as a table onto the screen
-    
-    // Function to render the adjacency matrix as a table onto the screen
+    // Function to return the component that renders the adjacency matrix
     const renderAdjacencyMatrix = () => {
       const adjacencyMatrix = generateAdjacencyMatrix();
       return (
@@ -238,7 +231,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   </tbody>
               </table>
           </div>
-      ) : <div> ok </div>
+      ) : <div>  </div>
       );
     };
 
@@ -282,19 +275,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Move forwards in the TSP simulation
     const nextStep = () => {
       if (stepNum < bestTour.length) { 
-
         setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
-
         setStepNum(prevStepNum => prevStepNum + 1);
         setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-
         setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
-
-
-
       } else {
         if (!(steps.length === 0)) {
-          // setChristofidesStepNum(prevStepNum => prevStepNum + 1);
           setPresentTour(true);
         }
         console.log("Reached maximum step.");
@@ -344,17 +330,14 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
         tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
-
-
       };
     };
 
-
+    // Variables that will help us render the graph
     const nodeCoordinates = generateNodeCoordinates(numNodes);
     const AdjMatrix = generateAdjacencyMatrix();
-    const currentAltStep = altSteps[altSteps.length - 1];
-
     const lastStep = steps[steps.length - 1];
+    const currentAltStep = altSteps[altSteps.length - 1];
 
     // Render the graph and adjacency matrix
     return (
@@ -383,9 +366,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
         <div className="container-fluid d-flex flex-column">
           <div className="row flex-grow-1">
-            {/* Graph */}
-            <div className="col-lg-8">
-             <svg width="700" height="700">
+            
+          {/* Graph */}
+          <div className="col-lg-8">
+          <svg width="700" height="700">
           {/* Render connections */}
           {nodeCoordinates.map((node, index) => {
             // Go through each node
@@ -441,7 +425,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
           {/* Render all alternate connections */}
           {currentAltStep && currentAltStep.map((altNode, index) => {
-            
             const currentNode = steps[steps.length - 1]; // Get the current node
             const x1 = nodeCoordinates[currentNode].x;
             const y1 = nodeCoordinates[currentNode].y;
@@ -466,17 +449,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             );
         })}
 
-
-
           {/* make every line inside best tour red */}
-          {/* first case a lil different for chritofies */}
           {christofidesAlgorithim ? (
-
-         
               lastStep && lastStep.map((node, index) => {
-           
-
-        
                   if (Array.isArray(node)) {
                       const node1 = node[0];
                       const node2 = node[1];
@@ -485,9 +460,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       const y1 = nodeCoordinates[node1].y;
                       const x2 = nodeCoordinates[node2].x;
                       const y2 = nodeCoordinates[node2].y;
+
                       let color = "#ff8a27"
-
-
                       if (christofidesStepNum === 0) {
                         color = "#2730ff";
                       }
@@ -495,9 +469,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                         color = "#ff2730";
                       }
                       else if (christofidesStepNum === 2){
-      
                         color = "#e100ff";
-                      
                         // Check if [1, 3] is in secondLast
                         // const secondLast = steps[steps.length - 3];
                         // const isPresent = secondLast.some(step => step[0] === node1 && step[1] === node2);
@@ -507,7 +479,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                         // } else {
                         //     color = "#ff2730" ; // Set color to orange if [1, 3] is not present
                         // }
-   
                       }
                       
                       return (
@@ -535,13 +506,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                           const x2 = nodeCoordinates[node2].x;
                           const y2 = nodeCoordinates[node2].y;
                           let color = "#ff8a27"
-
                           if (christofidesStepNum === 3) {
                             color = presentTour ? "#ff0000" : "#ff8a27";
                           }
-                          
-
-
                           return (
                               <line
                                   key={`${node1}-${node2}`}
@@ -558,22 +525,15 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                           );
                       }
                   }
-
-                  
-
-
               })
 
           ) : (
-              // Render normally if Christofides algorithm is false
 
               steps.map((node, index) => {
 
                   if (Array.isArray(node)) {
                       const node1 = node[0];
                       const node2 = node[1];
-   
-
                       const x1 = nodeCoordinates[node1].x;
                       const y1 = nodeCoordinates[node1].y;
                       const x2 = nodeCoordinates[node2].x;
@@ -624,8 +584,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           {/* Render nodes */}
           {renderNodes()}
           
-             </svg>
-            </div>
+          </svg>
+          </div>
             
             {/* Adjacency Matrix */}
             <div className="col-lg-4 py-5 d-flex flex-column justify-content-between">
@@ -653,6 +613,21 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   <button onClick={generateTSPHandler(NearestNeighborTSP)} className="btn btn-light mx-1">Nearest Neighbor</button>
                   <button onClick={generateTSPHandler(GreedyTSP)} className="btn btn-light mx-1">Greedy</button>
                   <button onClick={generateTSPHandler(ChristofidesTSP)} className="btn btn-light mx-1">Christofides</button>
+
+                  <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Dropdown button
+                  </button>
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="#">Action</a>
+                    <a class="dropdown-item" href="#">Another action</a>
+                    <a class="dropdown-item" href="#">Something else here</a>
+                  </div>
+
+ 
+
+                </div>
+
                 </div>
 
                 {/* Display the best tour and its weight */}
