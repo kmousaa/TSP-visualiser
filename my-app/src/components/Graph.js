@@ -1,13 +1,16 @@
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
 import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP } from "./TspAlgorithims";
-import { FaSave, FaDownload, FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward } from 'react-icons/fa';
+import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer} from 'react-icons/fa';
 import { FaPersonHiking } from "react-icons/fa6";
 import "../utils/Graph.css";
 import React from "react";
+import { useState } from "react";
 
 // Represents the graph and its adjacency matrix
 function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep, showAdjacencyMatrix, setShowAdjacencyMatrix , christofidesAlgorithim, setChristofidesAlgorithim, setChristofidesStepNum, christofidesStepNum}) {
-    
+
+    const [algo, setAlgo] = useState("Select Algorithm");
+    const [stop, setStop] = useState([]);
 
     // Function to restart states
     const resetBestTour = () => {
@@ -231,7 +234,112 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   </tbody>
               </table>
           </div>
-      ) : <div>  </div>
+      ) : <div>  
+
+          {
+
+            <div>
+                {algo !== "Select Algorithm" ? (
+                    <div>
+                        <div class="alert alert-info" role="alert">
+                            You have selected: <span className="fw-bold">{algo} Algorithm</span>
+                        </div>
+
+                        <div className="key">
+                            <h5>Key:</h5>
+                            <ul class="list-group">
+                                {algo === "Brute Force" && (
+                                    <>
+                                        <li class="algorithm">
+                                            <FaSquare className="icon" style={{ color: "#30bbd1" }} />
+                                            <span class="badge bg-primary"></span> Current Node
+                                        </li>
+                                        <li class="algorithm">
+                                            <FaSquare className="icon" style={{ color: '#ff8a27' }} />
+                                            <span class="badge bg-primary"></span> Current Tour
+                                        </li>
+                                        <li class="algorithm">
+                                            <FaSquare className="icon" style={{ color: '#ff0000' }} />
+                                            <span class="badge bg-primary"></span> Final Tour
+                                        </li>
+                                    </>
+                                )}
+                                {algo === "Greedy" && (
+                                    <>
+                                    <li class="algorithm">
+                                        <FaSquare className="icon" style={{ color: '#ff8a27' }} />
+                                        <span class="badge bg-primary"></span> Current Tour
+                                    </li>
+                                    <li class="algorithm">
+                                        <FaSquare className="icon" style={{ color: '#ff0000' }} />
+                                        <span class="badge bg-primary"></span> Final Tour
+                                    </li>
+                                    </>
+                                )}
+                                {algo === "Nearest Neighbor" && (
+                                    <>
+                                    <li class="algorithm">
+                                        <FaSquare className="icon" style={{ color: "#30bbd1" }} />
+                                        <span class="badge bg-primary"></span> Current Edge + Potential Next Edges
+                                    </li>
+                                    <li class="algorithm">
+                                        <FaSquare className="icon" style={{ color: '#ff8a27' }} />
+                                        <span class="badge bg-primary"></span> Current Tour
+                                    </li>
+                                    <li class="algorithm">
+                                        <FaSquare className="icon" style={{ color: '#ff0000' }} />
+                                        <span class="badge bg-primary"></span> Final Tour
+                                    </li>
+                                    </>
+                                )}
+                                {algo === "Christofides" && (
+                                    <>
+                                    <li class="algorithm">
+                                        <FaSquare className="icon" style={{ color: "#2730ff" }} />
+                                        <span class="badge bg-primary"></span> Minimum Spanning Tree
+                                    </li>
+                                    <li class="algorithm">
+                                        <FaSquare className="icon" style={{ color: "#ff2730" }} />
+                                        <span class="badge bg-primary"></span> Minimum Weight Perfect Matching for Odd Vertices 
+                                    </li>
+                                    <li class="algorithm">
+                                        <FaSquare className="icon" style={{ color: "#e100ff" }} />
+                                        <span class="badge bg-primary"></span> Connected Multigraph
+                                    </li>
+                                    <li class="algorithm">
+                                        <FaSquare className="icon" style={{ color: '#ff8a27' }} />
+                                        <span class="badge bg-primary"></span> Hamiltoinian Cycle 
+                                    </li>
+                                    <li class="algorithm">
+                                        <FaSquare className="icon" style={{ color: '#ff0000' }} />
+                                        <span class="badge bg-primary"></span> Final Tour
+                                    </li>
+                                    </>
+                                )}
+
+                            </ul>
+                        </div>
+
+
+                    </div>
+                ) : (
+                    <div>
+                        <div class="alert alert-info" role="alert">
+                            Please create graph and select algorithm, then press the step through buttons.
+                        </div>
+                    </div>
+                )}
+            </div>
+
+
+
+        }
+
+
+
+
+
+      </div>
       );
     };
 
@@ -239,13 +347,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // TEMPORARY - Display the weight of the selected edge onto the screen
     const showWeight = (e, node1, node2) => {
       const weight = adjacencyMatrix[`${node1}-${node2}`];
-      let displayText;
-      if (typeof weight === "undefined") {
-        displayText = "Selected weight: Click to input weight";
-      } else {
-        displayText = "Selected weight: " + weight + "   " + "  (" + (node1 + 1) + "-" + (node2 + 1) + ")";
-      }
-      document.getElementById("weight").innerHTML = displayText;
+     
     }
     
     const showWeightedEdges = (e, node1, node2) => {
@@ -303,6 +405,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Show the answer of the TSP simulation
     const fastForward = () => {
       setSteps(bestTour);
+      setChristofidesStepNum(4);
       setStepNum(bestTour.length);
       setPresentTour(true);
       setAltSteps(consideredStep);
@@ -316,6 +419,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setPresentTour(false);
     };
 
+    // Play button
+
+      
     // Function to render nodes
     const renderNodes = () => {
       let nodeCoordinates = generateNodeCoordinates(numNodes);
@@ -326,9 +432,32 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       ));
     };
 
+   
+    // Function to return the name of the TSP algorithm
+    function functionName(fun) {
+      var ret = fun.name;
+  
+      if (ret === "BruteForceTSP") {
+        return "Brute Force";
+      }
+      if (ret === "NearestNeighborTSP") {
+        return "Nearest Neighbor";
+      }
+      if (ret === "GreedyTSP") {
+        return "Greedy";
+      }
+      if (ret === "ChristofidesTSP") {
+        return "Christofides";
+      }
+      else{
+        return "Select Algorithim";
+      }
+    }
+
     // Helper function to generate TSP algorithm handlers
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
+        setAlgo(functionName(tspAlgorithm));
         tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
       };
     };
@@ -351,7 +480,20 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               <span>TSP Heuristic Algorithm Visualizer</span>
             </h2>
           </div>
+
           <div>
+            <div class="btn-group">
+              <a class="btn btn-light dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                <span className="fw-bold">Select Algorithim</span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a  onClick={generateTSPHandler(BruteForceTSP)}  class="dropdown-item" href="#">Brute Force</a></li>
+                <li><a  onClick={generateTSPHandler(NearestNeighborTSP)} class="dropdown-item" href="#">Nearest Neighbor</a></li>
+                <li><a  onClick={generateTSPHandler(GreedyTSP)} class="dropdown-item" href="#">Greedy</a></li>
+                <li><a  onClick={generateTSPHandler(ChristofidesTSP)} class="dropdown-item" href="#">Christofides</a></li>
+              </ul>
+            </div>
+  
             {/* Save and load buttons with icons */}
             <button className="btn btn-light mx-4" onClick={saveGraph}>
               <FaSave className="me-1" />
@@ -594,50 +736,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               </div>
 
               {/* Additional buttons */}
-              <div className="buttons mt-auto">
-                {/* Graph Operations */}
-                <div>
-                  <button onClick={() => addNode()} className="btn btn-light mx-1">Add Node</button>
-                  {/* <input type="number" value={numNodes} onChange={(e) => {setNumNodes(Number(e.target.value))}} className="form-control form-control-sm mx-1" style={{ width: "80px" }} /> */}
-                  <button onClick={() => removeNode()} disabled={numNodes === 0} className="btn btn-light mx-1">Remove Node</button>
-                  <button onClick={() => resetGraph()} className="btn btn-light mx-1">Reset Graph</button>
-                  <button onClick={() => clearWeights()} className="btn btn-light mx-1">Clear Weights</button>
-                  <button onClick={() => generateRandomWeights()} className="btn btn-light mx-1">Random Weight</button>
-                  <button onClick={() => logWeights()} className="btn btn-light mx-1">Log Weights</button>
-                  <button onClick={() => showAdjMatrix()} className="btn btn-light mx-1">Show Adj Matrix</button>
-                </div>
-
-                {/* TSP algorithms */}
-                <div>
-                  <button onClick={generateTSPHandler(BruteForceTSP)} className="btn btn-light mx-1">Brute Force</button>
-                  <button onClick={generateTSPHandler(NearestNeighborTSP)} className="btn btn-light mx-1">Nearest Neighbor</button>
-                  <button onClick={generateTSPHandler(GreedyTSP)} className="btn btn-light mx-1">Greedy</button>
-                  <button onClick={generateTSPHandler(ChristofidesTSP)} className="btn btn-light mx-1">Christofides</button>
-
-                  <div class="dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Dropdown button
-                  </button>
-                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                  </div>
-
- 
-
-                </div>
-
-                </div>
-
-                {/* Display the best tour and its weight */}
-                <div>
-                  <p1 id="weight" className="text-white mx-1">Selected weight: NA</p1>
-                  <p1 className="text-white mx-1">Best Tour: {bestTour}</p1>
-                  <p1 className="text-white mx-1">Tour length: {bestTour.length}</p1>
-                  <p1 className="text-white mx-1">Best Weight: {bestWeight}</p1>
+              <div className="edit-graph-box p-3 border">
+                <h3>Edit Graph</h3>
+                <div className="d-flex flex-wrap gap-2 justify-content-evenly">
+                  <button onClick={() => addNode()} className="btn btn-outline-dark btn-sm ">  <FaPlus/> Add Node</button>
+                  <button onClick={() => removeNode()} disabled={numNodes === 0} className="btn btn-outline-dark btn-sm"><FaMinus /> Remove Node</button>
+                  <button onClick={() => resetGraph()} className="btn btn-outline-dark btn-sm"><FaSync /> Reset Graph</button>
+                  <button onClick={() => clearWeights()} className="btn btn-outline-dark btn-sm"><FaEraser /> Clear Weights</button>
+                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Weight</button>
+                  <button onClick={() => showAdjMatrix()} className="btn btn-outline-dark btn-sm"><FaEye /> Show Distance</button>
                 </div>
               </div>
+
             </div>
           </div>
 

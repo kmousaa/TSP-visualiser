@@ -3,6 +3,7 @@
   max-width: 600px; /* Set the maximum width of the container */
   max-height: 400px; /* Set the maximum height of the container */
   overflow-x: auto; /* Enable horizontal scrolling */
+  margin-right: 20px;
 }
 
 .adjacency-matrix {
@@ -16,6 +17,26 @@
   white-space: nowrap; /* Prevent text wrapping */
   overflow: hidden; /* Hide overflowing content */
   text-overflow: ellipsis; /* Display ellipsis for overflowed content */
-  padding: 15px; /* Add padding for better readability */
+  padding: 9px; /* Add padding for better readability */
   min-width: 80px; /* Set minimum width for columns */
+ 
 }
+
+.edit-graph-box {
+  margin-bottom: 20px;
+  margin-right: 10px;
+}
+
+
+.icon {
+  font-size: 24px; /* Adjust the icon size as needed */
+}
+
+.key{
+  text-align: left;
+}
+
+.algorithm {
+  padding: 5px; /* Adjust padding as needed */
+}
+

@@ -32,7 +32,7 @@ function App() {
 
 
   return (
-    <div className="App">
+    <div className="App ">
 
       {/* Consists of the graph and the adjacency matrix */}
       <Graph 

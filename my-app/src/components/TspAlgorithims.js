@@ -107,7 +107,7 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
 
 // Its US - this does not work
 export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim) => {
-    
+    resetBestTour();
     let tour = [];
     let adjacencyMatrixNoDupes = removeDupeDict(adjacencyMatrix);
     let sortedAdjacencyMatrix = sortDictionary(adjacencyMatrixNoDupes);
