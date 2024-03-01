@@ -5,6 +5,8 @@ import { FaPersonHiking } from "react-icons/fa6";
 import "../utils/Graph.css";
 import React from "react";
 import { useState } from "react";
+import { motion } from "framer-motion";
+
 
 // Represents the graph and its adjacency matrix
 function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep, showAdjacencyMatrix, setShowAdjacencyMatrix , christofidesAlgorithim, setChristofidesAlgorithim, setChristofidesStepNum, christofidesStepNum}) {
@@ -575,7 +577,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             const color = "#30bbd1";
             
             return (
-              <line
+              <motion.line
                 key={`${currentNode}-${altNode}`}
                 x1={x1}
                 y1={y1}
@@ -584,6 +586,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 stroke={color}
                 strokeOpacity="0.5"
                 strokeWidth="4"
+
+                initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                transition={{ duration: 0.45 , delay: 0.45 }} // Adjust the duration of the animation
+                
                 onMouseMove={(e) => { showWeightedEdges(e, currentNode, altNode) }}
                 onClick={(e) => { SelectAdjMatrix(e, currentNode, altNode); }}
                 onMouseOut={(e) => { e.target.style.stroke = color; }}
@@ -624,7 +631,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       }
                       
                       return (
-                          <line
+                          <motion.line
                               key={`${node1}-${node2}`}
                               x1={x1}
                               y1={y1}
@@ -632,6 +639,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                               y2={y2}
                               stroke={color}
                               strokeWidth="4"
+
+                              initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                              animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                              transition={{ duration: 0.5}} // Adjust the duration of the animation
+
                               onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
                               onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
                               onMouseOut={(e) => { e.target.style.stroke = color; }}
@@ -652,14 +664,19 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                             color = presentTour ? "#ff0000" : "#ff8a27";
                           }
                           return (
-                              <line
+                              <motion.line
                                   key={`${node1}-${node2}`}
                                   x1={x1}
                                   y1={y1}
                                   x2={x2}
                                   y2={y2}
                                   stroke={color}
-                                  strokeWidth="4"
+                                  strokeWidth="4"  
+
+                                  initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                                  animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                                  transition={{ duration: 0.45 }} // Adjust the duration of the animation
+
                                   onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
                                   onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
                                   onMouseOut={(e) => { e.target.style.stroke = color; }}
@@ -682,7 +699,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       const y2 = nodeCoordinates[node2].y;
                       const color = presentTour ? "#ff0000" : "#ff8a27";
                       return (
-                          <line
+                          <motion.line
                               key={`${node1}-${node2}`}
                               x1={x1}
                               y1={y1}
@@ -690,6 +707,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                               y2={y2}
                               stroke={color}
                               strokeWidth="4"
+
+                              initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                              animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                              transition={{ duration: 0.45 }} // Adjust the duration of the animation
+
                               onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
                               onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
                               onMouseOut={(e) => { e.target.style.stroke = color; }}
@@ -705,7 +727,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                           const y2 = nodeCoordinates[node2].y;
                           const color = presentTour ? "#ff0000" : "#ff8a27";
                           return (
-                              <line
+                              <motion.line
                                   key={`${node1}-${node2}`}
                                   x1={x1}
                                   y1={y1}
@@ -713,6 +735,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                   y2={y2}
                                   stroke={color}
                                   strokeWidth="4"
+
+                                  initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                                  animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                                  transition={{ duration: 0.45 }} // Adjust the duration of the animation
+
                                   onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
                                   onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
                                   onMouseOut={(e) => { e.target.style.stroke = color; }}
