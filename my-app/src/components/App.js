@@ -30,6 +30,8 @@ function App() {
   const [christofidesAlgorithim, setChristofidesAlgorithim] = useState(false);
   const [christofidesStepNum, setChristofidesStepNum] = useState(0);
 
+  // Interactive mode states
+  const [interactiveMode, setInteractiveMode] = useState(false);
 
   return (
     <div className="App ">
@@ -60,6 +62,8 @@ function App() {
         setChristofidesAlgorithim={setChristofidesAlgorithim}
         christofidesStepNum={christofidesStepNum}
         setChristofidesStepNum={setChristofidesStepNum}
+        interactiveMode={interactiveMode}
+        setInteractiveMode={setInteractiveMode}
       />
     </div>
   );

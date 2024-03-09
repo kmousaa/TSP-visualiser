@@ -11,6 +11,7 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
     let possible_tours = permutations([...Array(numNodes).keys()]); // Generate all possible tours
     let best_tour = [];
     let best_weight = Number.MAX_VALUE;
+    let intermediate_tours = [];
 
     // Find the tour with the smallest weight
     for (let i = 0; i < possible_tours.length; i++) {
@@ -21,15 +22,18 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
             best_tour = tour;
             best_weight = weight;
         }
+        intermediate_tours.push(tour);
     }
         
     setBestTour(best_tour);
     setBestWeight(best_weight);
 
+
     console.log("Total weight:", best_weight); // Log the total weight
 
     return best_weight; // Return the weight of the best tour
 };
+
 
 
 export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep) => {
@@ -89,14 +93,15 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
     setConsideredStep(considered);
 
     // Initialise the steps to 1 in order to show the first step of simulating the algorithim
-    setSteps([tour[0]]);
-    setAltSteps(prevSteps => [...prevSteps, considered[0]]);
-    setCurrentStep(1);
+    // setSteps([tour[0]]);
+    // setAltSteps(prevSteps => [...prevSteps, considered[0]]);
+    // setCurrentStep(1);
 
     console.log("Total weight:", weight); // Log the total weight
 
     return weight;
 };
+
 
 
 
@@ -112,6 +117,7 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
     let adjacencyMatrixNoDupes = removeDupeDict(adjacencyMatrix);
     let sortedAdjacencyMatrix = sortDictionary(adjacencyMatrixNoDupes);
     let degreeDict = {};
+    let weight = 0;
 
     for (let i = 0; i < numNodes; i++) {
         degreeDict[i] = 0;
@@ -133,6 +139,7 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
             tour.push([node1, node2]);
             degreeDict[node1] += 1;
             degreeDict[node2] += 1;
+            weight += adjacencyMatrix[`${node1}-${node2}`];
         }
 
         // If adding the edge does not create a cycle, add it to the tour
@@ -140,6 +147,7 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
             tour.push([node1, node2]);
             degreeDict[node1] += 1;
             degreeDict[node2] += 1;
+            weight += adjacencyMatrix[`${node1}-${node2}`];
         }
 
         // Remove the edge from the sorted adjacency matrix
@@ -149,6 +157,8 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
 
     // Show the sequence of nodes in the tour
     setBestTour(tour);
+    setBestWeight(weight);
+   
 
 
 };
@@ -365,6 +375,8 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     setBestTour(finalTour);
     console.log("Final Tour", finalTour);
     setSteps([finalTour[0]]);
+
+    setBestWeight(tourWeight(finalTour[finalTour.length - 1], adjacencyMatrix));
 
     
     console.log("Step", [finalTour[0]]);

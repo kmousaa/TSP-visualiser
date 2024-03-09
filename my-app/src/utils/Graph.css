@@ -1,7 +1,7 @@
 
 .table-responsive {
   max-width: 600px; /* Set the maximum width of the container */
-  max-height: 400px; /* Set the maximum height of the container */
+  max-height: 340px; /* Set the maximum height of the container */
   overflow-x: auto; /* Enable horizontal scrolling */
   margin-right: 20px;
 }
@@ -40,3 +40,23 @@
   padding: 5px; /* Adjust padding as needed */
 }
 
+
+
+
+
+/* Define the default color */
+
+
+/* Define the hover color */
+.edge:hover {
+  stroke: #00aeff; /* Blue */
+  stroke-opacity: 1; /* Adjust the opacity as needed */
+}
+
+.node-group:hover .node {
+  fill: #00aeff; /* Blue */
+  stroke: #000000; /* Black */
+}
+.node-group:hover .nodeNo {
+  fill: #000000; /* Blue */
+}

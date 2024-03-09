@@ -26,16 +26,16 @@ export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, chr
     
 
     return (
-      <g key={index}>
-        {/* Node outline */}
-        <circle cx={node.x} cy={node.y} r="20" fill="none" stroke={borderColor} strokeWidth="4" />
-        {/* Node body */}
-        <circle cx={node.x} cy={node.y} r="18" fill={nodeColor} />
-        {/* Bold number inside the node */}
-        <text x={node.x} y={node.y} fill={textColor} fontSize="20" fontWeight="bold" textAnchor="middle" alignmentBaseline="central">
-          {index + 1}
-        </text>
-      </g>
+      <g class="node" key={index} className="node-group">
+      {/* Node outline */}
+      <circle class="node" cx={node.x} cy={node.y} r="20" fill="none" stroke={borderColor} strokeWidth="4" />
+      {/* Node body */}
+      <circle class="node" cx={node.x} cy={node.y} r="18" fill={nodeColor} />
+      {/* Bold number inside the node */}
+      <text class="nodeNo" x={node.x} y={node.y} fill={textColor} fontSize="20" fontWeight="bold" textAnchor="middle" alignmentBaseline="central">
+        {index + 1}
+      </text>
+    </g>
     );
   };
   
