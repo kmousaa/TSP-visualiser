@@ -1,7 +1,7 @@
 // GraphUtil.js
 
-
-export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, christofidesAlgorithim ,christofidesStepNum) => {
+// Function to render the edges of the graph      
+export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, christofidesAlgorithim ,christofidesStepNum , setClickedNode, interactiveMode) => {
     // Define the color based on the boolean value
     
     let tempColor; // Define tempColor outside of the if-else blocks
@@ -26,7 +26,8 @@ export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, chr
     
 
     return (
-      <g class="node" key={index} className="node-group">
+      <a href="#0" class="pe-auto" style={{ textDecoration: 'none' }}>
+      <g class="node" onClick={() =>  interactiveMode ? setClickedNode(index) :    setClickedNode(null)  }  key={index} className="node-group">
       {/* Node outline */}
       <circle class="node" cx={node.x} cy={node.y} r="20" fill="none" stroke={borderColor} strokeWidth="4" />
       {/* Node body */}
@@ -36,6 +37,7 @@ export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, chr
         {index + 1}
       </text>
     </g>
+    </a>
     );
   };
   

@@ -35,12 +35,15 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
 };
 
 
-
-export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep) => {
+export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim, startNode) => {
     resetBestTour();
 
-    // Pick a random starting node
-    let start = Math.floor(Math.random() * numNodes);
+    // Pick a random starting node (unless we are in interactive mode, in which case the user picks the starting node)
+    console.log("Start Node freshhh", startNode);
+    let start = startNode !== null ?  startNode : Math.floor(Math.random() * numNodes) ;
+    console.log("Lets start here", start);
+    console.log( startNode !== null);
+
     let tour = [start];
     let weight = 0;
 
@@ -70,7 +73,6 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
         }
         weight += minWeight;
         tour.push(minNode);
-
        
         if(i === numNodes - 2){
             // We can only consider the last node in the last step

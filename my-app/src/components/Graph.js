@@ -9,13 +9,12 @@ import { motion } from "framer-motion";
 
 
 
-
-
 // Represents the graph and its adjacency matrix
 function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep, showAdjacencyMatrix, setShowAdjacencyMatrix , christofidesAlgorithim, setChristofidesAlgorithim, setChristofidesStepNum, christofidesStepNum , interactiveMode, setInteractiveMode}) {
 
     const [algo, setAlgo] = useState("Select Algorithm");
     const [stop, setStop] = useState(true);
+    const [clickedNode, setClickedNode] = useState(null);
 
     // Function to restart states
     const resetBestTour = () => {
@@ -28,6 +27,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setAltSteps([]);
       setChristofidesAlgorithim(false);
       setChristofidesStepNum(0);
+      setClickedNode(null);
+
+      
       // setAlgo("Select Algorithm");
     }
 
@@ -138,7 +140,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       const newWeights = {};
       for (let i = 0; i < numNodes; i++) {
         for (let j = i + 1; j < numNodes; j++) {
-          const weight = Math.floor(Math.random() * 10) + 1; // Generate a random weight between 1 and 10
+          const weight = Math.floor(Math.random() * 20) + 1; // Generate a random weight between 1 and 10
           newWeights[`${i}-${j}`] = weight;
           newWeights[`${j}-${i}`] = weight; // Symmetrically assign weight
         }
@@ -147,7 +149,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
 
     const showAdjMatrix = () => {
+
       setShowAdjacencyMatrix(!showAdjacencyMatrix);
+      
     };
 
 
@@ -321,6 +325,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // When clicking an edge in the graph, select the adjacnecy matrix input
     const SelectAdjMatrix = (e, node1, node2) => {
       setShowAdjacencyMatrix(true);
+
       setTimeout(() => {
         const inputId = `${node1}-${node2}`;
         const inputElement = document.getElementById(inputId);
@@ -328,6 +333,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           inputElement.focus(); // Focus on the input element
         }
       }, 1); // Delay to make sure adjancecy matrix shown if hidden 
+    
 
     };
 
@@ -342,6 +348,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log(consideredStep);
       console.log("Alternate Steps: ")
       console.log(altSteps);
+      console.log("Clicked node");
+      console.log(clickedNode);
+      console.log("Interactive Mode: ");
+      console.log(interactiveMode);
       console.log("_________________________");
     };
 
@@ -349,30 +359,39 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Move forwards in the TSP simulation
     const nextStep = () => {
 
-      // call the same algorithim on any graph we we reset
-      // if (stepNum === 0) {
-      //   if (algo === "Brute Force") {
-      //     BruteForceTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
-      //   }
-      //   if (algo === "Nearest Neighbor") {
-      //     NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
-      //   }
-      //   if (algo === "Greedy") {
-      //     GreedyTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
-      //   }
-      //   if (algo === "Christofides") {
-      //     ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
-      //   }
-      // }
+      if (stepNum < bestTour.length) {
 
+        // if interactive mode and next clicked step is correct then go to next step
+        if (interactiveMode) {
 
-      if (stepNum < bestTour.length) { 
+          // on last step, if the clicked node is the last node in the best tour, then go to next step 
+          if (clickedNode === bestTour[stepNum]) {
+            setPresentTour(false);
+            setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
+            setStepNum(prevStepNum => prevStepNum + 1);
+            setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+            setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+            console.log("Correct step");
 
-        setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
-        setStepNum(prevStepNum => prevStepNum + 1);
-        setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-        setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
-
+            // if last step then go forward
+            if (stepNum === bestTour.length - 1) {
+              setInteractiveMode(false);
+              setPresentTour(true);
+            }
+          }
+          else{
+            console.log("Incorrect step");
+          }
+        }
+        else{
+          setPresentTour(false);
+          setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
+          setStepNum(prevStepNum => prevStepNum + 1);
+          setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+          setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+        }
+        
+        
 
       } else {
         if (!(steps.length === 0)) {
@@ -409,9 +428,23 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Restart the TSP simulation
     const restart = () => {
       setSteps([]);
+      setAltSteps([]);
       setStepNum(0);
       setPresentTour(false);
+      setChristofidesStepNum(0);
+      setClickedNode(null);
+      // if its nearest neighbor and not interactive mode, then run the algorithm again
+      if (algo === "Nearest Neighbor" && !interactiveMode) {
+        NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, clickedNode);
+      }
     };
+
+    const softRestart = () => {
+      setClickedNode(null);
+      // if its nearest neighbor and not interactive mode, then run the algorithm again
+
+    };
+
 
 
     const play = () => {
@@ -426,7 +459,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       const flattenedSteps = steps.flat(); // Flatten the steps array if it's 2D
       const flattendedLastStep = (christofidesAlgorithim && lastStep) ? lastStep.flat() : []; // Flatten the last step array if it's 2D
       return nodeCoordinates.map((node, index) => (
-        renderCustomNode(node, index, (flattenedSteps.includes(index) || flattendedLastStep.includes(index))  , (steps[steps.length - 1] === index), presentTour , christofidesAlgorithim, christofidesStepNum)
+        renderCustomNode(node, index, (flattenedSteps.includes(index) || flattendedLastStep.includes(index))  , (steps[steps.length - 1] === index), presentTour , christofidesAlgorithim, christofidesStepNum, setClickedNode, interactiveMode)
       ));
     };
 
@@ -457,9 +490,36 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
         setAlgo(functionName(tspAlgorithm));
-        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
+
+        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim, clickedNode);
       };
     };
+
+    // if Nearest Neighbor algoirithim is chosen, and interactive mode is true, then when user clicks on a node, the algorithm should run again with the selected node
+    useEffect(() => {
+      if (interactiveMode) {
+        if (algo === "Nearest Neighbor") {
+          if (clickedNode !== null ) {
+            if (stepNum === 0) {
+              resetBestTour();
+              NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, clickedNode);
+              // go one step forward
+              setSteps([clickedNode]);
+              setStepNum(1);
+              setAltSteps([consideredStep[0]]);
+            }
+            else{
+              nextStep();
+            }
+
+          }
+        }
+      }
+    }, [clickedNode]);
+
+
+
+
 
     // Variables that will help us render the graph
     const nodeCoordinates = generateNodeCoordinates(numNodes);
@@ -489,10 +549,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 <span className="fw-bold">Select Algorithim</span>
               </a>
               <ul class="dropdown-menu">
-                <li><a  onClick={generateTSPHandler(BruteForceTSP)}  class="dropdown-item" href="#">Brute Force</a></li>
-                <li><a  onClick={generateTSPHandler(NearestNeighborTSP)} class="dropdown-item" href="#">Nearest Neighbor</a></li>
-                <li><a  onClick={generateTSPHandler(GreedyTSP)} class="dropdown-item" href="#">Greedy</a></li>
-                <li><a  onClick={generateTSPHandler(ChristofidesTSP)} class="dropdown-item" href="#">Christofides</a></li>
+                <li><a  onClick={generateTSPHandler(BruteForceTSP)}  class="dropdown-item" href="#0">Brute Force</a></li>
+                <li><a  onClick={generateTSPHandler(NearestNeighborTSP)} class="dropdown-item" href="#0">Nearest Neighbor</a></li>
+                <li><a  onClick={generateTSPHandler(GreedyTSP)} class="dropdown-item" href="#0">Greedy</a></li>
+                <li><a  onClick={generateTSPHandler(ChristofidesTSP)} class="dropdown-item" href="#0">Christofides</a></li>
               </ul>
             </div>
   
@@ -530,7 +590,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 return (
                   // Check if node-node2 in the adjacency matrix has a value not "NA"
                   result ? (
-                    <a href="#" class="pe-auto  stretched-link d-inline-block p-2">
+                    <a href="#0" class="pe-auto  stretched-link d-inline-block p-2">
                     <line
                       class="edge"
                       key={`${node1}-${node2}`} // Line with undefined weight
@@ -549,7 +609,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   ) : (
 
           
-                  <a href="#" class="pe-auto">
+                  <a href="#0" class="pe-auto">
                   <line
                     class="edge"  
                     key={`${node1}-${node2}`} // Line with defined weight
@@ -575,7 +635,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           })}
 
           {/* Render all alternate connections */}
-          {!interactiveMode && currentAltStep && currentAltStep.map((altNode, index) => {
+          {currentAltStep && currentAltStep.map((altNode, index) => {
             const currentNode = steps[steps.length - 1]; // Get the current node
             const x1 = nodeCoordinates[currentNode].x;
             const y1 = nodeCoordinates[currentNode].y;
@@ -822,7 +882,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 <button className="btn btn-light mx-1" onClick={nextStep}><FaStepForward /></button>
                 <button className="btn btn-light mx-1" onClick={restart}><FaRedo /></button>
                 <button className="btn btn-light mx-1" onClick={fastForward}><FaFastForward /></button>
-                <button className="btn btn-danger mx-1" onClick={() => setInteractiveMode(!interactiveMode)}> <FaToggleOff /> Interactive Mode </button>
+                <button className="btn btn-danger mx-1" onClick={() => {
+                  if (!presentTour){
+                  setInteractiveMode(!interactiveMode)
+                  softRestart();
+                  setShowAdjacencyMatrix(false)}
+                  }
+                }><FaToggleOn /> Interactive Mode  </button>
                 </>
               )
             }
