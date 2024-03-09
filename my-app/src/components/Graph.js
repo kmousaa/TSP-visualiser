@@ -620,13 +620,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
                       let color = "#ff8a27"
 
-                      if (christofidesStepNum === 0) {
+                      if (christofidesStepNum === 1) {
                         color = "#2730ff";
                       }
-                      else if (christofidesStepNum === 1) {
+                      else if (christofidesStepNum === 2) {
                         color = "#ff2730";
                       }
-                      else if (christofidesStepNum === 2){
+                      else if (christofidesStepNum === 3){
                         color = "#e100ff";
 
                         // Check if [1, 3] is in secondLast
@@ -670,7 +670,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                           const x2 = nodeCoordinates[node2].x;
                           const y2 = nodeCoordinates[node2].y;
                           let color = "#ff8a27"
-                          if (christofidesStepNum === 3) {
+                          if (christofidesStepNum === 4) {
                             color = presentTour ? "#ff0000" : "#ff8a27";
                           }
                           return (

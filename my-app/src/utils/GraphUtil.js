@@ -6,13 +6,13 @@ export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, chr
     
     let tempColor; // Define tempColor outside of the if-else blocks
 
-    if (christofidesAlgorithim && christofidesStepNum === 0){
+    if (christofidesAlgorithim && christofidesStepNum === 1){
       tempColor = "#2730ff";
     }
-    else if (christofidesAlgorithim && christofidesStepNum === 1){
+    else if (christofidesAlgorithim && christofidesStepNum === 2){
       tempColor = "#ff2730";
     }
-    else if (christofidesAlgorithim && christofidesStepNum === 2){
+    else if (christofidesAlgorithim && christofidesStepNum === 3){
       tempColor = "#e100ff";
     }
 

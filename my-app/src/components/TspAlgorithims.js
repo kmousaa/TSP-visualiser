@@ -374,13 +374,13 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
 
     setBestTour(finalTour);
     console.log("Final Tour", finalTour);
-    setSteps([finalTour[0]]);
+    // setSteps([finalTour[0]]);
 
     setBestWeight(tourWeight(finalTour[finalTour.length - 1], adjacencyMatrix));
 
     
     console.log("Step", [finalTour[0]]);
-    setCurrentStep(1);
+    // setCurrentStep(1);
 
     setChristofidesAlgorithim(true);
     
