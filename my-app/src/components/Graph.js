@@ -7,6 +7,8 @@ import React from "react";
 import { useState , useEffect} from "react";
 import { motion } from "framer-motion";
 
+import { permutations, getAdjacentNodes , tourWeight, sortDictionary, removeDupeDict} from "../utils/GraphUtil";
+
 
 
 // Represents the graph and its adjacency matrix
@@ -15,6 +17,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [algo, setAlgo] = useState("Select Algorithm");
     const [stop, setStop] = useState(true);
     const [clickedNode, setClickedNode] = useState(null);
+    const [clickedEdge, setClickedEdge] = useState(null);
 
     // Function to restart states
     const resetBestTour = () => {
@@ -149,7 +152,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
 
     const showAdjMatrix = () => {
-
       setShowAdjacencyMatrix(!showAdjacencyMatrix);
       
     };
@@ -295,7 +297,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 ) : (
                     <div>
                         <div class="alert alert-primary" role="alert">
-                        Begin by constructing the graph and assigning weights. Then, choose a TSP algorithm to visualise.
+                        Begin by constructing the graph and assigning weights. Then, choose a TSP algorithm to visualise. MAKE SURE TO SATISFY TRIANGLE INEQUALITY.
                         </div>
                     </div>
                 )}
@@ -308,6 +310,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // TEMPORARY - Display the weight of the selected edge onto the screen
     const showWeight = (e, node1, node2) => {
+      // update the clicked edge
+      setClickedEdge([node1, node2]);
       const weight = adjacencyMatrix[`${node1}-${node2}`];
      
     }
@@ -350,6 +354,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log(altSteps);
       console.log("Clicked node");
       console.log(clickedNode);
+      console.log("Clicked edge");
+      console.log(clickedEdge);
       console.log("Interactive Mode: ");
       console.log(interactiveMode);
       console.log("_________________________");
@@ -365,23 +371,91 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         if (interactiveMode) {
 
           // on last step, if the clicked node is the last node in the best tour, then go to next step 
-          if (clickedNode === bestTour[stepNum]) {
-            setPresentTour(false);
-            setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
-            setStepNum(prevStepNum => prevStepNum + 1);
-            setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-            setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
-            console.log("Correct step");
 
-            // if last step then go forward
-            if (stepNum === bestTour.length - 1) {
+          if (algo === "Nearest Neighbor") {
+            
+            const adjacentNodes = getAdjacentNodes(steps[steps.length-1], adjacencyMatrix);                      
+            let current = steps[steps.length - 1];
+            let adjNodes = getAdjacentNodes(current, adjacencyMatrix);
+            let minWeight = Number.MAX_VALUE;
+            let minNode = -1;
+            let potentialHops = [];
+
+            // Find the nearest neighbor
+            for (let j = 0; j < adjacentNodes.length; j++) {
+              if (!steps.includes(adjacentNodes[j]) && adjacencyMatrix[`${current}-${adjacentNodes[j]}`] < minWeight) {
+                  minWeight = adjacencyMatrix[`${current}-${adjacentNodes[j]}`];
+                  minNode = adjNodes[j];
+                  potentialHops.push(adjacentNodes[j]);
+              }
+              else if (!steps.includes(adjacentNodes[j]) && adjacencyMatrix[`${current}-${adjacentNodes[j]}`] === minWeight) {
+                  potentialHops.push(adjacentNodes[j]);
+              }
+            }
+
+            if (potentialHops.includes(clickedNode)) {
+              setPresentTour(false);
+              setSteps(prevSteps => [...prevSteps, clickedNode]);
+              setStepNum(prevStepNum => prevStepNum + 1);
+              setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+              setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+              console.log("Correct step");
+            }
+            if (stepNum === bestTour.length - 1 && potentialHops.length === 0) {
+              setPresentTour(false);
+              setSteps(prevSteps => [...prevSteps, clickedNode]);
+              setStepNum(prevStepNum => prevStepNum + 1);
+              setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+              setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
               setInteractiveMode(false);
               setPresentTour(true);
             }
+            
           }
-          else{
-            console.log("Incorrect step");
+
+          else if (algo == "Greedy") {
+            // if user selects the shortest edge, then go to next step
+            if (clickedEdge !== null) {
+              if (clickedEdge[0] == bestTour[stepNum] && clickedEdge[1] == bestTour[stepNum + 1]) {
+                setPresentTour(false);
+                setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
+                setStepNum(prevStepNum => prevStepNum + 1);
+                setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+                setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+                console.log("Correct step");
+              }
+            }
           }
+      
+
+
+
+
+          // if (clickedNode === bestTour[stepNum]) {
+          //   setPresentTour(false);
+          //   setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
+          //   setStepNum(prevStepNum => prevStepNum + 1);
+          //   setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+          //   setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+          //   console.log("Correct step");
+
+          //   // if last step then go forward
+          //   if (stepNum === bestTour.length - 1) {
+          //     setInteractiveMode(false);
+          //     setPresentTour(true);
+          //   }
+
+          // }
+
+          // else{
+          //   console.log("Incorrect step");
+          // }
+
+
+
+
+
+
         }
         else{
           setPresentTour(false);
@@ -502,10 +576,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           if (clickedNode !== null ) {
             if (stepNum === 0) {
               resetBestTour();
+
+
               NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, clickedNode);
               // go one step forward
+
+              // refresh consideredStep variable
+            
               setSteps([clickedNode]);
               setStepNum(1);
+
+
+
               setAltSteps([consideredStep[0]]);
             }
             else{
@@ -514,9 +596,41 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
           }
         }
+        if (algo == "Brute Force"){
+          if (clickedNode !== null ) {
+            if (stepNum === 0) {
+              resetBestTour();
+              // go one step forward
+              if (clickedNode == [bestTour[0]]) {
+                BruteForceTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
+
+                setSteps([bestTour[0]]);
+                setStepNum(1);
+              }
+            }
+            else{
+              nextStep();
+            }
+          }
+        }
+
+        // if (algo == "Greedy"){
+        //   if (clickedEdge !== null){
+        //     if (stepNum === 0) {
+
+        //       resetBestTour();
+        //       // go one step forward
+        //       GreedyTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
+        //       setSteps([bestTour[0]]);
+        //       setStepNum(1);
+
+        //     }
+        //   }
+        // }
+
+
       }
     }, [clickedNode]);
-
 
 
 
@@ -635,7 +749,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           })}
 
           {/* Render all alternate connections */}
-          {currentAltStep && currentAltStep.map((altNode, index) => {
+          {!interactiveMode && currentAltStep && currentAltStep.map((altNode, index) => {
             const currentNode = steps[steps.length - 1]; // Get the current node
             const x1 = nodeCoordinates[currentNode].x;
             const y1 = nodeCoordinates[currentNode].y;

@@ -126,6 +126,8 @@ export const sortDictionary = (dict) => {
     sorted_dict[key] = value;
   }
 
+  console.log("Sorteed dict:")
+  console.log(sorted_dict)
   return sorted_dict;
 
 };

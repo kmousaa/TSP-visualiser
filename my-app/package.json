@@ -9,6 +9,8 @@
     "bootstrap": "^5.3.3",
     "bootstrap5-toggle": "^5.0.4",
     "framer-motion": "^11.0.8",
+    "hungarian-on3": "^0.3.1",
+    "munkres-algorithm": "^1.0.2",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.1",
     "react-dom": "^18.2.0",
