@@ -1,5 +1,5 @@
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
-import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP } from "./TspAlgorithims";
+import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP , hasCycle} from "./TspAlgorithims";
 import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer, FaRuler, FaToggleOff, FaToggleOn} from 'react-icons/fa';
 import { FaPersonHiking } from "react-icons/fa6";
 import "../utils/Graph.css";
@@ -18,6 +18,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [stop, setStop] = useState(true);
     const [clickedNode, setClickedNode] = useState(null);
     const [clickedEdge, setClickedEdge] = useState(null);
+
 
     // Function to restart states
     const resetBestTour = () => {
@@ -311,7 +312,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // TEMPORARY - Display the weight of the selected edge onto the screen
     const showWeight = (e, node1, node2) => {
       // update the clicked edge
-      setClickedEdge([node1, node2]);
       const weight = adjacencyMatrix[`${node1}-${node2}`];
      
     }
@@ -334,6 +334,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         const inputId = `${node1}-${node2}`;
         const inputElement = document.getElementById(inputId);
         if (inputElement) {
+          setClickedEdge([node1, node2]);
           inputElement.focus(); // Focus on the input element
         }
       }, 1); // Delay to make sure adjancecy matrix shown if hidden 
@@ -414,17 +415,86 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           }
 
           else if (algo == "Greedy") {
-            // if user selects the shortest edge, then go to next step
-            if (clickedEdge !== null) {
-              if (clickedEdge[0] == bestTour[stepNum] && clickedEdge[1] == bestTour[stepNum + 1]) {
-                setPresentTour(false);
-                setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
-                setStepNum(prevStepNum => prevStepNum + 1);
-                setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-                setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
-                console.log("Correct step");
+
+
+            let adjacencyMatrixNoDupes = removeDupeDict(adjacencyMatrix);
+            let sortedAdjacencyMatrix = sortDictionary(adjacencyMatrixNoDupes);
+            let potentialEdges = [];
+            let firstValue = Object.values(sortedAdjacencyMatrix)[0]; 
+
+            while (true) {
+              let nextValue = Object.values(sortedAdjacencyMatrix)[potentialEdges.length];
+              if (nextValue === firstValue) {          
+                let edge = Object.keys(sortedAdjacencyMatrix)[potentialEdges.length]; 
+                let edgeArray = edge.split("-");
+                let node1 = parseInt(edgeArray[0]);
+                let node2 = parseInt(edgeArray[1]);
+                potentialEdges.push([node1,node2]);
+              }
+              else{
+                break;
               }
             }
+
+            // if the clicked edge is in the potential edges, then go to next step
+            let included = false;
+            for (const edge of potentialEdges) {
+                if (edge[0] === clickedEdge[0] && edge[1] === clickedEdge[1]) {
+                    included = true;
+                    break;
+                }
+            }
+
+
+            let degreeDict = {};
+            for (let i = 0; i < numNodes; i++) {
+                degreeDict[i] = 0;
+            }
+            for (const edge of steps) {
+                degreeDict[edge[0]] += 1;
+                degreeDict[edge[1]] += 1;
+            }
+
+            console.log("LAbadaba")
+            console.log("Def dict")
+            console.log(degreeDict);
+            console.log("Clicked edge")
+            console.log(clickedEdge);
+            console.log("Included")
+            console.log(included);
+            console.log("Has cycle")
+            console.log(hasCycle(steps, clickedEdge));
+
+            // last edge
+            if (steps.length + 1 === numNodes && hasCycle(steps, clickedEdge) && degreeDict[clickedEdge[0]]< 2 && degreeDict[clickedEdge[1]] < 2) {
+              setPresentTour(false);
+              setSteps(prevSteps => [...prevSteps, clickedEdge]);
+              setStepNum(prevStepNum => prevStepNum + 1);
+              setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+              setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+              setInteractiveMode(false);
+              setPresentTour(true);
+            }
+
+                
+            if (included && !hasCycle(steps, clickedEdge) && degreeDict[clickedEdge[0]] < 2 && degreeDict[clickedEdge[1]] < 2) {
+              console.log("Correct step");
+              setPresentTour(false);
+              console.log(steps)
+              setSteps(prevSteps => [...prevSteps, clickedEdge]);
+              setStepNum(prevStepNum => prevStepNum + 1);
+              setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+              setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+              console.log("Correct step");
+
+            } else {
+                console.log("Clicked edge is not in potential edges");
+            }
+                
+
+
+                
+
           }
       
 
@@ -507,10 +577,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setPresentTour(false);
       setChristofidesStepNum(0);
       setClickedNode(null);
-      // if its nearest neighbor and not interactive mode, then run the algorithm again
-      if (algo === "Nearest Neighbor" && !interactiveMode) {
-        NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, clickedNode);
-      }
     };
 
     const softRestart = () => {
@@ -576,43 +642,70 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           if (clickedNode !== null ) {
             if (stepNum === 0) {
               resetBestTour();
-
-
               NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, clickedNode);
-              // go one step forward
-
-              // refresh consideredStep variable
-            
               setSteps([clickedNode]);
               setStepNum(1);
-
-
-
               setAltSteps([consideredStep[0]]);
             }
             else{
               nextStep();
             }
-
           }
         }
-        if (algo == "Brute Force"){
-          if (clickedNode !== null ) {
+
+
+        else if (algo === "Greedy") {
+          if (clickedEdge !== null){
             if (stepNum === 0) {
               resetBestTour();
-              // go one step forward
-              if (clickedNode == [bestTour[0]]) {
-                BruteForceTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
-
-                setSteps([bestTour[0]]);
-                setStepNum(1);
+              GreedyTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
+   
+             
+              // add the edges with the lowest weight (All of them ) into an array
+              let adjacencyMatrixNoDupes = removeDupeDict(adjacencyMatrix);
+              let sortedAdjacencyMatrix = sortDictionary(adjacencyMatrixNoDupes);
+              let potentialEdges = [];
+              let firstValue = Object.values(sortedAdjacencyMatrix)[0]; 
+              while (true) {
+                let nextValue = Object.values(sortedAdjacencyMatrix)[potentialEdges.length];
+                if (nextValue === firstValue) {          
+                  let edge = Object.keys(sortedAdjacencyMatrix)[potentialEdges.length]; 
+                  let edgeArray = edge.split("-");
+                  let node1 = parseInt(edgeArray[0]);
+                  let node2 = parseInt(edgeArray[1]);
+                  potentialEdges.push([node1,node2]);
+                }
+                else{
+                  break;
+                }
               }
+
+              // if the clicked edge is in the potential edges, then go to next step
+              let included = false;
+              for (const edge of potentialEdges) {
+                  if (edge[0] === clickedEdge[0] && edge[1] === clickedEdge[1]) {
+                      included = true;
+                      break;
+                  }
+              }
+              if (included) {
+                console.log("Correct step");
+                setSteps([clickedEdge]);
+                setStepNum(1);
+              } else {
+                  console.log("Clicked edge is not in potential edges");
+              }
+                  
+              
+
+
             }
             else{
               nextStep();
             }
           }
         }
+
 
         // if (algo == "Greedy"){
         //   if (clickedEdge !== null){
@@ -630,7 +723,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
 
       }
-    }, [clickedNode]);
+    }, [clickedNode, clickedEdge]);
 
 
 
@@ -722,7 +815,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     </a>
                   ) : (
 
-          
                   <a href="#0" class="pe-auto">
                   <line
                     class="edge"  
@@ -740,7 +832,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   />
                   </a>
 
-                
                   ) // Show line differently if the value is "NA"
                 );
                 

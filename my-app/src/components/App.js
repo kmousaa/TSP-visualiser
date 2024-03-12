@@ -33,6 +33,9 @@ function App() {
   // Interactive mode states
   const [interactiveMode, setInteractiveMode] = useState(false);
 
+  // Degree dictionary
+  const [degreeDict, setDegreeDict] = useState({});
+
   return (
     <div className="App ">
 
@@ -64,6 +67,8 @@ function App() {
         setChristofidesStepNum={setChristofidesStepNum}
         interactiveMode={interactiveMode}
         setInteractiveMode={setInteractiveMode}
+        degreeDict={degreeDict}
+        setDegreeDict={setDegreeDict}
       />
     </div>
   );

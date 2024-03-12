@@ -116,14 +116,8 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
 
 
 
-
 // Its US - this does not work
-
-
-// Its US - this does not work
-
-// Its US - this does not work
-export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim) => {
+export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight) => {
     resetBestTour();
     let tour = [];
     let adjacencyMatrixNoDupes = removeDupeDict(adjacencyMatrix);
@@ -137,8 +131,7 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
 
     // loop until we have all the nodes in the tour
     while (tour.length < numNodes) {
-        console.log("Tour");
-        console.log(tour);  
+
         // Get the first edge from the sorted adjacency matrix
         let edge = Object.keys(sortedAdjacencyMatrix)[0];
         let nodes = edge.split('-');
@@ -170,14 +163,13 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
     // Show the sequence of nodes in the tour
     setBestTour(tour);
     setBestWeight(weight);
-   
-
+    return degreeDict;
 
 };
 
 
 // Function that checks if adding a new edge to the graph creates a cycle [TICK]
-function hasCycle(graph, newNode) {
+export const hasCycle = (graph, newNode) => {
     const adjacencyList = {};
     
     // Construct adjacency list
