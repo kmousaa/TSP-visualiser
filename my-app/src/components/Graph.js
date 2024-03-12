@@ -491,41 +491,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 console.log("Clicked edge is not in potential edges");
             }
                 
-
-
-                
-
           }
-      
-
-
-
-
-          // if (clickedNode === bestTour[stepNum]) {
-          //   setPresentTour(false);
-          //   setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
-          //   setStepNum(prevStepNum => prevStepNum + 1);
-          //   setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-          //   setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
-          //   console.log("Correct step");
-
-          //   // if last step then go forward
-          //   if (stepNum === bestTour.length - 1) {
-          //     setInteractiveMode(false);
-          //     setPresentTour(true);
-          //   }
-
-          // }
-
-          // else{
-          //   console.log("Incorrect step");
-          // }
-
-
-
-
-
-
         }
         else{
           setPresentTour(false);
