@@ -267,7 +267,7 @@ const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBest
 
 
 // TRIANGLE INEQUALITY MUST HOLD for this to work
-export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim) => {
+export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim, mstOverwrite) => {
     resetBestTour();
 
 
@@ -277,6 +277,24 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     let mst = PrimsMST(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep);
     console.log("MST")
     console.log(mst);
+
+    // overwrite the mst if we are in interactive mode
+    if (mstOverwrite) {
+        mst.mstEdges = mstOverwrite;
+
+        // build new degree dictionary based on edges from mstOverwrite
+        let degreeDict = {};
+        for (let i = 0; i < numNodes; i++) {
+            degreeDict[i] = 0;
+        }
+        for (let edge of mstOverwrite) {
+            degreeDict[edge[0]] += 1;
+            degreeDict[edge[1]] += 1;
+        }
+        mst.degreeDict = degreeDict;
+        
+        console.log("Overwrite MST")
+    }
     // {mstEdges: [[0, 2], [0, 3], [3, 1]], degreeDict: Object}
     finalTour.push(mst.mstEdges);
     
@@ -467,109 +485,14 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
 
 
     console.log("Total weight:", tourWeight(tspTour, adjacencyMatrix)); // Log the total weight
+
+    // weight of the MST
+    let mstWeight = 0;
+    for (let edge of mst.mstEdges) {
+        mstWeight += adjacencyMatrix[`${edge[0]}-${edge[1]}`];
+    }
+
+    
+    return { mst, mstWeight, oddDegreeNodes, bestMatch, multigraph, eulerianTour, tspTour};
 };
-
-
-// export const GreedyTSP= (resetBestTour,numNodes , adjacencyMatrix, setBestTour, setBestWeight, setSteps , setAltSteps ,setCurrentStep, setConsideredStep) => {
-    
-//     resetBestTour();
-    
-//     let tour = [];
-//     let stop = false;
-
-//     // Dictionary that stores every node as well as the number of degree it has
-//     let degreeDict = {};
-//     for (let i = 0; i < numNodes; i++) {
-//         degreeDict[i] = 0;
-//     }
-
-//     // Remove duplicates from adjacency matrix
-//     let adjMatrixNoDupes = removeDupeDict(adjacencyMatrix);
-
-//     while (!stop){
-
-//         // Sort the current adjacency matrix to make the smallest edge come first
-//         let sortedAdjMatrix = sortDictionary(adjMatrixNoDupes);
-//         let sortedAdjMatrixLength =  Object.keys(sortedAdjMatrix).length;
-        
-//         // If adding the last edge completes the cycle 
-//         if (tour.length + 1 === numNodes){
-
-//             // Find the node that causes both edges to be 2-2 from remaining sorted edges
-//             for (let i = 0; i < sortedAdjMatrixLength; i++) {
-
-//                 let edge = Object.keys(sortedAdjMatrix)[i];
-//                 let nodes = edge.split('-');
-//                 let node1 = parseInt(nodes[0]);
-//                 let node2 = parseInt(nodes[1]);
-            
-//                 // Add the edge if it does not cause the degree to increase over 2
-//                 let entry1 = degreeDict[node1];
-//                 let entry2 = degreeDict[node2];
-            
-    
-//                 if (entry1 === 1 && entry2 === 1) {
-//                     // That means we can add this final edge to the tour
-//                     tour.push([node1,node2]);
-//                     degreeDict[node1] += 1;
-//                     degreeDict[node2] += 1;
-//                     delete adjMatrixNoDupes[edge];
-
-//                     break;
-//                 }
-//                 else{
-
-//                     // This means it is not the node we want and remove it from the adjMatrixNoDupe
-//                     delete adjMatrixNoDupes[edge];
-//                 }
-                
-                
-//             }           
-//         }
-//         else{
-
-//             for (let i = 0; i < sortedAdjMatrixLength; i++) {
-                
-//                 // Split up the currently considered edge  {1-2: 1, 0-2: 2, 1-3: 3, 2-3: 5, 0-1: 6, …}
-//                 let edge = Object.keys(sortedAdjMatrix)[i];
-//                 let nodes = edge.split('-');
-//                 let node1 = parseInt(nodes[0]);
-//                 let node2 = parseInt(nodes[1]);
-            
-//                 // Add the edge if it does not cause the degree to increase over 2
-//                 let entry1 = degreeDict[node1];
-//                 let entry2 = degreeDict[node2];
-            
-//                 // This shall increase degree more than 2
-//                 if (entry1 === 2 || entry2 === 2) {
-//                     // Skip that entry then - remove it from the adjMatrixNoDupe
-//                     delete adjMatrixNoDupes[edge];
-
-//                 }
-//                 else{
-//                     tour.push([node1,node2]);
-//                     degreeDict[node1] += 1;
-//                     degreeDict[node2] += 1;
-//                     delete adjMatrixNoDupes[edge];
-         
-//                     break;
-//                 }
-                
-//             }
-
-//         }
-
-//         // If the tour is complete, stop
-//         if (tour.length === numNodes){
-//             stop = true;
-//         }
-
-//     }
-//     console.log(tour);
-
-//     setBestTour(tour);
-//     setSteps([tour[0]]);
-//     setCurrentStep(1);
-
-// };
 

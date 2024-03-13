@@ -19,6 +19,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [clickedNode, setClickedNode] = useState(null);
     const [clickedEdge, setClickedEdge] = useState(null);
 
+    // Christofides algorithm for interactive mode
+    const [mstWeight, setMstWeight] = useState(0);
+    const [tempMst, setTempMst] = useState([]);
+
 
     // Function to restart states
     const resetBestTour = () => {
@@ -359,9 +363,63 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log(clickedEdge);
       console.log("Interactive Mode: ");
       console.log(interactiveMode);
+      console.log("Christofides Step Num: ");
+      console.log(christofidesStepNum)
       console.log("_________________________");
     };
 
+    useEffect(() => {
+      console.log("MAN WHAT!")
+      console.log(christofidesStepNum);
+    }, [christofidesStepNum]); // This will log the updated value of christofidesStepNum
+
+
+    const nextChristofidesStep = () => {
+
+      console.log("Next Christofides Step");
+
+      if (christofidesStepNum == 1) {
+        console.log("Step 0");
+        // check that the MST is correct (miniumum value)
+        let mstStep = steps[0];
+
+        // weight of the MST
+        let calculatedMstWeight = 0;
+        for (let edge of mstStep) {
+          calculatedMstWeight += adjacencyMatrix[`${edge[0]}-${edge[1]}`];
+        }
+
+        if (calculatedMstWeight === mstWeight) {
+          console.log("Correct MST");
+          // clear steps array
+          console.log("interact");
+
+          let stepsBefore = steps;
+          let stepNumBefore = stepNum;
+
+          console.log("Steps")
+          console.log(steps);
+          // refresh states in algorithim by calling it again
+          let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, mstStep);
+            
+          console.log(christofidesStepNum)
+          // increment step number
+          setChristofidesStepNum(2);
+          setStepNum(1);
+          setSteps(stepsBefore)
+          // add empy array to end of steps before
+          // setSteps([...stepsBefore, []]);
+          
+        }
+        else{
+          setSteps([]);
+          resetBestTour();
+          console.log("Incorrect MST");
+        }
+
+      }
+
+    }
 
     // Move forwards in the TSP simulation
     const nextStep = () => {
@@ -492,15 +550,61 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             }
                 
           }
+
+          else if (algo === "Christofides") { 
+
+            if (christofidesStepNum === 1) {
+              let mstStep = steps[0];
+              // if adding the edge creates a cycle, then go to next step
+              if (!hasCycle(mstStep, clickedEdge)) {
+                console.log("No cycle formed");
+                setPresentTour(false);
+                setSteps(prevSteps => [[...prevSteps[0], clickedEdge]]);
+                // setStepNum(prevStepNum => prevStepNum + 1);
+                setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+                console.log("Correct step");
+
+                
+              }
+              else{
+                console.log("Cycle formed");
+              }
+
+
+            }
+            else if (christofidesStepNum === 2) {
+            }
+            else if (christofidesStepNum === 3) {
+            }
+            else if (christofidesStepNum === 4) {
+            }
+            else{
+
+            }
+
+
+
+          }
+
         }
+
+
         else{
+          
+
+          console.log("im tweekin im geekin off the percocets");
           setPresentTour(false);
           setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
           setStepNum(prevStepNum => prevStepNum + 1);
           setChristofidesStepNum(prevStepNum => prevStepNum + 1);
           setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
-        }
         
+
+        }
+
+
+        
+
         
 
       } else {
@@ -543,6 +647,17 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setPresentTour(false);
       setChristofidesStepNum(0);
       setClickedNode(null);
+
+      // run the algorithm again
+      if (algo === "Nearest Neighbor") {
+        NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
+      }
+      else if (algo === "Greedy") {
+        GreedyTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
+      }
+      else if (algo === "Christofides") {
+        ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
+      }
     };
 
     const softRestart = () => {
@@ -619,14 +734,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           }
         }
 
-
         else if (algo === "Greedy") {
           if (clickedEdge !== null){
             if (stepNum === 0) {
               resetBestTour();
               GreedyTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
-   
-             
               // add the edges with the lowest weight (All of them ) into an array
               let adjacencyMatrixNoDupes = removeDupeDict(adjacencyMatrix);
               let sortedAdjacencyMatrix = sortDictionary(adjacencyMatrixNoDupes);
@@ -645,7 +757,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   break;
                 }
               }
-
               // if the clicked edge is in the potential edges, then go to next step
               let included = false;
               for (const edge of potentialEdges) {
@@ -661,10 +772,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               } else {
                   console.log("Clicked edge is not in potential edges");
               }
-                  
-              
-
-
             }
             else{
               nextStep();
@@ -672,20 +779,23 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           }
         }
 
-
-        // if (algo == "Greedy"){
-        //   if (clickedEdge !== null){
-        //     if (stepNum === 0) {
-
-        //       resetBestTour();
-        //       // go one step forward
-        //       GreedyTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
-        //       setSteps([bestTour[0]]);
-        //       setStepNum(1);
-
-        //     }
-        //   }
-        // }
+        if (algo === "Christofides") {
+          if (clickedEdge !== null){
+            if (stepNum === 0) {
+              resetBestTour();
+              let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setSteps, setConsideredStep, setChristofidesAlgorithim);
+              setMstWeight(data.mstWeight);
+              // let user build the minimum spanning tree  its fine for first step
+              setChristofidesAlgorithim(true);
+              setChristofidesStepNum(1);
+              setSteps([[clickedEdge]]);
+              setStepNum(1);             
+            }
+            else{
+              nextStep();
+            }
+          }
+        }
 
 
       }
@@ -1045,6 +1155,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 <>
 
                 <button className="btn btn-success mx-1" onClick={() => setInteractiveMode(!interactiveMode)}><FaToggleOn /> Interactive Mode  </button>
+                <button className="btn btn-light mx-1" onClick={() => nextChristofidesStep( christofidesStepNum   ) }><FaToggleOn /> Next Step  </button>
                 </>
               ) : (
                 <>
