@@ -28,19 +28,25 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [minOddPairNum, setMinOddPairNum] = useState(0);
 
     const [multiGraph, setMultiGraph] = useState([[]]);
-
     const [eulerianTour, setEulerianTour] = useState([[]]);
-
+    const [expectingInput, setExpectingInput] = useState(false);
+    
     // Handel user input
-    const [inputValue, setInputValue] = useState('');
+    const [inputValueEularian, setInputEularian] = useState('');
+    const [inputHamiltonian, setInputHamiltonian] = useState('');
 
-    const handleChange = (event) => {
-      setInputValue(event.target.value);
+    const handleChangeEularian = (event) => {
+      setInputEularian(event.target.value);
+    };
+
+    const handleChangeHamiltonian = (event) => {
+      setInputHamiltonian(event.target.value);
     };
 
     const handleSubmit = () => {
-      nextChristofidesStep(inputValue);
-      setInputValue('');
+      nextChristofidesStep(inputValueEularian, inputHamiltonian);
+      setInputEularian('');
+      setInputHamiltonian('');
     };
   
 
@@ -56,6 +62,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setChristofidesAlgorithim(false);
       setChristofidesStepNum(0);
       setClickedNode(null);
+      setExpectingInput(false);
 
       
       // setAlgo("Select Algorithm");
@@ -383,6 +390,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log(interactiveMode);
       console.log("Christofides Step Num: ");
       console.log(christofidesStepNum)
+      console.log("expecting input")
+      console.log(expectingInput);
       console.log("_________________________");
     };
 
@@ -410,7 +419,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
   
 
 
-    const nextChristofidesStep = (inputValue) => {
+    const nextChristofidesStep = (eularianInput , hamiltonianInput) => {
 
       console.log("Next Christofides Step");
 
@@ -504,9 +513,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 
         if (isEqual(steps[steps.length - 1], multiGraph)) {
           console.log("YEESYESYES")
-          setChristofidesStepNum(4);
-          setStepNum(3);
-          setSteps([...steps, []]);
+          setExpectingInput(true);
+        
+          // setChristofidesStepNum(4);
+          // setStepNum(3);
+          // setSteps([...steps, []]);
         }
         else{
           console.log("NO")
@@ -519,17 +530,143 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
       
       // This means that user inputted a list we must check depoending on the step
-      if (inputValue !== "" && inputValue !== null){
+      if (eularianInput !== "" && eularianInput !== null && hamiltonianInput !== "" && hamiltonianInput !== null){
         console.log("Input")
-        console.log(inputValue);
+        console.log(eularianInput);
         
-        if (christofidesStepNum == 4){
+        if (expectingInput == true){
+          
           console.log("Euclidain tour")
-          console.log(eulerianTour);
-
+          console.log(eularianInput);
+          console.log("hamiltonian tour")
+          console.log(hamiltonianInput);
+          console.log("-------")
           console.log((eulerianTour.flat().toString()));
 
+          // Check if the eulerian tour is correct, there can be multiple correct answers
+          //  eularian tour = [ [0,3] , [0,2] , [0,1] , [1,2] ]
+          // input = 3,0,1,2,0 
+          // ... or it can be 3,0,2,1,0
+
+          let node1 = parseInt(eularianInput[0]);
+          let node2 = parseInt(eularianInput[1]);
+
+          // dicitonary that stores edge and a boolean indicited if the edge has been visited
+          let visitedEdgeDict = {};
+          for (let edge of multiGraph) {
+            visitedEdgeDict[edge] = false;
+          }
+          console.log("initial dict")
+          console.log(visitedEdgeDict);
+
+          // check if [node1,node2] exists in the multigraph tour in any order, if it does, then mark it as visited
+          // if all edges are visited, then the eulerian tour is correct
+          // if we visit an edge that is already visited, then the eulerian tour is incorrect
+          // if we visit an edge that does not exist, then the eulerian tour is incorrect
+          // all of multiGraph must be visited
+
+          let eularianInputArray = eularianInput.split(',').map(Number);
+
+          // for every element in array minus it by 1
+          for (let i = 0; i < eularianInputArray.length; i++) {
+            eularianInputArray[i] -= 1;
+          }
+
+          let correctEulerianTour = true;
+
+          for (let i = 0; i < eularianInputArray.length - 1; i++) {
+
+              let node1 = parseInt(eularianInputArray[i]);
+              let node2 = parseInt(eularianInputArray[i + 1]);
+
+              console.log("Checking if edge exists " + node1 + " " + node2 + "inside the multiGraph tour");
+              console.log(multiGraph);
+              console.log("KEEMSTAR")
           
+              let found = false;
+              for (let edge of multiGraph) {
+                  if ((edge[0] === node1 && edge[1] === node2) || (edge[0] === node2 && edge[1] === node1)) {
+                      found = true;
+                      break;
+                  }
+              }
+              if (found) {
+                  // make it true in the visited edge dictionary
+                  if (visitedEdgeDict[[node1,node2]] === true || visitedEdgeDict[[node2,node1]] === true) {
+                      console.log("NO");
+                      correctEulerianTour = false;
+                      break;
+                  }
+
+                  // if it [node1,node2 in dictionary, then mark it as visited and if its [mpde2,node1] its basically same]
+                  visitedEdgeDict[[node1,node2]] = true;
+                  visitedEdgeDict[[node2,node1]] = true;
+
+
+              } else {
+                  console.log("NO");
+                  correctEulerianTour = false;
+                  break;
+              }
+          }
+
+          // check if all edges are visited
+          for (let edge in visitedEdgeDict) {
+              if (visitedEdgeDict[edge] === false) {
+                  correctEulerianTour = false;
+                  break;
+              }
+          }
+          console.log("Dict")
+          console.log(visitedEdgeDict);
+
+          if (correctEulerianTour) {
+            console.log("Correct Eulerian Tour");
+          }
+          else{
+            console.log("Incorrect Eulerian Tour");
+          }
+
+
+          // Compute hamioltonian tour based on the eulerian tour
+
+          console.log("CONVERTING EULARIAN TO HAMILTONIAN")
+          const hamiltonian = [];
+          for (let vertex of eularianInputArray) {
+              console.log("Vertex" + vertex);
+              if (!hamiltonian.includes(vertex)) {
+                hamiltonian.push(vertex);
+              }
+          }
+      
+          // Add the first vertex to the end of the tour
+          hamiltonian.push(hamiltonian[0]);
+
+          // let eularianInputArray = eularianInput.split(',').map(Number);
+          let hamiltonianInputArray = hamiltonianInput.split(',').map(Number);
+          for (let i = 0; i < hamiltonianInputArray.length; i++) {
+            hamiltonianInputArray[i] -= 1;
+          }
+
+          console.log("User inputted hamiltonian")
+          console.log(hamiltonianInputArray);
+          console.log("Computed hamiltonian")
+          console.log(hamiltonian);
+
+          if (JSON.stringify(hamiltonian) === JSON.stringify(hamiltonianInputArray)) {
+            console.log("Correct Hamiltonian Tour");
+
+            // PROCEED
+            setExpectingInput(false);
+            setChristofidesStepNum(4);
+            setStepNum(3);
+            setSteps([...steps, bestTour[bestTour.length - 1]]);
+            setPresentTour(true);
+
+          }
+          else{
+            console.log("Incorrect Hamiltonian Tour");
+          }
 
         }
 
@@ -1291,13 +1428,21 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         
 
                     {/* Input for the 4th step in chrisofides algorithim */}
-                    {christofidesStepNum === 4 ? (
+                    {expectingInput === true ? (
+
                     <div>
                     <input 
                       type="text"
-                      value={inputValue}
-                      onChange={handleChange}
-                      placeholder="Enter something..."z
+                      value={inputValueEularian}
+                      onChange={handleChangeEularian}
+                      placeholder="Eularian Tour..."z
+                    />
+
+                    <input 
+                      type="text"
+                      value={inputHamiltonian}
+                      onChange={handleChangeHamiltonian}
+                      placeholder="Hamiltonian Tour..."z
                     />
                     <button className="btn btn-primary" onClick={handleSubmit}>
                       Submit
