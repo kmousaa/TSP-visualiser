@@ -20,9 +20,29 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [clickedEdge, setClickedEdge] = useState(null);
 
     // Christofides algorithm for interactive mode
+    const [mst, setMst] = useState([[]]);
     const [mstWeight, setMstWeight] = useState(0);
-    const [tempMst, setTempMst] = useState([]);
 
+    const [oddDegreeVerticies, setOddDegreeVerticies] = useState([]);
+    const [minOddPairWeight, setMinOddPairWeight] = useState(0);
+    const [minOddPairNum, setMinOddPairNum] = useState(0);
+
+    const [multiGraph, setMultiGraph] = useState([[]]);
+
+    const [eulerianTour, setEulerianTour] = useState([[]]);
+
+    // Handel user input
+    const [inputValue, setInputValue] = useState('');
+
+    const handleChange = (event) => {
+      setInputValue(event.target.value);
+    };
+
+    const handleSubmit = () => {
+      nextChristofidesStep(inputValue);
+      setInputValue('');
+    };
+  
 
     // Function to restart states
     const resetBestTour = () => {
@@ -158,9 +178,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     const showAdjMatrix = () => {
       setShowAdjacencyMatrix(!showAdjacencyMatrix);
-      
     };
-
 
     // Function to return the component that renders the adjacency matrix
     const renderAdjacencyMatrix = () => {
@@ -369,12 +387,30 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
 
     useEffect(() => {
-      console.log("MAN WHAT!")
+
       console.log(christofidesStepNum);
     }, [christofidesStepNum]); // This will log the updated value of christofidesStepNum
 
 
-    const nextChristofidesStep = () => {
+
+
+    function areOddVerticesConnected(bestPairStep, oddVertices) {
+
+      const coveredVertices = new Set();
+      // Add all vertices connected by the edges in bestPairStep
+      for (const [vertex1, vertex2] of bestPairStep) {
+          coveredVertices.add(vertex1);
+          coveredVertices.add(vertex2);
+      }
+      
+      // Check if all odd vertices are covered
+      return oddVertices.every(vertex => coveredVertices.has(vertex));
+
+    }
+  
+
+
+    const nextChristofidesStep = (inputValue) => {
 
       console.log("Next Christofides Step");
 
@@ -390,31 +426,111 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         }
 
         if (calculatedMstWeight === mstWeight) {
-          console.log("Correct MST");
-          // clear steps array
-          console.log("interact");
-
+        
+          // refresh states in algorithim by calling it again, using the user defined mst
           let stepsBefore = steps;
-          let stepNumBefore = stepNum;
-
-          console.log("Steps")
-          console.log(steps);
-          // refresh states in algorithim by calling it again
           let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, mstStep);
-            
-          console.log(christofidesStepNum)
-          // increment step number
+          
+          // UPdate information needed for future steps
+          setMst(mstStep);
+          setMstWeight(data.matchingWeight);
+          setOddDegreeVerticies(data.oddDegreeNodes);
+          setMinOddPairWeight(data.matchingWeight);
+          setMinOddPairNum(data.bestMatch.length);
+
+
+          // set the next step
           setChristofidesStepNum(2);
           setStepNum(1);
-          setSteps(stepsBefore)
-          // add empy array to end of steps before
-          // setSteps([...stepsBefore, []]);
-          
+          setSteps([...stepsBefore, []]);
         }
         else{
           setSteps([]);
           resetBestTour();
           console.log("Incorrect MST");
+        }
+
+      }
+
+      else if (christofidesStepNum == 2) {
+        // Check that the minimum weight perfect matching is correct
+        let bestPairStep = steps[steps.length - 1];
+
+        let calculatedMatchingWeight = 0;
+        for (let edge of bestPairStep) {
+          calculatedMatchingWeight += adjacencyMatrix[`${edge[0]}-${edge[1]}`];
+        }
+
+
+        if (calculatedMatchingWeight === minOddPairWeight && bestPairStep.length === minOddPairNum && areOddVerticesConnected(bestPairStep, oddDegreeVerticies)) {
+
+                  
+          // refresh states in algorithim by calling it again, using the user defined mst
+          let stepsBefore = steps;
+          let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, mst,  bestPairStep);
+          console.log("PRomise")
+          console.log(data);
+          
+          // UPdate information needed for future steps
+          setMstWeight(data.matchingWeight);
+          setOddDegreeVerticies(data.oddDegreeNodes);
+          setMinOddPairWeight(data.matchingWeight);
+          setMinOddPairNum(data.bestMatch.length);
+          setMultiGraph(data.multigraph);
+          setEulerianTour(data.eulerianTour);
+
+          // set the next step
+          console.log("YESYESYES");
+          setChristofidesStepNum(3);
+          setStepNum(2);
+          setSteps([...stepsBefore, []]);
+          
+        }
+        else{
+          console.log("NO")
+          // clear the ODD edges steps
+          setSteps(prevSteps => {
+            const newState = prevSteps.slice(0, -1); // Keep all arrays except the last one
+            newState.push([]);
+            return newState;
+          });
+
+        }
+
+      }
+      else if (christofidesStepNum == 3){
+        // if the last step is equal to the 
+        const isEqual = (a, b) => JSON.stringify(a.sort()) === JSON.stringify(b.sort());
+                
+        if (isEqual(steps[steps.length - 1], multiGraph)) {
+          console.log("YEESYESYES")
+          setChristofidesStepNum(4);
+          setStepNum(3);
+          setSteps([...steps, []]);
+        }
+        else{
+          console.log("NO")
+          setSteps(prevSteps => {
+            const newState = prevSteps.slice(0, -1); // Keep all arrays except the last one
+            newState.push([]);
+            return newState;
+          });
+        } 
+      }
+      
+      // This means that user inputted a list we must check depoending on the step
+      if (inputValue !== "" && inputValue !== null){
+        console.log("Input")
+        console.log(inputValue);
+        
+        if (christofidesStepNum == 4){
+          console.log("Euclidain tour")
+          console.log(eulerianTour);
+
+          console.log((eulerianTour.flat().toString()));
+
+          
+
         }
 
       }
@@ -473,7 +589,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           }
 
           else if (algo == "Greedy") {
-
 
             let adjacencyMatrixNoDupes = removeDupeDict(adjacencyMatrix);
             let sortedAdjacencyMatrix = sortDictionary(adjacencyMatrixNoDupes);
@@ -560,23 +675,44 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 console.log("No cycle formed");
                 setPresentTour(false);
                 setSteps(prevSteps => [[...prevSteps[0], clickedEdge]]);
-                // setStepNum(prevStepNum => prevStepNum + 1);
                 setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
                 console.log("Correct step");
-
-                
               }
               else{
                 console.log("Cycle formed");
               }
-
-
             }
             else if (christofidesStepNum === 2) {
+              console.log("WOAH");
+              
+              setPresentTour(false);
+              setSteps(prevSteps => {
+                // Check if clickedEdge is already in the array
+                if (!prevSteps[1].some(edge => edge[0] === clickedEdge[0] && edge[1] === clickedEdge[1])) {
+                    return [...prevSteps.slice(0, 1), [...prevSteps[1], clickedEdge]];
+                }
+                return prevSteps; // Return the previous state if the edge is already present
+              });
+              setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+
             }
             else if (christofidesStepNum === 3) {
+              console.log("Step 3");
+              console.log(steps)
+
+              setSteps(prevSteps => {
+                if (!prevSteps[prevSteps.length - 1].some(edge => edge[0] === clickedEdge[0] && edge[1] === clickedEdge[1])) {
+                    const updatedLastArray = [...prevSteps[prevSteps.length - 1], clickedEdge];
+                    return [...prevSteps.slice(0, -1), updatedLastArray];
+                }
+                return prevSteps; 
+              
+            });
+   
+           
             }
             else if (christofidesStepNum === 4) {
+
             }
             else{
 
@@ -591,8 +727,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
         else{
           
-
-          console.log("im tweekin im geekin off the percocets");
           setPresentTour(false);
           setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
           setStepNum(prevStepNum => prevStepNum + 1);
@@ -802,8 +936,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     }, [clickedNode, clickedEdge]);
 
 
-
-
     // Variables that will help us render the graph
     const nodeCoordinates = generateNodeCoordinates(numNodes);
     const AdjMatrix = generateAdjacencyMatrix();
@@ -886,7 +1018,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       strokeWidth="3"
                       onMouseMove={(e) => { showUnweightedEdges(e,node1,node2)}}
                       onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
-                      // onMouseOut={(e) => { e.target.style.stroke = "black"; }}
                     />
                     </a>
                   ) : (
@@ -904,7 +1035,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     strokeWidth="3"
                     onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
                     onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
-                    // onMouseOut={(e) => { e.target.style.stroke = "black"; }}
                   />
                   </a>
 
@@ -1155,7 +1285,36 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 <>
 
                 <button className="btn btn-success mx-1" onClick={() => setInteractiveMode(!interactiveMode)}><FaToggleOn /> Interactive Mode  </button>
-                <button className="btn btn-light mx-1" onClick={() => nextChristofidesStep( christofidesStepNum   ) }><FaToggleOn /> Next Step  </button>
+
+                { christofidesAlgorithim ? (
+                  <>
+        
+
+                    {/* Input for the 4th step in chrisofides algorithim */}
+                    {christofidesStepNum === 4 ? (
+                    <div>
+                    <input 
+                      type="text"
+                      value={inputValue}
+                      onChange={handleChange}
+                      placeholder="Enter something..."z
+                    />
+                    <button className="btn btn-primary" onClick={handleSubmit}>
+                      Submit
+                    </button>
+                  </div>
+           
+                    ) : (
+
+                  <button className="btn btn-light mx-1" onClick={() => nextChristofidesStep() }><FaToggleOn /> Next Step  </button>
+                    )}
+
+                 </>
+
+                ) : (
+                  <button className="btn btn-light mx-1" onClick={nextStep}><FaStepForward /> PLACEHOLDER</button>
+                )}
+                
                 </>
               ) : (
                 <>

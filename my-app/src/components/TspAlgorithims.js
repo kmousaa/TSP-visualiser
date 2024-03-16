@@ -267,7 +267,7 @@ const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBest
 
 
 // TRIANGLE INEQUALITY MUST HOLD for this to work
-export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim, mstOverwrite) => {
+export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim, mstOverwrite, bestPairOverwrite) => {
     resetBestTour();
 
 
@@ -405,9 +405,10 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     // console.log("Best Match 3");
     // console.log(munkres3);
 
-
-    // Remove symetry from the best match for example [1,0] and [0,1] are the same, so we only need one of them
-    // Remove symmetry from the best match
+    if (bestPairOverwrite) {
+        bestMatch = bestPairOverwrite;
+        console.log("Overwrite Best Match");
+    }
 
 
     finalTour.push(bestMatch);
@@ -492,7 +493,13 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         mstWeight += adjacencyMatrix[`${edge[0]}-${edge[1]}`];
     }
 
+    // weight of the perfect matching
+    let matchingWeight = 0;
+    for (let edge of bestMatch) {
+        matchingWeight += adjacencyMatrix[`${edge[0]}-${edge[1]}`];
+    }
+
     
-    return { mst, mstWeight, oddDegreeNodes, bestMatch, multigraph, eulerianTour, tspTour};
+    return { mst, mstWeight, matchingWeight, oddDegreeNodes, bestMatch, multigraph, eulerianTour, tspTour};
 };
 
