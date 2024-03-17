@@ -1179,8 +1179,81 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 const node1 = index;
                 const node2 = index + nextIndex + 1;
                 const result = AdjMatrix[node1][node2] === 0; // Check if the value is not "NA"
+
+                let sizeMultiplier = 1; // This multiplier can be adjusted as needed
+
+                let textAdjustmentX = 0;
+                let textAdjustmentY = 0;
+                
+
+                if (numNodes == 4) {
+                  sizeMultiplier = 1.2;
+                  if (node1 == 1 && node2 == 3) {
+                    textAdjustmentY = -110;
+                  }
+                  else if (node1 == 0 && node2 == 2) {
+                    textAdjustmentX = -110;
+                  }
+                }
+
+                else if (numNodes == 6) {
+                  sizeMultiplier = 1;
+                  if (node1 == 0 && node2 == 3 ){
+                    textAdjustmentX = -100;
+                  }
+                  else if (node1 == 1 && node2 == 3) {
+                    textAdjustmentY = -67;
+                    textAdjustmentX = -120;
+                  }
+                  else if (node1== 3 && node2 == 5) {
+                    textAdjustmentY = 67;
+                    textAdjustmentX = -120;
+                  }
+                  else if (node1 == 0 && node2 == 4) {
+                    textAdjustmentY = +67;
+                    textAdjustmentX = +120;
+                  }
+                  else if (node1 == 0 && node2 == 2) {
+                    textAdjustmentX = +120;
+                    textAdjustmentY = -67;
+                  }
+                  else if (node1 == 2 && node2 == 4) {
+                    textAdjustmentY = +130;
+          
+                  }
+                  else if (node1 == 1 && node2 == 5) {
+                    textAdjustmentY = -130;
+                  }
+                  else if (node1 == 1 && node2 == 4) {
+                    textAdjustmentX = -50;
+                    textAdjustmentY = -85;
+                  }
+                  else if (node1 == 2 && node2 == 5) {
+                    textAdjustmentX = 50;
+                    textAdjustmentY = -85;
+                  }
+                }
+
+                else if (numNodes == 7) {
+                  sizeMultiplier = 0.7
+                }
+
+                else{
+                  console.log("No special case")
+                }
+                // 8.......idk!!!
+
+                let textSize = 24 * sizeMultiplier; // Adjust font size based on the multiplier
+                let boxSize = 35 * sizeMultiplier; // Adjust box size based on the multiplier
+
+
+                
+
+
+                
      
                 return (
+                  
                   // Check if node-node2 in the adjacency matrix has a value not "NA"
                   result ? (
                     <a href="#0" class="pe-auto  stretched-link d-inline-block p-2">
@@ -1199,22 +1272,56 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     />
                     </a>
                   ) : (
+                  <>
+                    <a href="#0" class="pe-auto">
+                      <line
+                        class="edge"
+                        key={`${node1}-${node2}`} // Line with defined weight
+                        x1={node.x}
+                        y1={node.y}
+                        x2={nextNode.x}
+                        y2={nextNode.y}
+                        stroke="black"
+                        strokeOpacity="0.5"
+                        strokeWidth="3"
+                        onMouseMove={(e) => {
+                          showWeightedEdges(e, node1, node2);
+                        }}
+                        onClick={(e) => {
+                          SelectAdjMatrix(e, node1, node2);
+                        }}
+                      />
+                    </a>
+                    <g>
+                    <rect
+                      x={(node.x + nextNode.x) / 2 - boxSize / 2 + textAdjustmentX * sizeMultiplier} // Adjust padding as needed
+                      y={(node.y + nextNode.y) / 2 - boxSize / 2 + textAdjustmentY * sizeMultiplier} // Adjust padding as needed
+                      width={boxSize} // Adjust width based on the multiplier
+                      height={boxSize * 0.85} // Adjust height based on the multiplier
+                      fill="white" // Set the background color to white
+                      strokeWidth="2" // Set the border width
+                      rx="5" // Set border corner radius
+                      rx={boxSize / 4}
+                      style={{ pointerEvents: 'none' }} // Disable pointer events for the background
+                    />
+                    <text
+                      x={(node.x + nextNode.x) / 2 + textAdjustmentX * sizeMultiplier} // Calculate the midpoint for x-coordinate
+                      y={(node.y + nextNode.y) / 2 + textAdjustmentY * sizeMultiplier} // Calculate the midpoint for y-coordinate
+                      dominantBaseline="middle" // Align text vertically to the midpoint
+                      textAnchor="middle" // Align text horizontally to the midpoint
+                      fill="black" // Match text color with the line
+                      fontSize={textSize + "px"} // Adjust font size based on the multiplier
+                      fontWeight="bold" // Optionally make the weight text bold
+                      stroke="none" // Remove the stroke from the text
+                      style={{ pointerEvents: 'none' }} // Disable pointer events for the text
+                    >
+                      {/* Display the weight here */}
+                      {AdjMatrix[node1][node2]}
+                    </text>
+                    </g>
+                  </>
 
-                  <a href="#0" class="pe-auto">
-                  <line
-                    class="edge"  
-                    key={`${node1}-${node2}`} // Line with defined weight
-                    x1={node.x} 
-                    y1={node.y} 
-                    x2={nextNode.x} 
-                    y2={nextNode.y} 
-                    stroke= "black"
-                    strokeOpacity="0.5"
-                    strokeWidth="3"
-                    onMouseMove={(e) => { showWeightedEdges(e, node1,node2)}}  
-                    onClick = {(e) => { SelectAdjMatrix(e,node1,node2); }}
-                  />
-                  </a>
+  
 
                   ) // Show line differently if the value is "NA"
                 );
