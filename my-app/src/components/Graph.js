@@ -566,8 +566,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           // input = 3,0,1,2,0 
           // ... or it can be 3,0,2,1,0
 
-          let node1 = parseInt(eularianInput[0]);
-          let node2 = parseInt(eularianInput[1]);
+
 
           // dicitonary that stores edge and a boolean indicited if the edge has been visited
           let visitedEdgeDict = {};
@@ -841,28 +840,41 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             if (christofidesStepNum === 1) {
               let mstStep = steps[0];
               // if adding the edge creates a cycle, then go to next step
-              if (!hasCycle(mstStep, clickedEdge)) {
+           
                 console.log("No cycle formed");
                 setPresentTour(false);
-                setSteps(prevSteps => [[...prevSteps[0], clickedEdge]]);
+                setSteps(prevSteps => {
+                  // Toggle edge: if already present, remove it; if not, add it
+                  const updatedArray = prevSteps[0].filter(edge => !(edge[0] === clickedEdge[0] && edge[1] === clickedEdge[1]));
+                  if (updatedArray.length === prevSteps[0].length) {
+                      // Edge is not present, add it
+                      return [[...prevSteps[0], clickedEdge]];
+                  } else {
+                      // Edge is present, remove it
+                      return [updatedArray];
+                  }
+              });
+
+                
                 setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
                 console.log("Correct step");
-              }
-              else{
-                console.log("Cycle formed");
-              }
+    
             }
             else if (christofidesStepNum === 2) {
               console.log("WOAH");
               
               setPresentTour(false);
               setSteps(prevSteps => {
-                // Check if clickedEdge is already in the array
-                if (!prevSteps[1].some(edge => edge[0] === clickedEdge[0] && edge[1] === clickedEdge[1])) {
+                // Toggle edge: if already present, remove it; if not, add it
+                const updatedArray = prevSteps[1].filter(edge => !(edge[0] === clickedEdge[0] && edge[1] === clickedEdge[1]));
+                if (updatedArray.length === prevSteps[1].length) {
+                    // Edge is not present, add it
                     return [...prevSteps.slice(0, 1), [...prevSteps[1], clickedEdge]];
+                } else {
+                    // Edge is present, remove it
+                    return [...prevSteps.slice(0, 1), updatedArray];
                 }
-                return prevSteps; // Return the previous state if the edge is already present
-              });
+            });
               setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
 
             }
@@ -871,12 +883,17 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               console.log(steps)
 
               setSteps(prevSteps => {
-                if (!prevSteps[prevSteps.length - 1].some(edge => edge[0] === clickedEdge[0] && edge[1] === clickedEdge[1])) {
-                    const updatedLastArray = [...prevSteps[prevSteps.length - 1], clickedEdge];
+                // Check if clickedEdge is already in the last array
+                const updatedLastArray = prevSteps[prevSteps.length - 1].filter(edge => !(edge[0] === clickedEdge[0] && edge[1] === clickedEdge[1]));
+    
+                // Toggle edge: if already present, remove it; if not, add it
+                if (updatedLastArray.length === prevSteps[prevSteps.length - 1].length) {
+                    // Edge is not present, add it
+                    return [...prevSteps.slice(0, -1), [...prevSteps[prevSteps.length - 1], clickedEdge]];
+                } else {
+                    // Edge is present, remove it
                     return [...prevSteps.slice(0, -1), updatedLastArray];
                 }
-                return prevSteps; 
-              
             });
    
            
