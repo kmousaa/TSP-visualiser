@@ -35,6 +35,17 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [inputValueEularian, setInputEularian] = useState('');
     const [inputHamiltonian, setInputHamiltonian] = useState('');
 
+    // Begun interactive mode
+    const [beginInteractiveMode, setBeginInteractiveMode] = useState(false);
+    const [beginVisualisationMode, setBeginVisualisationMode] = useState(false);
+
+    // State to handel temporary step movement
+    const [stepStack, setStepStack] = useState([]);
+
+    // use effect that makes it so begininteractive false and beginvisualisation true when the user clicks in visualisation mode otherwise opposite
+
+
+
     const handleChangeEularian = (event) => {
       setInputEularian(event.target.value);
     };
@@ -63,11 +74,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setChristofidesStepNum(0);
       setClickedNode(null);
       setExpectingInput(false);
-
       
-      // setAlgo("Select Algorithm");
-    }
 
+    }
 
     // Function to generate the adjacency matrix
     const generateAdjacencyMatrix = () => {
@@ -392,6 +401,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       console.log(christofidesStepNum)
       console.log("expecting input")
       console.log(expectingInput);
+      console.log("Begin interactive")
+      console.log(beginInteractiveMode);
+      console.log("Begin visualisation")
+      console.log(beginVisualisationMode);
       console.log("_________________________");
     };
 
@@ -455,7 +468,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         }
         else{
           setSteps([]);
-          resetBestTour();
+          setSteps(prevSteps => {
+            const newState = prevSteps.slice(0, -1); // Keep all arrays except the last one
+            newState.push([]);
+            return newState;
+          });
           console.log("Incorrect MST");
         }
 
@@ -907,6 +924,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         setStepNum(bestTour.length);
         setPresentTour(true);
         setAltSteps(consideredStep);
+        setBeginInteractiveMode(false);
+        setBeginVisualisationMode(false);
       }
     };
 
@@ -918,6 +937,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setPresentTour(false);
       setChristofidesStepNum(0);
       setClickedNode(null);
+      setBeginInteractiveMode(false);
+      setBeginVisualisationMode(false);
+
 
       // run the algorithm again
       if (algo === "Nearest Neighbor") {
@@ -1060,17 +1082,36 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               setChristofidesAlgorithim(true);
               setChristofidesStepNum(1);
               setSteps([[clickedEdge]]);
-              setStepNum(1);             
+              setStepNum(1);           
+              console.log("MUST DUYSTY RUSTY")
+              setBeginInteractiveMode(true);  
             }
             else{
               nextStep();
             }
           }
         }
-
-
       }
     }, [clickedNode, clickedEdge]);
+
+
+    // if we click next step and we are not in interactive mode, then we must set beginInteractiveMode to false, and beginVisualisationMode to true
+    useEffect(() => {
+      console.log("GIVE ME YIUR FUUCKSx")
+      if (!interactiveMode && stepNum >= 1 && !beginInteractiveMode) {
+        setBeginInteractiveMode(false);
+        setBeginVisualisationMode(true);
+      }
+      // if step num is 0 "reset"
+      if (stepNum === 0 && !interactiveMode) {
+        setBeginInteractiveMode(false);
+        setBeginVisualisationMode(false);
+      }
+
+    }, [nextStep, prevStep]);
+
+  
+    
 
 
     // Variables that will help us render the graph
@@ -1421,7 +1462,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               interactiveMode ? (
                 <>
 
-                <button className="btn btn-success mx-1" onClick={() => setInteractiveMode(!interactiveMode)}><FaToggleOn /> Interactive Mode  </button>
+                <button className="btn btn-success mx-1" onClick={() => setInteractiveMode(!interactiveMode)} ><FaToggleOn /> Interactive Mode  </button>
 
                 { christofidesAlgorithim ? (
                   <>
@@ -1463,18 +1504,20 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 </>
               ) : (
                 <>
-                <button className="btn btn-light mx-1" onClick={prevStep}><FaStepBackward /></button>
-                <button className="btn btn-light mx-1" onClick={play}>   {stop ? <FaPlay /> : <FaPause />}</button>
-                <button className="btn btn-light mx-1" onClick={nextStep}><FaStepForward /></button>
-                <button className="btn btn-light mx-1" onClick={restart}><FaRedo /></button>
+                <button className="btn btn-light mx-1" onClick={prevStep} disabled = {beginInteractiveMode && algo == "Christofides"} ><FaStepBackward /></button>
+                <button className="btn btn-light mx-1" onClick={play} disabled = {beginInteractiveMode && algo == "Christofides"} >   {stop ? <FaPlay /> : <FaPause />}</button>
+                <button className="btn btn-light mx-1" onClick={nextStep} disabled = {beginInteractiveMode && algo == "Christofides"} ><FaStepForward /></button>
+                <button className="btn btn-light mx-1" onClick={restart} ><FaRedo /></button>
                 <button className="btn btn-light mx-1" onClick={fastForward}><FaFastForward /></button>
-                <button className="btn btn-danger mx-1" onClick={() => {
+                <button className="btn btn-danger mx-1" onClick ={() => {
                   if (!presentTour){
                   setInteractiveMode(!interactiveMode)
                   softRestart();
                   setShowAdjacencyMatrix(false)}
                   }
-                }><FaToggleOn /> Interactive Mode  </button>
+                }
+                disabled={beginVisualisationMode && algo == "Christofides"}
+                ><FaToggleOn /> Interactive Mode  </button>
                 </>
               )
             }
