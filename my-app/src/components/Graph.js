@@ -40,7 +40,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [beginVisualisationMode, setBeginVisualisationMode] = useState(false);
 
     // State to handel temporary step movement
-    const [stepStack, setStepStack] = useState([]);
+    const [tempAdjacencyMatrix, setTempAdjMatrix] = useState({});
 
     // use effect that makes it so begininteractive false and beginvisualisation true when the user clicks in visualisation mode otherwise opposite
 
@@ -74,8 +74,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setChristofidesStepNum(0);
       setClickedNode(null);
       setExpectingInput(false);
+      setTempAdjMatrix({});
       
-
     }
 
     // Function to generate the adjacency matrix
@@ -366,8 +366,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
   
     // When clicking an edge in the graph, select the adjacnecy matrix input
     const SelectAdjMatrix = (e, node1, node2) => {
+      
       setShowAdjacencyMatrix(true);
-
+      
       setTimeout(() => {
         const inputId = `${node1}-${node2}`;
         const inputElement = document.getElementById(inputId);
@@ -702,7 +703,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           // on last step, if the clicked node is the last node in the best tour, then go to next step 
 
           if (algo === "Nearest Neighbor") {
-            
+         
             const adjacentNodes = getAdjacentNodes(steps[steps.length-1], adjacencyMatrix);                      
             let current = steps[steps.length - 1];
             let adjNodes = getAdjacentNodes(current, adjacencyMatrix);
@@ -741,29 +742,45 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             }
             
           }
-
           else if (algo == "Greedy") {
-
-            let adjacencyMatrixNoDupes = removeDupeDict(adjacencyMatrix);
+            console.log("tempAdjacencyMatrix");
+            console.log(tempAdjacencyMatrix);
+            
+            let adjacencyMatrixNoDupes = removeDupeDict(tempAdjacencyMatrix);
             let sortedAdjacencyMatrix = sortDictionary(adjacencyMatrixNoDupes);
             let potentialEdges = [];
-            let firstValue = Object.values(sortedAdjacencyMatrix)[0]; 
-
-            while (true) {
-              let nextValue = Object.values(sortedAdjacencyMatrix)[potentialEdges.length];
-              if (nextValue === firstValue) {          
-                let edge = Object.keys(sortedAdjacencyMatrix)[potentialEdges.length]; 
-                let edgeArray = edge.split("-");
-                let node1 = parseInt(edgeArray[0]);
-                let node2 = parseInt(edgeArray[1]);
-                potentialEdges.push([node1,node2]);
-              }
-              else{
-                break;
-              }
+        
+            let degreeDict = {};
+            for (let i = 0; i < numNodes; i++) {
+                degreeDict[i] = 0;
             }
-
-            // if the clicked edge is in the potential edges, then go to next step
+            for (const edge of steps) {
+                degreeDict[edge[0]] += 1;
+                degreeDict[edge[1]] += 1; 
+            }
+        
+            console.log("Degree Dict");
+            console.log(degreeDict);
+                    
+            console.log("Sorted Adjacency Matrix");
+            console.log(sortedAdjacencyMatrix);
+        
+            let smallestWeight = Number.MAX_VALUE;
+            for (const [key, value] of Object.entries(sortedAdjacencyMatrix)) {
+                let [node1, node2] = key.split('-').map(Number);
+                if (value <= smallestWeight && degreeDict[node1] < 2 && degreeDict[node2] < 2 && !hasCycle(steps, [node1, node2])) {
+                    if (value < smallestWeight) {
+                        smallestWeight = value;
+                        potentialEdges = [];
+                    }
+                    potentialEdges.push([node1, node2]);
+                } 
+            }
+        
+            console.log("Potential Edges");
+            console.log(potentialEdges);
+        
+            // if the clicked edge is in the potential edges, then go to the next step
             let included = false;
             for (const edge of potentialEdges) {
                 if (edge[0] === clickedEdge[0] && edge[1] === clickedEdge[1]) {
@@ -771,54 +788,53 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     break;
                 }
             }
-
-
-            let degreeDict = {};
-            for (let i = 0; i < numNodes; i++) {
-                degreeDict[i] = 0;
-            }
-            for (const edge of steps) {
-                degreeDict[edge[0]] += 1;
-                degreeDict[edge[1]] += 1;
-            }
-
-            console.log("LAbadaba")
-            console.log("Def dict")
+        
+            console.log("LAbadaba");
+            console.log("Def dict");
             console.log(degreeDict);
-            console.log("Clicked edge")
+            console.log("Clicked edge");
             console.log(clickedEdge);
-            console.log("Included")
+            console.log("Included");
             console.log(included);
-            console.log("Has cycle")
+            console.log("Has cycle");
             console.log(hasCycle(steps, clickedEdge));
-
+        
             // last edge
             if (steps.length + 1 === numNodes && hasCycle(steps, clickedEdge) && degreeDict[clickedEdge[0]]< 2 && degreeDict[clickedEdge[1]] < 2) {
-              setPresentTour(false);
-              setSteps(prevSteps => [...prevSteps, clickedEdge]);
-              setStepNum(prevStepNum => prevStepNum + 1);
-              setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-              setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
-              setInteractiveMode(false);
-              setPresentTour(true);
+                setPresentTour(false);
+                setSteps(prevSteps => [...prevSteps, clickedEdge]);
+                setStepNum(prevStepNum => prevStepNum + 1);
+                setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+                setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+                setInteractiveMode(false);
+                setPresentTour(true);
             }
-
+        
                 
             if (included && !hasCycle(steps, clickedEdge) && degreeDict[clickedEdge[0]] < 2 && degreeDict[clickedEdge[1]] < 2) {
-              console.log("Correct step");
-              setPresentTour(false);
-              console.log(steps)
-              setSteps(prevSteps => [...prevSteps, clickedEdge]);
-              setStepNum(prevStepNum => prevStepNum + 1);
-              setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-              setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
-              console.log("Correct step");
-
+                console.log("Correct step");
+                setPresentTour(false);
+                console.log(steps);
+                setSteps(prevSteps => [...prevSteps, clickedEdge]);
+                setStepNum(prevStepNum => prevStepNum + 1);
+                setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+                setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+                console.log("Correct step");
+        
+                // remove the edge from the temp adj matrix
+                let tempAdjacencyMatrixCopy = tempAdjacencyMatrix;
+                delete tempAdjacencyMatrixCopy[`${clickedEdge[0]}-${clickedEdge[1]}`];
+                delete tempAdjacencyMatrixCopy[`${clickedEdge[1]}-${clickedEdge[0]}`];
+                setTempAdjMatrix(tempAdjacencyMatrixCopy);
+        
             } else {
                 console.log("Clicked edge is not in potential edges");
             }
-                
-          }
+        }
+        
+        
+        
+        
 
           else if (algo === "Christofides") { 
 
@@ -1062,6 +1078,14 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 console.log("Correct step");
                 setSteps([clickedEdge]);
                 setStepNum(1);
+                console.log("Im very musty!!!");
+                // delete the edge from the adjacency matrix
+                let newAdjacencyMatrix = {...adjacencyMatrix};
+                delete newAdjacencyMatrix[`${clickedEdge[0]}-${clickedEdge[1]}`];
+                delete newAdjacencyMatrix[`${clickedEdge[1]}-${clickedEdge[0]}`];
+                setTempAdjMatrix(newAdjacencyMatrix);
+
+
               } else {
                   console.log("Clicked edge is not in potential edges");
               }
@@ -1097,7 +1121,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // if we click next step and we are not in interactive mode, then we must set beginInteractiveMode to false, and beginVisualisationMode to true
     useEffect(() => {
-      console.log("GIVE ME YIUR FUUCKSx")
       if (!interactiveMode && stepNum >= 1 && !beginInteractiveMode) {
         setBeginInteractiveMode(false);
         setBeginVisualisationMode(true);
@@ -1110,6 +1133,175 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     }, [nextStep, prevStep]);
 
+
+    function calculateTextAttributes(node1, node2, numNodes) {
+      let sizeMultiplier = 1; // This multiplier can be adjusted as needed
+
+      let textAdjustmentX = 0;
+      let textAdjustmentY = 0;
+      let maxTextLength = 0;
+      
+      if (numNodes <= 3) {
+        maxTextLength = 5;
+        sizeMultiplier = 1.2;
+      }
+      else if (numNodes == 4) {
+        maxTextLength = 5;
+        sizeMultiplier = 1.2;
+
+        if (node1 == 1 && node2 == 3) {
+          textAdjustmentY = -110;
+        }
+        else if (node1 == 0 && node2 == 2) {
+          textAdjustmentX = -110;
+        }
+      }
+      else if (numNodes == 5) {
+        maxTextLength = 5;
+      }
+
+      else if (numNodes == 6) {
+        sizeMultiplier = 1;
+        maxTextLength = 4;
+
+        if (node1 == 0 && node2 == 3 ){
+          textAdjustmentX = -100;
+        }
+        else if (node1 == 1 && node2 == 3) {
+          textAdjustmentY = -67;
+          textAdjustmentX = -120;
+        }
+        else if (node1== 3 && node2 == 5) {
+          textAdjustmentY = 67;
+          textAdjustmentX = -120;
+        }
+        else if (node1 == 0 && node2 == 4) {
+          textAdjustmentY = +67;
+          textAdjustmentX = +120;
+        }
+        else if (node1 == 0 && node2 == 2) {
+          textAdjustmentX = +120;
+          textAdjustmentY = -67;
+        }
+        else if (node1 == 2 && node2 == 4) {
+          textAdjustmentY = +130;
+
+        }
+        else if (node1 == 1 && node2 == 5) {
+          textAdjustmentY = -130;
+        }
+        else if (node1 == 1 && node2 == 4) {
+          textAdjustmentX = -50;
+          textAdjustmentY = -85;
+        }
+        else if (node1 == 2 && node2 == 5) {
+          textAdjustmentX = 50;
+          textAdjustmentY = -85;
+        }
+      }
+
+      else if (numNodes == 7) {
+        sizeMultiplier = 0.7
+        maxTextLength = 4;
+      }
+      else if (numNodes == 8) { 
+        sizeMultiplier = 0.7;
+        maxTextLength = 4;
+        if (node1 == 4 && node2 == 6) {
+          textAdjustmentX = -120;
+          textAdjustmentY = 120;
+        }
+        else if (node1 == 0 && node2 == 4) {
+          textAdjustmentX = -105;
+        }
+        else if (node1 == 2 && node2 == 6) {
+          textAdjustmentY = -105;
+        }
+        else if (node1 == 3 && node2 == 7) {
+          textAdjustmentX = 80;
+          textAdjustmentY = -80;
+        }
+        else if (node1 == 1 && node2 == 5) {
+          textAdjustmentX = 80;
+          textAdjustmentY = 80;
+        }
+        else if (node1 == 2 && node2 == 4) {
+          textAdjustmentX = 120;
+          textAdjustmentY = 120;                
+        }
+        else if (node1 == 1 && node2 == 3) {
+          textAdjustmentX = 180;
+        }
+        else if (node1 == 0 && node2 == 2) {
+          textAdjustmentY = -127;
+          textAdjustmentX = 130;
+        }
+        else if (node1 == 0 && node2 == 6) {
+          textAdjustmentY = -130;
+          textAdjustmentX = -130;
+        }
+        else if (node1 == 5 && node2 == 7) {
+          textAdjustmentX = -180;
+        }
+        else if (node1 == 1 && node2 == 7) {
+          textAdjustmentY = -180;
+        }
+        else if (node1 == 3 && node2 == 5) {
+          textAdjustmentY = 180;
+        }
+      }
+      else if (numNodes == 9) {
+        maxTextLength = 4;
+        sizeMultiplier = 0.45;
+      }
+      else{
+        console.log("No special case")
+        sizeMultiplier = 0;
+
+      }
+      // 8.......idk!!!
+
+      let textSize = 24 * sizeMultiplier; // Adjust font size based on the multiplier
+      let boxSize = 35 * sizeMultiplier; // Adjust box size based on the multiplier
+
+      return {textAdjustmentX, textAdjustmentY, textSize, boxSize, maxTextLength, sizeMultiplier};
+
+    }
+
+    function generateTextJSX(node, nextNode, node1, node2, AdjMatrix, textAttributes) {
+      const { sizeMultiplier, textAdjustmentX, textAdjustmentY, maxTextLength } = textAttributes;
+      const textSize = 24 * sizeMultiplier; // Adjust font size based on the multiplier
+      const boxSize = 35 * sizeMultiplier; // Adjust box size based on the multiplier
+    
+      return (
+        <g>
+          <rect
+            x={(node.x + nextNode.x) / 2 - boxSize / 2 + textAdjustmentX * sizeMultiplier }
+            y={(node.y + nextNode.y) / 2 - boxSize / 2 + textAdjustmentY * sizeMultiplier}
+            width={boxSize}
+            height={boxSize * 0.85}
+            fill="white"
+            strokeWidth="2"
+            rx={boxSize / 2}
+            style={{ pointerEvents: 'none' }}
+          />
+          <text
+            x={(node.x + nextNode.x) / 2 + textAdjustmentX * sizeMultiplier}
+            y={(node.y + nextNode.y) / 2 + textAdjustmentY * sizeMultiplier}
+            dominantBaseline="middle"
+            textAnchor="middle"
+            fill="black"
+            fontSize={textSize + "px"}
+            fontWeight="bold"
+            stroke="none"
+            style={{ pointerEvents: 'none' }}
+          >
+            {AdjMatrix[node1][node2].toString().length > maxTextLength ? ".." : AdjMatrix[node1][node2]}
+          </text>
+        </g>
+      );
+    }
+
   
     
 
@@ -1121,6 +1313,19 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const currentAltStep = altSteps[altSteps.length - 1];
 
     const eachStepIsTour = lastStep && Array.isArray(lastStep) && lastStep.length > 2; // for brute force
+
+    const textOverlays = [];
+    nodeCoordinates.forEach((node, index) => {
+      nodeCoordinates.slice(index + 1).forEach((nextNode, nextIndex) => {
+        const node1 = index;
+        const node2 = index + nextIndex + 1;
+        const result = AdjMatrix[node1][node2] === 0;
+  
+        if (!result) {
+          textOverlays.push(generateTextJSX(node, nextNode, node1, node2, AdjMatrix, calculateTextAttributes(node1, node2, numNodes)));
+        }
+      });
+    });
 
     // Render the graph and adjacency matrix
     return (
@@ -1180,132 +1385,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 const node2 = index + nextIndex + 1;
                 const result = AdjMatrix[node1][node2] === 0; // Check if the value is not "NA"
 
-                let sizeMultiplier = 1; // This multiplier can be adjusted as needed
-
-                let textAdjustmentX = 0;
-                let textAdjustmentY = 0;
-                let maxTextLength = 0;
-
-                if (numNodes == 4) {
-                  maxTextLength = 5;
-                  sizeMultiplier = 1.2;
- 
-                  if (node1 == 1 && node2 == 3) {
-                    textAdjustmentY = -110;
-                  }
-                  else if (node1 == 0 && node2 == 2) {
-                    textAdjustmentX = -110;
-                  }
-                }
-                else if (numNodes == 5) {
-                  maxTextLength = 5;
-                }
-
-                else if (numNodes == 6) {
-                  sizeMultiplier = 1;
-                  maxTextLength = 4;
-
-                  if (node1 == 0 && node2 == 3 ){
-                    textAdjustmentX = -100;
-                  }
-                  else if (node1 == 1 && node2 == 3) {
-                    textAdjustmentY = -67;
-                    textAdjustmentX = -120;
-                  }
-                  else if (node1== 3 && node2 == 5) {
-                    textAdjustmentY = 67;
-                    textAdjustmentX = -120;
-                  }
-                  else if (node1 == 0 && node2 == 4) {
-                    textAdjustmentY = +67;
-                    textAdjustmentX = +120;
-                  }
-                  else if (node1 == 0 && node2 == 2) {
-                    textAdjustmentX = +120;
-                    textAdjustmentY = -67;
-                  }
-                  else if (node1 == 2 && node2 == 4) {
-                    textAdjustmentY = +130;
-          
-                  }
-                  else if (node1 == 1 && node2 == 5) {
-                    textAdjustmentY = -130;
-                  }
-                  else if (node1 == 1 && node2 == 4) {
-                    textAdjustmentX = -50;
-                    textAdjustmentY = -85;
-                  }
-                  else if (node1 == 2 && node2 == 5) {
-                    textAdjustmentX = 50;
-                    textAdjustmentY = -85;
-                  }
-                }
-
-                else if (numNodes == 7) {
-                  sizeMultiplier = 0.7
-                  maxTextLength = 4;
-                }
-                else if (numNodes == 8) { 
-                  sizeMultiplier = 0.7;
-                  maxTextLength = 4;
-                  if (node1 == 4 && node2 == 6) {
-                    textAdjustmentX = -120;
-                    textAdjustmentY = 120;
-                  }
-                  else if (node1 == 0 && node2 == 4) {
-                    textAdjustmentX = -105;
-                  }
-                  else if (node1 == 2 && node2 == 6) {
-                    textAdjustmentY = -105;
-                  }
-                  else if (node1 == 3 && node2 == 7) {
-                    textAdjustmentX = 80;
-                    textAdjustmentY = -80;
-                  }
-                  else if (node1 == 1 && node2 == 5) {
-                    textAdjustmentX = 80;
-                    textAdjustmentY = 80;
-                  }
-                  else if (node1 == 2 && node2 == 4) {
-                    textAdjustmentX = 120;
-                    textAdjustmentY = 120;                
-                  }
-                  else if (node1 == 1 && node2 == 3) {
-                    textAdjustmentX = 180;
-                  }
-                  else if (node1 == 0 && node2 == 2) {
-                    textAdjustmentY = -127;
-                    textAdjustmentX = 130;
-                  }
-                  else if (node1 == 0 && node2 == 6) {
-                    textAdjustmentY = -130;
-                    textAdjustmentX = -130;
-                  }
-                  else if (node1 == 5 && node2 == 7) {
-                    textAdjustmentX = -180;
-                  }
-                  else if (node1 == 1 && node2 == 7) {
-                    textAdjustmentY = -180;
-                  }
-                  else if (node1 == 3 && node2 == 5) {
-                    textAdjustmentY = 180;
-                  }
-                }
-                else if (numNodes == 9) {
-                  maxTextLength = 4;
-                  sizeMultiplier = 0.45;
-                }
-                else{
-                  console.log("No special case")
-                  sizeMultiplier = 0;
-
-                }
-                // 8.......idk!!!
-
-                let textSize = 24 * sizeMultiplier; // Adjust font size based on the multiplier
-                let boxSize = 35 * sizeMultiplier; // Adjust box size based on the multiplier
-
-                
+                              
                 return (
                   
                   // Check if node-node2 in the adjacency matrix has a value not "NA"
@@ -1326,7 +1406,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     />
                     </a>
                   ) : (
-                  <>
+       
                     <a href="#0" class="pe-auto">
                       <line
                         class="edge"
@@ -1346,33 +1426,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                         }}
                       />
                     </a>
-                    <g>
-                    <rect
-                      x={(node.x + nextNode.x) / 2 - boxSize / 2 + textAdjustmentX * sizeMultiplier} // Adjust padding as needed
-                      y={(node.y + nextNode.y) / 2 - boxSize / 2 + textAdjustmentY * sizeMultiplier} // Adjust padding as needed
-                      width={boxSize} // Adjust width based on the multiplier
-                      height={boxSize * 0.85} // Adjust height based on the multiplier
-                      fill="white" // Set the background color to white
-                      strokeWidth="2" // Set the border width
-                      rx="5" // Set border corner radius
-                      style={{ pointerEvents: 'none' }} // Disable pointer events for the background
-                    />
-                    <text
-                      x={(node.x + nextNode.x) / 2 + textAdjustmentX * sizeMultiplier} // Calculate the midpoint for x-coordinate
-                      y={(node.y + nextNode.y) / 2 + textAdjustmentY * sizeMultiplier} // Calculate the midpoint for y-coordinate
-                      dominantBaseline="middle" // Align text vertically to the midpoint
-                      textAnchor="middle" // Align text horizontally to the midpoint
-                      fill="black" // Match text color with the line
-                      fontSize={textSize + "px"} // Adjust font size based on the multiplier
-                      fontWeight="bold" // Optionally make the weight text bold
-                      stroke="none" // Remove the stroke from the text
-                      style={{ pointerEvents: 'none' }} // Disable pointer events for the text
-                    >
-                      {/* Display the weight here */}
-                      { AdjMatrix[node1][node2].toString().length > maxTextLength ? ".." : AdjMatrix[node1][node2]}
-                    </text>
-                    </g>
-                  </>
+    
+                  
 
   
 
@@ -1391,6 +1446,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             const x2 = nodeCoordinates[altNode].x;
             const y2 = nodeCoordinates[altNode].y;
             const color = "#30bbd1";
+            
+            
             
             return (
               <motion.line
@@ -1412,6 +1469,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 onClick={(e) => { SelectAdjMatrix(e, currentNode, altNode); }}
                 // onMouseOut={(e) => { e.target.style.stroke = color; }}
               />
+    
             );
         })}
 
@@ -1575,6 +1633,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
           {/* Render nodes */}
           {renderNodes()}
+          {textOverlays}
           
           </svg>
           </div>
