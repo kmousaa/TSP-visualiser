@@ -1184,10 +1184,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
                 let textAdjustmentX = 0;
                 let textAdjustmentY = 0;
-                
+                let maxTextLength = 0;
 
                 if (numNodes == 4) {
+                  maxTextLength = 5;
                   sizeMultiplier = 1.2;
+ 
                   if (node1 == 1 && node2 == 3) {
                     textAdjustmentY = -110;
                   }
@@ -1195,9 +1197,14 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     textAdjustmentX = -110;
                   }
                 }
+                else if (numNodes == 5) {
+                  maxTextLength = 5;
+                }
 
                 else if (numNodes == 6) {
                   sizeMultiplier = 1;
+                  maxTextLength = 4;
+
                   if (node1 == 0 && node2 == 3 ){
                     textAdjustmentX = -100;
                   }
@@ -1236,22 +1243,69 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
                 else if (numNodes == 7) {
                   sizeMultiplier = 0.7
+                  maxTextLength = 4;
                 }
-
+                else if (numNodes == 8) { 
+                  sizeMultiplier = 0.7;
+                  maxTextLength = 4;
+                  if (node1 == 4 && node2 == 6) {
+                    textAdjustmentX = -120;
+                    textAdjustmentY = 120;
+                  }
+                  else if (node1 == 0 && node2 == 4) {
+                    textAdjustmentX = -105;
+                  }
+                  else if (node1 == 2 && node2 == 6) {
+                    textAdjustmentY = -105;
+                  }
+                  else if (node1 == 3 && node2 == 7) {
+                    textAdjustmentX = 80;
+                    textAdjustmentY = -80;
+                  }
+                  else if (node1 == 1 && node2 == 5) {
+                    textAdjustmentX = 80;
+                    textAdjustmentY = 80;
+                  }
+                  else if (node1 == 2 && node2 == 4) {
+                    textAdjustmentX = 120;
+                    textAdjustmentY = 120;                
+                  }
+                  else if (node1 == 1 && node2 == 3) {
+                    textAdjustmentX = 180;
+                  }
+                  else if (node1 == 0 && node2 == 2) {
+                    textAdjustmentY = -127;
+                    textAdjustmentX = 130;
+                  }
+                  else if (node1 == 0 && node2 == 6) {
+                    textAdjustmentY = -130;
+                    textAdjustmentX = -130;
+                  }
+                  else if (node1 == 5 && node2 == 7) {
+                    textAdjustmentX = -180;
+                  }
+                  else if (node1 == 1 && node2 == 7) {
+                    textAdjustmentY = -180;
+                  }
+                  else if (node1 == 3 && node2 == 5) {
+                    textAdjustmentY = 180;
+                  }
+                }
+                else if (numNodes == 9) {
+                  maxTextLength = 4;
+                  sizeMultiplier = 0.45;
+                }
                 else{
                   console.log("No special case")
+                  sizeMultiplier = 0;
+
                 }
                 // 8.......idk!!!
 
                 let textSize = 24 * sizeMultiplier; // Adjust font size based on the multiplier
                 let boxSize = 35 * sizeMultiplier; // Adjust box size based on the multiplier
 
-
                 
-
-
-                
-     
                 return (
                   
                   // Check if node-node2 in the adjacency matrix has a value not "NA"
@@ -1301,7 +1355,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       fill="white" // Set the background color to white
                       strokeWidth="2" // Set the border width
                       rx="5" // Set border corner radius
-                      rx={boxSize / 4}
                       style={{ pointerEvents: 'none' }} // Disable pointer events for the background
                     />
                     <text
@@ -1316,7 +1369,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       style={{ pointerEvents: 'none' }} // Disable pointer events for the text
                     >
                       {/* Display the weight here */}
-                      {AdjMatrix[node1][node2]}
+                      { AdjMatrix[node1][node2].toString().length > maxTextLength ? ".." : AdjMatrix[node1][node2]}
                     </text>
                     </g>
                   </>
