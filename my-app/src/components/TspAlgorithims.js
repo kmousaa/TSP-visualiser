@@ -29,14 +29,21 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
     }
 
     // remove identiacal tours with same weight inside the intermediate tours
-    intermediate_tours = intermediate_tours.filter((tour, index, self) =>
-        index === self.findIndex((t) => (
-            t.join() === tour.join()
-        ))
-    )
-    
+    let filteredTours = [];
+    let seenWeights = new Set(); // Keep track of seen weights
+
+    for (let tour of intermediate_tours) {
+        let weight = tourWeight(tour, adjacencyMatrix);
+        if (!seenWeights.has(weight)) {
+            seenWeights.add(weight);
+            filteredTours.push(tour);
+        }
+    }
+
+    intermediate_tours = filteredTours;
+
+            
         
-    
 
     // mix up the intermediate tours order
     intermediate_tours = intermediate_tours.sort(() => Math.random() - 0.5);

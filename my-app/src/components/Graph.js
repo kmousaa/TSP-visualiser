@@ -1887,7 +1887,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   }
                   }
                 }
-                disabled={beginVisualisationMode && algo == "Christofides" }
+                disabled={ (beginVisualisationMode && algo == "Christofides")  || algo == "Brute Force"}
                 ><FaToggleOn /> Interactive Mode  </button>
                 </>
               )
