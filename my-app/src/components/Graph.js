@@ -1,6 +1,6 @@
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
 import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP , hasCycle} from "./TspAlgorithims";
-import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer, FaRuler, FaToggleOff, FaToggleOn} from 'react-icons/fa';
+import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer, FaRuler, FaToggleOff, FaToggleOn, FaRegHandPointLeft} from 'react-icons/fa';
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { FaPersonHiking } from "react-icons/fa6";
 import { AiTwotoneExperiment } from "react-icons/ai";
@@ -64,12 +64,16 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     const cbackwards = () => {
       // push steps to stepStore
-      setStepStore([...stepStore, steps]);
-      setSteps(prevSteps => {
-        const newState = prevSteps.slice(0, -1); // Keep all arrays except the last one
-        return newState;
-      });
-      setChristofidesStepNum(prevStepNum => prevStepNum - 1);
+
+      if (christofidesStepNum > 0) {
+        setStepStore([...stepStore, steps]);
+        setSteps(prevSteps => {
+          const newState = prevSteps.slice(0, -1); // Keep all arrays except the last one
+          return newState;
+        });
+        setChristofidesStepNum(prevStepNum => prevStepNum - 1);
+      }
+      
     }
 
 
@@ -325,7 +329,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                     <>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: "#30bbd1" }} />
-                                        <span class="badge bg-primary"></span> Current Edge + Potential Next Edges
+                                        <span class="badge bg-primary"></span> Current Edge + Potential Next Edges 
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff8a27' }} />
@@ -341,23 +345,23 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                     <>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: "#2730ff" }} />
-                                        <span class="badge bg-primary"></span> Minimum Spanning Tree
+                                        <span class="badge bg-primary"></span> Minimum Spanning Tree {(christofidesStepNum == 0 || christofidesStepNum == 1 ) ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: "#ff2730" }} />
-                                        <span class="badge bg-primary"></span> Minimum Weight Perfect Matching for Odd Vertices 
+                                        <span class="badge bg-primary"></span> Minimum Weight Perfect Matching for Odd Vertices {christofidesStepNum == 2 ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: "#e100ff" }} />
-                                        <span class="badge bg-primary"></span> Connected Multigraph
+                                        <span class="badge bg-primary"></span> Connected Multigraph {christofidesStepNum == 3 ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff8a27' }} />
-                                        <span class="badge bg-primary"></span> Hamiltoinian Cycle 
+                                        <span class="badge bg-primary"></span> Hamiltoinian Cycle {presentTour == false && christofidesStepNum == 4 ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff0000' }} />
-                                        <span class="badge bg-primary"></span> Final Tour
+                                        <span class="badge bg-primary"></span> Final Tour {presentTour == true  && christofidesStepNum == 4 ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     </>
                                 )}
@@ -415,6 +419,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // When clicking an edge in the graph, select the adjacnecy matrix input
     const SelectAdjMatrix = (e, node1, node2) => {
       
+      if (interactiveMode) {
+        setClickedEdge([node1, node2]);
+        setShowAdjacencyMatrix(false);
+        return;
+
+      }
       setShowAdjacencyMatrix(true);
       
       setTimeout(() => {

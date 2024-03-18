@@ -134,6 +134,9 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
 
         // Get the first edge from the sorted adjacency matrix
         let edge = Object.keys(sortedAdjacencyMatrix)[0];
+        if (!edge) {
+            return;
+        }
         let nodes = edge.split('-');
         let node1 = parseInt(nodes[0]);
         let node2 = parseInt(nodes[1]);
@@ -253,6 +256,11 @@ const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBest
         // Add the next node and edge to the MST
         includedNodes.add(nextNode);
         mstEdges.push(edge);
+
+        if (!edge){
+            return;
+        }
+
         
         degreeDict[edge[0]] += 1;
         degreeDict[edge[1]] += 1
@@ -277,6 +285,9 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     let mst = PrimsMST(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep);
     console.log("MST")
     console.log(mst);
+    if (!mst) {
+        return;
+    }
 
     // overwrite the mst if we are in interactive mode
     if (mstOverwrite) {
