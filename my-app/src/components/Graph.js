@@ -449,7 +449,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         return true;
       }
       
-      console.log(bestTour);
       if (bestTour.includes(-1) || bestTour.flat().includes(-1)) {
         showErrorAlert('Add weights to all edges before running the algorithm');
         return true;
@@ -483,7 +482,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           setMinOddPairNum(data.bestMatch.length);
 
           // Proceed to the next step
-          console.log("Correct MST");
           setChristofidesStepNum(2);
           setMaxChristofidesStep(2);
           setStepNum(1);
@@ -498,7 +496,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             newState.push([]);
             return newState;
           });
-          console.log("Incorrect MST");
           showErrorAlert("Selected MST is incorrect");
           
         }
@@ -521,7 +518,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           // Call the algorithim again to refresh the states, using the user defined perfect weight matching
           let stepsBefore = steps;
           let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, mst,  bestPairStep);
-          console.log(data);
+
           
           // Update information needed for future steps
           setMstWeight(data.matchingWeight);
@@ -532,7 +529,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           setEulerianTour(data.eulerianTour);
 
           // Proceed to the next step
-          console.log("Correct Perfect Matching");
+
           setChristofidesStepNum(3);
           setMaxChristofidesStep(3);
           setStepNum(2);
@@ -541,7 +538,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         }
         else{
           // Clear the perfect matching steps
-          console.log("Incorrect Perfect Matching");
           showErrorAlert("Minimum weight perfect matching is incorrect");
           setSteps(prevSteps => {
             const newState = prevSteps.slice(0, -1);
@@ -559,12 +555,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         
         // If user inputted the correct multiGraph, then proceed
         if (isEqual(steps[steps.length - 1], multiGraph)) {
-          console.log("Correct Multigraph");
           setExpectingInput(true);
         }
         else{
           // Clear the multigraph steps
-          console.log("Incorrect Multigraph");
           showErrorAlert("Selected multigraph is incorrect");
           setSteps(prevSteps => {
             const newState = prevSteps.slice(0, -1); 
@@ -612,14 +606,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               }
               if (found) {
                   if (visitedEdgeDict[[node1,node2]] === true || visitedEdgeDict[[node2,node1]] === true) {
-                      console.log("NO");
                       correctEulerianTour = false;
                       break;
                   }
                   visitedEdgeDict[[node1,node2]] = true;
                   visitedEdgeDict[[node2,node1]] = true;
               } else {
-                  console.log("NO");
                   correctEulerianTour = false;
                   break;
               }
@@ -632,20 +624,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   break;
               }
           }
-          console.log("Dict")
-          console.log(visitedEdgeDict);
-
-          if (correctEulerianTour) {
-            console.log("Correct Eulerian Tour");
-          }
-          else{
-            console.log("Incorrect Eulerian Tour");
-          }
 
           // Convert the user input to a hamiltonian tour
           const hamiltonian = [];
           for (let vertex of eularianInputArray) {
-              console.log("Vertex" + vertex);
               if (!hamiltonian.includes(vertex)) {
                 hamiltonian.push(vertex);
               }
@@ -661,16 +643,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           let correctHamiltonianTour = JSON.stringify(hamiltonian) === JSON.stringify(hamiltonianInputArray);
           // If the user inputted the correct hamiltonian tour, then proceed
           if (correctHamiltonianTour) {
-            console.log("Correct Hamiltonian Tour");
             setExpectingInput(false);
             setChristofidesStepNum(4);
             setMaxChristofidesStep(4);
             setStepNum(3);
             setSteps([...steps, bestTour[bestTour.length - 1]]);
             setPresentTour(true);
-          }
-          else{
-            console.log("Incorrect Hamiltonian Tour");
           }
 
           // error message if eulairan false, if eularian true and hamiltonian false, if both false
@@ -719,9 +697,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Move forwards in the TSP simulation
     const nextStep = () => {
 
+      // Prevents error
       if ( checkUndefined() ){
-        console.log("Undefined");
-        // if undefined run algorithim again
         return;
       }
 
@@ -753,9 +730,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               }
             }
 
-            console.log("Potential Hops");
-            console.log(potentialHops);
-
             let degreeDict = {};
             for (let i = 0; i < numNodes; i++) {
                 degreeDict[i] = 0;
@@ -763,8 +737,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             for (const edge of steps) {
                 degreeDict[edge] += 1;
             }
-            console.log("Degree Dict");
-            console.log(degreeDict);
 
             // find all alternate nodes that can be clicked
             // Consider the nodes we can visit
@@ -775,8 +747,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             // remove 1st element of considered
 
             // if not last step
-            console.log("BEFORE")
-            console.log(considered);
             if (stepNum < bestTour.length - 2) {
               considered = considered.flat();
             }
@@ -784,20 +754,15 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               // add first node to the considered list
               considered = considered.flat();
               considered.push(bestTour[0]);
-
             }
-            console.log("AFTER")
-            console.log(considered);
-
 
             if (potentialHops.includes(clickedNode)) {
               setPresentTour(false);
               setSteps(prevSteps => [...prevSteps, clickedNode]);
               setStepNum(prevStepNum => prevStepNum + 1);
               setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-
               setAltSteps(prevSteps => [...prevSteps, considered]);
-              console.log("Correct step");
+
             }
             else{
               showErrorAlert("Selected node is not the nearest neighbor");
@@ -863,14 +828,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         
                 
             if (included && !hasCycle(steps, clickedEdge) && degreeDict[clickedEdge[0]] < 2 && degreeDict[clickedEdge[1]] < 2) {
-                console.log("Correct step");
                 setPresentTour(false);
-                console.log(steps);
                 setSteps(prevSteps => [...prevSteps, clickedEdge]);
                 setStepNum(prevStepNum => prevStepNum + 1);
                 setChristofidesStepNum(prevStepNum => prevStepNum + 1);
                 setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
-                console.log("Correct step");
         
                 // remove the edge from the temp adj matrix
                 let tempAdjacencyMatrixCopy = tempAdjacencyMatrix;
@@ -880,11 +842,23 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         
             } else {
               // id adding caused cycle error message 
-              if (hasCycle(steps, clickedEdge)) {
+              if (hasCycle(steps, clickedEdge) &&  ((steps.length + 1) !== numNodes)){
                 showErrorAlert("Adding this edge will cause an incomplete cycle");
               }
               else{
-                showErrorAlert("Selected edge is not in potential edges");
+                // if adding causes degree to be greater than 2 error message
+                if (degreeDict[clickedEdge[0]] >= 2 || degreeDict[clickedEdge[1]] >= 2) {
+                  showErrorAlert("Adding this edge will cause a vertex to have a degree greater than 2");
+                }
+                else{
+                  // if last step and edge is not the smallest weight its ok
+                  if (!(steps.length + 1 === numNodes && !included)) {
+                    showErrorAlert("Selected edge does not have the smallest weight");
+                  }
+
+            
+                }
+
               }
 
             }
@@ -909,13 +883,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   }
               });
 
-                
                 setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
-                console.log("Correct step");
+
     
             }
             else if (christofidesStepNum === 2) {
-              console.log("WOAH");
               
               setPresentTour(false);
               setSteps(prevSteps => {
@@ -933,8 +905,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
             }
             else if (christofidesStepNum === 3) {
-              console.log("Step 3");
-              console.log(steps)
 
               setSteps(prevSteps => {
                 // Check if clickedEdge is already in the last array
@@ -969,7 +939,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         if (!(steps.length === 0)) {
           setPresentTour(true);
         }
-        console.log("Reached maximum step.");
       }
     };
     
@@ -1013,19 +982,14 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
       // Run the algorithm again, to avoid the user having to click the button again
       if (algo === "Nearest Neighbor") {
-        console.log("Nearest Neighboring");
         NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
-        console.log("Best Tour");
-        console.log(bestTour);
         setBestTour(bestTour);
         setConsideredStep(consideredStep);
       }
       else if (algo === "Greedy") {
-        console.log("Greedingy");
         GreedyTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
       }
       else if (algo === "Christofides") {
-        console.log("Christofides");
         ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
       }
     };
@@ -1072,12 +1036,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
         setAlgo(functionName(tspAlgorithm));
-        console.log("Algorithm");
-        console.log(algo);
+      
         if (functionName(tspAlgorithm) === "Nearest Neighbor") {
           let data = NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
-          console.log("data");
-          console.log(data);
         }
         else{
           tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
@@ -1147,17 +1108,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   }
               }
               if (included) {
-                console.log("Correct step");
                 setSteps([clickedEdge]);
                 setStepNum(1);
-                console.log("Im very musty!!!");
                 let newAdjacencyMatrix = {...adjacencyMatrix};
                 delete newAdjacencyMatrix[`${clickedEdge[0]}-${clickedEdge[1]}`];
                 delete newAdjacencyMatrix[`${clickedEdge[1]}-${clickedEdge[0]}`];
                 setTempAdjMatrix(newAdjacencyMatrix);
-              } else {
-                  console.log("Clicked edge is not in potential edges");
-              }
+              } 
             }
             else{
               nextStep();
@@ -1176,7 +1133,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               setMaxChristofidesStep(1);
               setSteps([[clickedEdge]]);
               setStepNum(1);           
-              console.log("MUST DUYSTY RUSTY")
               setBeginInteractiveMode(true);  
             }
             else{

@@ -38,10 +38,7 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
 
     // mix up the intermediate tours order
     intermediate_tours = intermediate_tours.sort(() => Math.random() - 0.5);
-    
-    // go through the intermediate tours , if the weight of the intermediate tour is same as best tour then keep all until what we found
-    console.log("Trying to find tour: ", best_tour + " with weight: " + best_weight );
-    
+        
     // loop through the intermediate tours and find a tour with the same weight as the best tour
     let index = 0;
     for (let i = 0; i < intermediate_tours.length; i++) {
@@ -285,8 +282,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
 
     // Step 1 - Find the Minimum Spanning Tree
     let mst = PrimsMST(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep);
-    console.log("MST")
-    console.log(mst);
     if (!mst) {
         return;
     }
@@ -300,16 +295,12 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         for (let i = 0; i < numNodes; i++) {
             degreeDict[i] = 0;
         }
-
-        console.log("Overwrite MST")
-        console.log(mstOverwrite);
         for (let edge of mstOverwrite) {
             degreeDict[edge[0]] += 1;
             degreeDict[edge[1]] += 1;
         }
         mst.degreeDict = degreeDict;
         
-        console.log("Overwrite MST")
     }
     finalTour.push(mst.mstEdges);
     
@@ -338,8 +329,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         }
         oddMatrix.push(row);
     }
-    console.log("Odd Matrix");
-    console.log(oddMatrix);
 
     // Using the Munkres algorithm to find the best matching for odd nodes:
     // The Munkres algorithm (also known as the Hungarian algorithm) is utilized here to find the best way to match the odd nodes in a graph, ensuring the minimum total weight.
@@ -347,8 +336,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     // I tried a brute force approach to find the best matching, but it was not efficient for larger graphs. The Munkres algorithm is a much more efficient way to solve this problem.
     let munkres1 = require('munkres-js');
     let bestMatch = munkres1(oddMatrix) 
-    console.log("Best Match");
-    console.log(bestMatch);
 
     // Remove symmetry from the best match
     bestMatch = bestMatch.filter(pair => pair[0] < pair[1]);
@@ -359,7 +346,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     // Overwrite the best match if user defined it
     if (bestPairOverwrite) {
         bestMatch = bestPairOverwrite;
-        console.log("Overwrite Best Match");
     }
 
     finalTour.push(bestMatch);
