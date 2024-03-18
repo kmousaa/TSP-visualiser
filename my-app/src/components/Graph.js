@@ -1,98 +1,42 @@
+import React from "react";
+import "react-toggle/style.css";
+import "../utils/Graph.css";
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
-import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP , hasCycle} from "./TspAlgorithims";
 import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer, FaRuler, FaToggleOff, FaToggleOn, FaRegHandPointLeft, FaFastBackward} from 'react-icons/fa';
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { FaPersonHiking } from "react-icons/fa6";
 import { AiTwotoneExperiment } from "react-icons/ai";
-import "../utils/Graph.css";
-import React from "react";
 import { useState , useEffect} from "react";
 import { motion } from "framer-motion";
-
-import { permutations, getAdjacentNodes , tourWeight, sortDictionary, removeDupeDict} from "../utils/GraphUtil";
 import Toggle from 'react-toggle';
-import "react-toggle/style.css";
 
-
+import {getAdjacentNodes , sortDictionary, removeDupeDict, calculateTextAttributes, generateTextJSX, areOddVerticesConnected, functionName} from "../utils/GraphUtil";
+import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP , hasCycle} from "./TspAlgorithims";
 
 // Represents the graph and its adjacency matrix
 function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep, showAdjacencyMatrix, setShowAdjacencyMatrix , christofidesAlgorithim, setChristofidesAlgorithim, setChristofidesStepNum, christofidesStepNum , interactiveMode, setInteractiveMode}) {
 
+    // States to handel graph visualisation
     const [algo, setAlgo] = useState("Select Algorithm");
     const [stop, setStop] = useState(true);
     const [clickedNode, setClickedNode] = useState(null);
     const [clickedEdge, setClickedEdge] = useState(null);
-
-    // Christofides algorithm for interactive mode
-    const [mst, setMst] = useState([[]]);
-    const [mstWeight, setMstWeight] = useState(0);
-
-    const [oddDegreeVerticies, setOddDegreeVerticies] = useState([]);
-    const [minOddPairWeight, setMinOddPairWeight] = useState(0);
-    const [minOddPairNum, setMinOddPairNum] = useState(0);
-
-    const [multiGraph, setMultiGraph] = useState([[]]);
-    const [eulerianTour, setEulerianTour] = useState([[]]);
-    const [expectingInput, setExpectingInput] = useState(false);
-    
-    // Handel user input
-    const [inputValueEularian, setInputEularian] = useState('');
-    const [inputHamiltonian, setInputHamiltonian] = useState('');
-
-    // Begun interactive mode
     const [beginInteractiveMode, setBeginInteractiveMode] = useState(false);
     const [beginVisualisationMode, setBeginVisualisationMode] = useState(false);
 
-    // State to handel temporary step movement
-    const [tempAdjacencyMatrix, setTempAdjMatrix] = useState({});
-
-    // stepStore stack
+    // States to handel the Christofides algorithim interactive mode
+    const [mst, setMst] = useState([[]]);
+    const [mstWeight, setMstWeight] = useState(0);
+    const [oddDegreeVerticies, setOddDegreeVerticies] = useState([]);
+    const [minOddPairWeight, setMinOddPairWeight] = useState(0);
+    const [minOddPairNum, setMinOddPairNum] = useState(0);
+    const [multiGraph, setMultiGraph] = useState([[]]);
+    const [eulerianTour, setEulerianTour] = useState([[]]);
+    const [expectingInput, setExpectingInput] = useState(false);
+    const [inputValueEularian, setInputEularian] = useState('');
+    const [inputHamiltonian, setInputHamiltonian] = useState('');
     const [stepStore, setStepStore] = useState([]);
-
-
-
-    
-
-    // use effect that makes it so begininteractive false and beginvisualisation true when the user clicks in visualisation mode otherwise opposite
-
-    const cforwards = () => {
-      // pop from stepStore and add it to steps
-      if (stepStore.length > 0) {
-        let lastStep = stepStore.pop();
-        setSteps([...lastStep]);
-        setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-      }
-    }
-
-    const cbackwards = () => {
-      // push steps to stepStore
-
-      if (christofidesStepNum > 0) {
-        setStepStore([...stepStore, steps]);
-        setSteps(prevSteps => {
-          const newState = prevSteps.slice(0, -1); // Keep all arrays except the last one
-          return newState;
-        });
-        setChristofidesStepNum(prevStepNum => prevStepNum - 1);
-      }
-      
-    }
-
-
-    const handleChangeEularian = (event) => {
-      setInputEularian(event.target.value);
-    };
-
-    const handleChangeHamiltonian = (event) => {
-      setInputHamiltonian(event.target.value);
-    };
-
-    const handleSubmit = () => {
-      nextChristofidesStep(inputValueEularian, inputHamiltonian);
-      setInputEularian('');
-      setInputHamiltonian('');
-    };
-  
+    const [tempAdjacencyMatrix, setTempAdjMatrix] = useState({});
 
     // Function to restart states
     const resetBestTour = () => {
@@ -110,8 +54,24 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setTempAdjMatrix({});
       setStepStore([]);
       setStop(true);
-      
     }
+
+
+    // Handels user input for the Christofides algorithim
+    const handleChangeEularian = (event) => {
+      setInputEularian(event.target.value);
+    };
+
+    const handleChangeHamiltonian = (event) => {
+      setInputHamiltonian(event.target.value);
+    };
+
+    const handleSubmit = () => {
+      nextChristofidesStep(inputValueEularian, inputHamiltonian);
+      setInputEularian('');
+      setInputHamiltonian('');
+    };
+  
 
     // Function to generate the adjacency matrix
     const generateAdjacencyMatrix = () => {
@@ -128,13 +88,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       return newMatrix;
     };
     
-    // Function to add a new node to the graph
+    // Graph creation functions
     const addNode = () => {
       resetBestTour();
       setNumNodes(numNodes + 1);
     };
   
-    // Function to remove the last node from the graph
     const removeNode = () => {
       if (numNodes > 0) {
         resetBestTour();
@@ -151,20 +110,17 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
     };
   
-    // Function to reset the graphs state
     const resetGraph = () => {
       resetBestTour();
       setNumNodes(0);
       setAdjacencyMatrix({});
     };
   
-    // Function to clear all edge weights
     const clearWeights = () => {
       resetBestTour();
       setAdjacencyMatrix({});
     };
 
-    // Function to save the graph as a JSON file
     const saveGraph = () => {
       const graph = {
         numNodes,
@@ -179,7 +135,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       a.click();
     };
   
-    // Function to load the graph from a JSON file
     const loadGraph = () => {
       const input = document.createElement("input");
       input.type = "file";
@@ -201,11 +156,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Function to update edge weight in the adjacency matrix
     const updateEdgeWeight = (node1, node2, weight) => {
       resetBestTour();
-      const newWeights = { ...adjacencyMatrix }; // Shallow copy of the adjacency matrix
+      const newWeights = { ...adjacencyMatrix }; 
       newWeights[`${node1}-${node2}`] = Number(weight);
       newWeights[`${node2}-${node1}`] = Number(weight); // Symmetrically assign weight
-      
-      // if weight empty put 0
       if (weight === "") {
         newWeights[`${node1}-${node2}`] = 0;
         newWeights[`${node2}-${node1}`] = 0; 
@@ -213,7 +166,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setAdjacencyMatrix(newWeights);
     };
     
-    // Function to add random weights to the adjacency matrix
+    // Function to add random weights to the adjacency matrix CHANGE
     const generateRandomWeights = () => {
       resetBestTour();
       const newWeights = {};
@@ -284,7 +237,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       ) : <div>  
 
           {
-
             <div>
               {interactiveMode ? (
               <div class="alert alert-warning" role="alert">
@@ -309,8 +261,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                             aria-valuemax="100"
                           ></div>
                         </div>
-
-
                             <h5>Key:</h5>
                             <ul class="list-group">
                                 {algo === "Brute Force" && (
@@ -406,35 +356,27 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       );
     };
 
-
-    // TEMPORARY - Display the weight of the selected edge onto the screen
     const showWeight = (e, node1, node2) => {
-      // update the clicked edge
       const weight = adjacencyMatrix[`${node1}-${node2}`];
-     
     }
     
     const showWeightedEdges = (e, node1, node2) => {
-      // e.target.style.stroke = "#00aeff";
       showWeight(e, node1, node2);
     }
   
     const showUnweightedEdges = (e, node1, node2) => {
-      // e.target.style.stroke = "#00aeff";
       showWeight(e, node1, node2);
     }
   
     // When clicking an edge in the graph, select the adjacnecy matrix input
     const SelectAdjMatrix = (e, node1, node2) => {
-      
+      // Adj matrix not shown if interactive mode is on
       if (interactiveMode) {
         setClickedEdge([node1, node2]);
         setShowAdjacencyMatrix(false);
         return;
-
       }
       setShowAdjacencyMatrix(true);
-      
       setTimeout(() => {
         const inputId = `${node1}-${node2}`;
         const inputElement = document.getElementById(inputId);
@@ -442,79 +384,21 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           setClickedEdge([node1, node2]);
           inputElement.focus(); // Focus on the input element
         }
-      }, 1); // Delay to make sure adjancecy matrix shown if hidden 
-    
-
+      }, 1); 
     };
 
-    const logTour = (e, node1, node2) => {
-      console.log("_________________________");
-      console.log("Best Tour: ");
-      console.log(bestTour);
-      console.log("Steps: ")
-      console.log(steps);
-      console.log(stepNum);
-      console.log("Considered Steps: ")
-      console.log(consideredStep);
-      console.log("Alternate Steps: ")
-      console.log(altSteps);
-      console.log("Clicked node");
-      console.log(clickedNode);
-      console.log("Clicked edge");
-      console.log(clickedEdge);
-      console.log("Interactive Mode: ");
-      console.log(interactiveMode);
-      console.log("Christofides Step Num: ");
-      console.log(christofidesStepNum)
-      console.log("expecting input")
-      console.log(expectingInput);
-      console.log("Begin interactive")
-      console.log(beginInteractiveMode);
-      console.log("Begin visualisation")
-      console.log(beginVisualisationMode);
-      console.log("_________________________");
-    };
-
-    function checkUndefined(adjacencyMatrix) {
-      console.log("CHECKING WITH ME")
+    // Check if we have a valid tour present
+    function checkUndefined() {
       console.log(bestTour);
       if (bestTour.includes(-1) || bestTour.flat().includes(-1)) {
         return true;
       }
     }
     
-
-    useEffect(() => {
-
-      console.log(christofidesStepNum);
-    }, [christofidesStepNum]); // This will log the updated value of christofidesStepNum
-
-
-
-
-    function areOddVerticesConnected(bestPairStep, oddVertices) {
-
-      const coveredVertices = new Set();
-      // Add all vertices connected by the edges in bestPairStep
-      for (const [vertex1, vertex2] of bestPairStep) {
-          coveredVertices.add(vertex1);
-          coveredVertices.add(vertex2);
-      }
-      
-      // Check if all odd vertices are covered
-      return oddVertices.every(vertex => coveredVertices.has(vertex));
-
-    }
-  
-
-
+    // Checks if the current input for christofides interactive mode is correct before moving to the next step
     const nextChristofidesStep = (eularianInput , hamiltonianInput) => {
 
-      console.log("Next Christofides Step");
-
       if (christofidesStepNum == 1) {
-        console.log("Step 0");
-        // check that the MST is correct (miniumum value)
         let mstStep = steps[0];
 
         // weight of the MST
@@ -523,29 +407,31 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           calculatedMstWeight += adjacencyMatrix[`${edge[0]}-${edge[1]}`];
         }
 
+        // Compares the calculated MST weight to the user defined MST weight
         if (calculatedMstWeight === mstWeight) {
         
-          // refresh states in algorithim by calling it again, using the user defined mst
+          // Call the algorithim again to refresh the states, using the user defined mst
           let stepsBefore = steps;
           let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, mstStep);
           
-          // UPdate information needed for future steps
+          // Updates information needed for future steps
           setMst(mstStep);
           setMstWeight(data.matchingWeight);
           setOddDegreeVerticies(data.oddDegreeNodes);
           setMinOddPairWeight(data.matchingWeight);
           setMinOddPairNum(data.bestMatch.length);
 
-
-          // set the next step
+          // Proceed to the next step
+          console.log("Correct MST");
           setChristofidesStepNum(2);
           setStepNum(1);
           setSteps([...stepsBefore, []]);
         }
         else{
+          // Clear the MST steps
           setSteps([]);
           setSteps(prevSteps => {
-            const newState = prevSteps.slice(0, -1); // Keep all arrays except the last one
+            const newState = prevSteps.slice(0, -1); 
             newState.push([]);
             return newState;
           });
@@ -555,25 +441,24 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
 
       else if (christofidesStepNum == 2) {
-        // Check that the minimum weight perfect matching is correct
+        
         let bestPairStep = steps[steps.length - 1];
 
+        // weight of the perfect weight matching
         let calculatedMatchingWeight = 0;
         for (let edge of bestPairStep) {
           calculatedMatchingWeight += adjacencyMatrix[`${edge[0]}-${edge[1]}`];
         }
 
-
+        // Checks if the users perfect matching weight is correct,
         if (calculatedMatchingWeight === minOddPairWeight && bestPairStep.length === minOddPairNum && areOddVerticesConnected(bestPairStep, oddDegreeVerticies)) {
 
-                  
-          // refresh states in algorithim by calling it again, using the user defined mst
+          // Call the algorithim again to refresh the states, using the user defined perfect weight matching
           let stepsBefore = steps;
           let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, mst,  bestPairStep);
-          console.log("PRomise")
           console.log(data);
           
-          // UPdate information needed for future steps
+          // Update information needed for future steps
           setMstWeight(data.matchingWeight);
           setOddDegreeVerticies(data.oddDegreeNodes);
           setMinOddPairWeight(data.matchingWeight);
@@ -581,18 +466,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           setMultiGraph(data.multigraph);
           setEulerianTour(data.eulerianTour);
 
-          // set the next step
-          console.log("YESYESYES");
+          // Proceed to the next step
+          console.log("Correct Perfect Matching");
           setChristofidesStepNum(3);
           setStepNum(2);
           setSteps([...stepsBefore, []]);
           
         }
         else{
-          console.log("NO")
-          // clear the ODD edges steps
+          // Clear the perfect matching steps
+          console.log("Incorrect Perfect Matching");
           setSteps(prevSteps => {
-            const newState = prevSteps.slice(0, -1); // Keep all arrays except the last one
+            const newState = prevSteps.slice(0, -1);
             newState.push([]);
             return newState;
           });
@@ -601,81 +486,56 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
       }
       else if (christofidesStepNum == 3){
-        // if the last step is equal to the 
+
+        // Function to see if 2 arrays are equal
         const isEqual = (a, b) => JSON.stringify(a.sort()) === JSON.stringify(b.sort());
-                
-        if (isEqual(steps[steps.length - 1], multiGraph)) {
-          console.log("YEESYESYES")
-          setExpectingInput(true);
         
-          // setChristofidesStepNum(4);
-          // setStepNum(3);
-          // setSteps([...steps, []]);
+        // If user inputted the correct multiGraph, then proceed
+        if (isEqual(steps[steps.length - 1], multiGraph)) {
+          console.log("Correct Multigraph");
+          setExpectingInput(true);
         }
         else{
-          console.log("NO")
+          // Clear the multigraph steps
+          console.log("Incorrect Multigraph");
           setSteps(prevSteps => {
-            const newState = prevSteps.slice(0, -1); // Keep all arrays except the last one
+            const newState = prevSteps.slice(0, -1); 
             newState.push([]);
             return newState;
           });
         } 
       }
       
-      // This means that user inputted a list we must check depoending on the step
+      // Last step, the user is expected to input the eularian and hamiltonian tour
       if (eularianInput !== "" && eularianInput !== null && hamiltonianInput !== "" && hamiltonianInput !== null){
-        console.log("Input")
-        console.log(eularianInput);
-        
+
         if (expectingInput == true){
           
-          console.log("Euclidain tour")
-          console.log(eularianInput);
-          console.log("hamiltonian tour")
-          console.log(hamiltonianInput);
-          console.log("-------")
-          console.log((eulerianTour.flat().toString()));
-
-          // Check if the eulerian tour is correct, there can be multiple correct answers
-          //  eularian tour = [ [0,3] , [0,2] , [0,1] , [1,2] ]
-          // input = 3,0,1,2,0 
-          // ... or it can be 3,0,2,1,0
-
-
-
-          // dicitonary that stores edge and a boolean indicited if the edge has been visited
+          // Dicitonary that stores edge and a boolean indicited if the edge has been visited
           let visitedEdgeDict = {};
           for (let edge of multiGraph) {
             visitedEdgeDict[edge] = false;
           }
-          console.log("initial dict")
-          console.log(visitedEdgeDict);
 
-          // check if [node1,node2] exists in the multigraph tour in any order, if it does, then mark it as visited
-          // if all edges are visited, then the eulerian tour is correct
-          // if we visit an edge that is already visited, then the eulerian tour is incorrect
-          // if we visit an edge that does not exist, then the eulerian tour is incorrect
-          // all of multiGraph must be visited
+          // - Check if edge [node1,node2] exists in the multigraph tour in any order. If it does, mark it as visited.
+          // - If all edges are visited, then the Eulerian tour is correct.
+          // - If we visit an edge that is already visited, then the Eulerian tour is incorrect.
+          // - If we visit an edge that does not exist, then the Eulerian tour is incorrect.
+          // - All edges in multiGraph must be visited.
 
+          // Reduce the user input by 1 to match the array index
           let eularianInputArray = eularianInput.split(',').map(Number);
-
-          // for every element in array minus it by 1
           for (let i = 0; i < eularianInputArray.length; i++) {
             eularianInputArray[i] -= 1;
           }
 
           let correctEulerianTour = true;
-
           for (let i = 0; i < eularianInputArray.length - 1; i++) {
 
               let node1 = parseInt(eularianInputArray[i]);
-              let node2 = parseInt(eularianInputArray[i + 1]);
-
-              console.log("Checking if edge exists " + node1 + " " + node2 + "inside the multiGraph tour");
-              console.log(multiGraph);
-              console.log("KEEMSTAR")
-          
+              let node2 = parseInt(eularianInputArray[i + 1]);          
               let found = false;
+
               for (let edge of multiGraph) {
                   if ((edge[0] === node1 && edge[1] === node2) || (edge[0] === node2 && edge[1] === node1)) {
                       found = true;
@@ -683,18 +543,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   }
               }
               if (found) {
-                  // make it true in the visited edge dictionary
                   if (visitedEdgeDict[[node1,node2]] === true || visitedEdgeDict[[node2,node1]] === true) {
                       console.log("NO");
                       correctEulerianTour = false;
                       break;
                   }
-
-                  // if it [node1,node2 in dictionary, then mark it as visited and if its [mpde2,node1] its basically same]
                   visitedEdgeDict[[node1,node2]] = true;
                   visitedEdgeDict[[node2,node1]] = true;
-
-
               } else {
                   console.log("NO");
                   correctEulerianTour = false;
@@ -702,7 +557,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               }
           }
 
-          // check if all edges are visited
+          // Check to see if all edges have been visited
           for (let edge in visitedEdgeDict) {
               if (visitedEdgeDict[edge] === false) {
                   correctEulerianTour = false;
@@ -719,10 +574,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             console.log("Incorrect Eulerian Tour");
           }
 
-
-          // Compute hamioltonian tour based on the eulerian tour
-
-          console.log("CONVERTING EULARIAN TO HAMILTONIAN")
+          // Convert the user input to a hamiltonian tour
           const hamiltonian = [];
           for (let vertex of eularianInputArray) {
               console.log("Vertex" + vertex);
@@ -730,43 +582,49 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 hamiltonian.push(vertex);
               }
           }
-      
-          // Add the first vertex to the end of the tour
           hamiltonian.push(hamiltonian[0]);
-
-          // let eularianInputArray = eularianInput.split(',').map(Number);
+          
+          // convert the user into array index
           let hamiltonianInputArray = hamiltonianInput.split(',').map(Number);
           for (let i = 0; i < hamiltonianInputArray.length; i++) {
             hamiltonianInputArray[i] -= 1;
           }
 
-          console.log("User inputted hamiltonian")
-          console.log(hamiltonianInputArray);
-          console.log("Computed hamiltonian")
-          console.log(hamiltonian);
-
+          // If the user inputted the correct hamiltonian tour, then proceed
           if (JSON.stringify(hamiltonian) === JSON.stringify(hamiltonianInputArray)) {
             console.log("Correct Hamiltonian Tour");
-
-            // PROCEED
             setExpectingInput(false);
             setChristofidesStepNum(4);
             setStepNum(3);
             setSteps([...steps, bestTour[bestTour.length - 1]]);
             setPresentTour(true);
-
           }
           else{
             console.log("Incorrect Hamiltonian Tour");
           }
-
         }
-
       }
-
     }
 
-    
+    // Functions to handle the graph visualisation
+    const cforwards = () => {
+      if (stepStore.length > 0) {
+        let lastStep = stepStore.pop();
+        setSteps([...lastStep]);
+        setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+      }
+    }
+
+    const cbackwards = () => {
+      if (christofidesStepNum > 0) {
+        setStepStore([...stepStore, steps]);
+        setSteps(prevSteps => {
+          const newState = prevSteps.slice(0, -1); // Keep all arrays except the last one
+          return newState;
+        });
+        setChristofidesStepNum(prevStepNum => prevStepNum - 1);
+      }
+    }
 
     // Move forwards in the TSP simulation
     const nextStep = () => {
@@ -778,10 +636,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
       if (stepNum < bestTour.length) {
 
-        // if interactive mode and next clicked step is correct then go to next step
+        // If in interactive mode, then check if the user input is correct before moving to the next step
         if (interactiveMode) {
-
-          // on last step, if the clicked node is the last node in the best tour, then go to next step 
 
           if (algo === "Nearest Neighbor") {
          
@@ -1032,24 +888,16 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
         }
 
-
         else{
-          
+          // Proceed to the next step
           setPresentTour(false);
           setSteps(prevSteps => [...prevSteps, bestTour[stepNum]]);
           setStepNum(prevStepNum => prevStepNum + 1);
           setChristofidesStepNum(prevStepNum => prevStepNum + 1);
           setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
-        
-
         }
-
-
-        
-
-        
-
       } else {
+        // On the last step, then show the final tour (graph becomes red)
         if (!(steps.length === 0)) {
           setPresentTour(true);
         }
@@ -1094,8 +942,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setBeginInteractiveMode(false);
       setBeginVisualisationMode(false);
 
-
-      // run the algorithm again
+      // Run the algorithm again, to avoid the user having to click the button again
       if (algo === "Nearest Neighbor") {
         console.log("Nearest Neighboring");
         NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
@@ -1114,12 +961,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
     };
 
-    const softRestart = () => {
-      setClickedNode(null);
-      // if its nearest neighbor and not interactive mode, then run the algorithm again
-
-    };
-
     // Play the TSP simulation
     const play = () => {
       if (stepNum === bestTour.length) {
@@ -1128,19 +969,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setStop(!stop);
     };
 
-
-    // plays the TSP simulation by going nexxt step if stop is false play every 2 seconds
+    // Plays the TSP simulation
     useEffect(() => {
-
-      // if presentTour is true, then first restart the simulation
-      console.log("Present Tour");
-      console.log(presentTour);
-      console.log("Step Num");
-      console.log(stepNum);
-      console.log("Best Tour Length");
-      console.log(bestTour.length);
-
-
       if (!stop) {
         const interval = setInterval(() => {
           nextStep();
@@ -1148,22 +978,14 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         return () => clearInterval(interval);
       }
     }, [stop, nextStep]);
-
-    // if TSP tour is present, then stop becomes true
+    
     useEffect(() => {
       if (presentTour) {
         setStop(true);
-        // turn off interactive mode
       }
     }, [presentTour]);
 
 
-
-
-
-      
-      
-   
 
 
     // Function to render nodes
@@ -1177,45 +999,23 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
 
    
-    // Function to return the name of the TSP algorithm
-    function functionName(fun) {
-      var ret = fun.name;
-  
-      if (ret === "BruteForceTSP") {
-        return "Brute Force";
-      }
-      if (ret === "NearestNeighborTSP") {
-        return "Nearest Neighbor";
-      }
-      if (ret === "GreedyTSP") {
-        return "Greedy";
-      }
-      if (ret === "ChristofidesTSP") {
-        return "Christofides";
-      }
-      else{
-        return "Select Algorithim";
-      }
-    }
-
-
     // Helper function to generate TSP algorithm handlers
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
         setAlgo(functionName(tspAlgorithm));
-
         tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim, clickedNode);
       };
     };
 
-    // use effect that turns off interactive mode when the algorithm is brute force changed
+    // Prevent interactive mode for the brute force algorithm
     useEffect(() => {
       if (algo === "Brute Force") {
         setInteractiveMode(false);
       }
     }, [algo]);
 
-    // if Nearest Neighbor algoirithim is chosen, and interactive mode is true, then when user clicks on a node, the algorithm should run again with the selected node
+
+    // Starting point for the interactive mode, user selects a node / edge to start the algorithm
     useEffect(() => {
   
       if (interactiveMode) {
@@ -1239,7 +1039,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             if (stepNum === 0) {
               resetBestTour();
               GreedyTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
-              // add the edges with the lowest weight (All of them ) into an array
               let adjacencyMatrixNoDupes = removeDupeDict(adjacencyMatrix);
               let sortedAdjacencyMatrix = sortDictionary(adjacencyMatrixNoDupes);
               let potentialEdges = [];
@@ -1257,7 +1056,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   break;
                 }
               }
-              // if the clicked edge is in the potential edges, then go to next step
               let included = false;
               for (const edge of potentialEdges) {
                   if (edge[0] === clickedEdge[0] && edge[1] === clickedEdge[1]) {
@@ -1270,13 +1068,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 setSteps([clickedEdge]);
                 setStepNum(1);
                 console.log("Im very musty!!!");
-                // delete the edge from the adjacency matrix
                 let newAdjacencyMatrix = {...adjacencyMatrix};
                 delete newAdjacencyMatrix[`${clickedEdge[0]}-${clickedEdge[1]}`];
                 delete newAdjacencyMatrix[`${clickedEdge[1]}-${clickedEdge[0]}`];
                 setTempAdjMatrix(newAdjacencyMatrix);
-
-
               } else {
                   console.log("Clicked edge is not in potential edges");
               }
@@ -1293,7 +1088,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               resetBestTour();
               let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setSteps, setConsideredStep, setChristofidesAlgorithim);
               setMstWeight(data.mstWeight);
-              // let user build the minimum spanning tree  its fine for first step
               setChristofidesAlgorithim(true);
               setChristofidesStepNum(1);
               setSteps([[clickedEdge]]);
@@ -1309,196 +1103,22 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
     }, [clickedNode, clickedEdge]);
 
-
-    // if we click next step and we are not in interactive mode, then we must set beginInteractiveMode to false, and beginVisualisationMode to true
+    // Maintain the states that stores if viusalsaition or interaction is running
     useEffect(() => {
       if (!interactiveMode && stepNum >= 1 && !beginInteractiveMode) {
         setBeginInteractiveMode(false);
         setBeginVisualisationMode(true);
       }
-      // if step num is 0 "reset"
       if (stepNum === 0 && !interactiveMode) {
         setBeginInteractiveMode(false);
         setBeginVisualisationMode(false);
       }
-
     }, [nextStep, prevStep]);
 
-    // make it so whenver the graph changes , algo becomes select algorithim
     useEffect(() => {
       setAlgo("Select Algorithm");
     }, [adjacencyMatrix, numNodes]);
 
-
-
-    function calculateTextAttributes(node1, node2, numNodes) {
-      let sizeMultiplier = 1; // This multiplier can be adjusted as needed
-
-      let textAdjustmentX = 0;
-      let textAdjustmentY = 0;
-      let maxTextLength = 0;
-      
-      if (numNodes <= 3) {
-        maxTextLength = 5;
-        sizeMultiplier = 1.2;
-      }
-      else if (numNodes == 4) {
-        maxTextLength = 5;
-        sizeMultiplier = 1.2;
-
-        if (node1 == 1 && node2 == 3) {
-          textAdjustmentY = -110;
-        }
-        else if (node1 == 0 && node2 == 2) {
-          textAdjustmentX = -110;
-        }
-      }
-      else if (numNodes == 5) {
-        maxTextLength = 5;
-      }
-
-      else if (numNodes == 6) {
-        sizeMultiplier = 1;
-        maxTextLength = 4;
-
-        if (node1 == 0 && node2 == 3 ){
-          textAdjustmentX = -100;
-        }
-        else if (node1 == 1 && node2 == 3) {
-          textAdjustmentY = -67;
-          textAdjustmentX = -120;
-        }
-        else if (node1== 3 && node2 == 5) {
-          textAdjustmentY = 67;
-          textAdjustmentX = -120;
-        }
-        else if (node1 == 0 && node2 == 4) {
-          textAdjustmentY = +67;
-          textAdjustmentX = +120;
-        }
-        else if (node1 == 0 && node2 == 2) {
-          textAdjustmentX = +120;
-          textAdjustmentY = -67;
-        }
-        else if (node1 == 2 && node2 == 4) {
-          textAdjustmentY = +130;
-
-        }
-        else if (node1 == 1 && node2 == 5) {
-          textAdjustmentY = -130;
-        }
-        else if (node1 == 1 && node2 == 4) {
-          textAdjustmentX = -50;
-          textAdjustmentY = -85;
-        }
-        else if (node1 == 2 && node2 == 5) {
-          textAdjustmentX = 50;
-          textAdjustmentY = -85;
-        }
-      }
-
-      else if (numNodes == 7) {
-        sizeMultiplier = 0.7
-        maxTextLength = 4;
-      }
-      else if (numNodes == 8) { 
-        sizeMultiplier = 0.7;
-        maxTextLength = 4;
-        if (node1 == 4 && node2 == 6) {
-          textAdjustmentX = -120;
-          textAdjustmentY = 120;
-        }
-        else if (node1 == 0 && node2 == 4) {
-          textAdjustmentX = -105;
-        }
-        else if (node1 == 2 && node2 == 6) {
-          textAdjustmentY = -105;
-        }
-        else if (node1 == 3 && node2 == 7) {
-          textAdjustmentX = 80;
-          textAdjustmentY = -80;
-        }
-        else if (node1 == 1 && node2 == 5) {
-          textAdjustmentX = 80;
-          textAdjustmentY = 80;
-        }
-        else if (node1 == 2 && node2 == 4) {
-          textAdjustmentX = 120;
-          textAdjustmentY = 120;                
-        }
-        else if (node1 == 1 && node2 == 3) {
-          textAdjustmentX = 180;
-        }
-        else if (node1 == 0 && node2 == 2) {
-          textAdjustmentY = -127;
-          textAdjustmentX = 130;
-        }
-        else if (node1 == 0 && node2 == 6) {
-          textAdjustmentY = -130;
-          textAdjustmentX = -130;
-        }
-        else if (node1 == 5 && node2 == 7) {
-          textAdjustmentX = -180;
-        }
-        else if (node1 == 1 && node2 == 7) {
-          textAdjustmentY = -180;
-        }
-        else if (node1 == 3 && node2 == 5) {
-          textAdjustmentY = 180;
-        }
-      }
-      else if (numNodes == 9) {
-        maxTextLength = 4;
-        sizeMultiplier = 0.45;
-      }
-      else{
-        sizeMultiplier = 0;
-      }
-      // 8.......idk!!!
-
-      let textSize = 24 * sizeMultiplier; // Adjust font size based on the multiplier
-      let boxSize = 35 * sizeMultiplier; // Adjust box size based on the multiplier
-
-      return {textAdjustmentX, textAdjustmentY, textSize, boxSize, maxTextLength, sizeMultiplier};
-
-    }
-
-    function generateTextJSX(node, nextNode, node1, node2, AdjMatrix, textAttributes) {
-      const { sizeMultiplier, textAdjustmentX, textAdjustmentY, maxTextLength } = textAttributes;
-      const textSize = 24 * sizeMultiplier; // Adjust font size based on the multiplier
-      const boxSize = 35 * sizeMultiplier; // Adjust box size based on the multiplier
-    
-      return (
-        <g>
-          <rect
-            x={(node.x + nextNode.x) / 2 - boxSize / 2 + textAdjustmentX * sizeMultiplier }
-            y={(node.y + nextNode.y) / 2 - boxSize / 2 + textAdjustmentY * sizeMultiplier}
-            width={boxSize}
-            height={boxSize * 0.85}
-            fill="white"
-            strokeWidth="2"
-            rx={boxSize / 2}
-            style={{ pointerEvents: 'none' }}
-          />
-          <text
-            x={(node.x + nextNode.x) / 2 + textAdjustmentX * sizeMultiplier}
-            y={(node.y + nextNode.y) / 2 + textAdjustmentY * sizeMultiplier}
-            dominantBaseline="middle"
-            textAnchor="middle"
-            fill="black"
-            fontSize={textSize + "px"}
-            fontWeight="bold"
-            stroke="none"
-            style={{ pointerEvents: 'none' }}
-          >
-            {AdjMatrix[node1][node2].toString().length > maxTextLength ? ".." : AdjMatrix[node1][node2]}
-          </text>
-        </g>
-      );
-    }
-
-  
-    
 
 
     // Variables that will help us render the graph
@@ -1507,8 +1127,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const lastStep = steps[steps.length - 1];
     const currentAltStep = altSteps[altSteps.length - 1];
 
-    const eachStepIsTour = lastStep && Array.isArray(lastStep) && lastStep.length > 2; // for brute force
-
+    // Generate the weights for the edges of the graph
     const textOverlays = [];
     nodeCoordinates.forEach((node, index) => {
       nodeCoordinates.slice(index + 1).forEach((nextNode, nextIndex) => {
@@ -1525,17 +1144,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Render the graph and adjacency matrix
     return (
       <div className="Graph">
-        {/* Title bar */}
+
+        {/* Top of page */}
         <div className="title-bar bg-dark p-3 px-4 d-flex justify-content-between">
-          
+          {/* Page Title */}
           <div>
-            {/* Styled title */}
             <h2 className="text-white fw-bold d-flex align-items-center justify-content-between">
               <FaPersonHiking className="me-2" />
               <span>TSP Heuristic Algorithm Visualizer</span>
             </h2>
           </div>
 
+          {/* Dropdown to select the algorithm */}
           <div>
             <div class="btn-group">
               <a class="btn btn-light dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
@@ -1561,14 +1181,15 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           </div>
         </div>
 
-
-
+        {/* Middle section */}
         <div className="container-fluid d-flex flex-column">
           <div className="row flex-grow-1">
+         
           {/* Graph */}
           <div className="col-lg-8">
           <svg width="700" height="700">
-          {/* Render connections */}
+
+          {/* Render connections between the nodes */}
           {nodeCoordinates.map((node, index) => {
             // Go through each node
             return (
@@ -1633,7 +1254,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             );
           })}
 
-          {/* Render all alternate connections */}
+          {/* Render all alternate connections, if it exists */}
           { currentAltStep && currentAltStep.map((altNode, index) => {
             const currentNode = steps[steps.length - 1]; // Get the current node
             const x1 = nodeCoordinates[currentNode].x;
@@ -1668,7 +1289,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             );
         })}
 
-          {/* make every line inside best tour red */}
+          {/* Render the current / final TSP tour */}
+          {/* There is a difference in rendering tours for each algorithim, for example nearest neighbor has the nodes inside the tour, while the other algorithms have the edges inside the tour */}
           {christofidesAlgorithim ? (
               lastStep && lastStep.map((node, index) => {
                   if (Array.isArray(node)) {
@@ -1761,8 +1383,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
           ) : (
               // All other algorithms
-              
-
               steps.map((node, index) => {
                 if (Array.isArray(node)) {
 
@@ -1872,20 +1492,20 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           {/* Render nodes */}
           {renderNodes()}
           {textOverlays}
-          
           </svg>
+
           </div>
-            
-            {/* Adjacency Matrix */}
+            {/* Right panel of screen */}
             <div className="col-lg-4 py-5 d-flex flex-column justify-content-between">
+              
+              {/* Adjacency Matrix */}
               <div className="adjacency-matrix-container">
               {renderAdjacencyMatrix()}
               </div>
-
-
               {
                 presentTour && (
                   <div class="alert alert-success" role="alert">
+                    {/* Shows weight and tour when found */}
                     <span className="fw-bold">Final Tour</span> has been found! 
                     <br/>
                     <span className="fw-bold"> Weight: {bestWeight} </span>
@@ -1893,8 +1513,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 )
               }
 
-
-              {/* Additional buttons */}
+              {/* Buttons to edit graph */}
               <div className="edit-graph-box p-3 border">
                 <h3>Edit Graph</h3>
                 <div className="d-flex flex-wrap gap-2 justify-content-evenly">
@@ -1904,26 +1523,21 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   <button onClick={() => clearWeights()} className="btn btn-outline-dark btn-sm"><FaEraser /> Clear Weights</button>
                   <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Weight</button>
                   <button onClick={() => showAdjMatrix()} className="btn btn-outline-dark btn-sm"><FaRuler /> Show Distance</button>
-                 
                 </div>
               </div>
-
             </div>
           </div>
-
-
 
           {/* Control buttons */}
           <div className="title-bar bg-dark d-flex fixed-bottom w-100 p-3 ">
             <div className="container-fluid">
               <div className="row justify-content-center">
-                {/* Centered buttons */}
                 <div className="col text-center">
                   {interactiveMode ? (
                     <>
                       {christofidesAlgorithim ? (
                         <>
-                          {/* Input for the 4th step in chrisofides algorithim */}
+                          {/* Input need for the 4th step in chrisofides algorithim */}
                           {expectingInput === true ? (
                             <div>
                               <input 
@@ -1943,7 +1557,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                               </button>
                             </div>
                           ) : (
-                            // go forwards c for chrisofides
+                            // Allows users to step through the chrisofides algorithim during interactive mode
                             <>
                               <button className="btn btn-light mx-1" onClick={() => nextChristofidesStep() }>
                                 <FaToggleOn /> Next Step
@@ -1964,6 +1578,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       )}
                     </>
                   ) : (
+                    // Control buttons for the TSP simulation
                     <div className = "controller">
                       <button className="btn btn-light mx-1" onClick={restart}>
                         <FaFastBackward />
@@ -1984,7 +1599,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   )}
                 </div>
                 
-                {/* Interactive Mode toggle button on the right */}
+                {/* Interactive Mode toggle on the right side */}
                 <div className="flicker col-auto">
                   <Toggle
                     id='cheese-status'
@@ -1992,7 +1607,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     onChange={() => {
                       if (!presentTour) {
                         setInteractiveMode(!interactiveMode);
-                        softRestart();
+                        setClickedNode(null);
                         setShowAdjacencyMatrix(false);
                         setStepStore([]);
                       }
@@ -2004,14 +1619,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               </div>
             </div>
           </div>
-
-
-
-
         </div>
-
-
-
       </div>
     );
   }

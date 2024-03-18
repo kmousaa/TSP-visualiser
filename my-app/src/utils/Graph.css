@@ -1,25 +1,24 @@
-
+/* General Styles */
 .table-responsive {
-  max-width: 600px; /* Set the maximum width of the container */
-  max-height: 340px; /* Set the maximum height of the container */
-  overflow-x: auto; /* Enable horizontal scrolling */
+  max-width: 600px;
+  max-height: 340px;
+  overflow-x: auto;
   margin-right: 20px;
 }
 
 .adjacency-matrix {
-  width: auto; /* Set the width based on content */
-  min-width: 100%; /* Ensure a minimum width for the table */
-  table-layout: auto ; /* Ensure fixed layout for consistent column width */
+  width: auto;
+  min-width: 100%;
+  table-layout: auto;
 }
 
 .adjacency-matrix th,
 .adjacency-matrix td {
-  white-space: nowrap; /* Prevent text wrapping */
-  overflow: hidden; /* Hide overflowing content */
-  text-overflow: ellipsis; /* Display ellipsis for overflowed content */
-  padding: 9px; /* Add padding for better readability */
-  min-width: 80px; /* Set minimum width for columns */
- 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 9px;
+  min-width: 80px;
 }
 
 .edit-graph-box {
@@ -27,76 +26,43 @@
   margin-right: 10px;
 }
 
-
 .icon {
-  font-size: 24px; /* Adjust the icon size as needed */
+  font-size: 24px;
 }
 
-.key{
+.key {
   text-align: left;
 }
 
 .algorithm {
-  padding: 5px; /* Adjust padding as needed */
+  padding: 5px;
 }
 
-
-
-
-
-/* Define the default color */
-
-
-/* Define the hover color */
+/* Color Definitions */
+/* Default color */
+/* Hover color */
 .edge:hover {
-  stroke: #00aeff; /* Blue */
-  stroke-opacity: 1; /* Adjust the opacity as needed */
+  stroke: #00aeff;
+  stroke-opacity: 1;
 }
 
 .node-group:hover .node {
-  fill: #00aeff; /* Blue */
-  stroke: #000000; /* Black */
-}
-.node-group:hover .nodeNo {
-  fill: #000000; /* Blue */
+  fill: #00aeff;
+  stroke: #000000;
 }
 
+.node-group:hover .nodeNo {
+  fill: #000000;
+}
 
 .controller {
-
   margin-left: 320px;
 }
 
-
-/* .flicker {
-  margin-right: 20px;  
-
-} */
-
-/* .flicker {
-  position: absolute;
-  bottom: 8px;
-  right: 16px;
-  font-size: 18px;
-} */
-
-/* .flicker-text {
-  position: absolute;
-  bottom: -10px;
-  right: 16px;
-  font-size: 18px;
-} */
-
-.title-bar .controller {
+/* Title Bar Styles */
+.title-bar .controller,
+.title-bar .col-auto .btn {
   display: flex;
   align-items: center;
-}
-
-.title-bar .col-auto {
-  display: flex;
-  align-items: center;
-}
-
-.title-bar .btn {
-  margin: 0 5px; /* Adjust the margins of the buttons */
+  margin: 0 5px;
 }
