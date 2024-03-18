@@ -300,16 +300,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                 {algo === "Brute Force" && (
                                     <>
                                         <li class="algorithm">
-                                            <FaSquare className="icon" style={{ color: "#30bbd1" }} />
-                                            <span class="badge bg-primary"></span> Current Node
-                                        </li>
-                                        <li class="algorithm">
                                             <FaSquare className="icon" style={{ color: '#ff8a27' }} />
-                                            <span class="badge bg-primary"></span> Current Tour
+                                            <span class="badge bg-primary"></span> Current Tour {(presentTour == false ) ? <FaRegHandPointLeft /> : null}
                                         </li>
                                         <li class="algorithm">
                                             <FaSquare className="icon" style={{ color: '#ff0000' }} />
-                                            <span class="badge bg-primary"></span> Final Tour
+                                            <span class="badge bg-primary"></span> Final Tour {(presentTour == true ) ? <FaRegHandPointLeft /> : null}
                                         </li>
                                     </>
                                 )}
@@ -333,11 +329,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff8a27' }} />
-                                        <span class="badge bg-primary"></span> Current Tour
+                                        <span class="badge bg-primary"></span> Current Tour {(presentTour == false ) ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff0000' }} />
-                                        <span class="badge bg-primary"></span> Final Tour
+                                        <span class="badge bg-primary"></span> Final Tour {(presentTour == true ) ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     </>
                                 )}
@@ -1078,12 +1074,36 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     };
 
-
-
+    // Play the TSP simulation
     const play = () => {
-      console.log("Play button clicked");
       setStop(!stop);
     };
+
+
+    // plays the TSP simulation by going nexxt step if stop is false play every 2 seconds
+    useEffect(() => {
+      if (!stop) {
+        const interval = setInterval(() => {
+          nextStep();
+        }, 1000);
+        return () => clearInterval(interval);
+      }
+    }, [stop, nextStep]);
+
+    // if TSP tour is present, then stop becomes true
+    useEffect(() => {
+      if (presentTour) {
+        setStop(true);
+      }
+    }, [presentTour]);
+
+
+
+
+
+      
+      
+   
 
 
     // Function to render nodes
