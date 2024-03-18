@@ -1,10 +1,12 @@
+// Graph.js
+
+// External imports
 import React from "react";
 import "react-toggle/style.css";
 import "../utils/Graph.css";
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
 import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer, FaRuler, FaToggleOff, FaToggleOn, FaRegHandPointLeft, FaFastBackward} from 'react-icons/fa';
 import { IoIosCheckmarkCircle } from "react-icons/io";
-import { GiPathDistance } from "react-icons/gi";
 import { BiSolidError } from "react-icons/bi";
 import { FaPersonHiking } from "react-icons/fa6";
 import { AiTwotoneExperiment } from "react-icons/ai";
@@ -12,8 +14,12 @@ import { useState , useEffect} from "react";
 import { motion } from "framer-motion";
 import Toggle from 'react-toggle';
 
+// Internal imports
 import {getAdjacentNodes , sortDictionary, removeDupeDict, calculateTextAttributes, generateTextJSX, areOddVerticesConnected, functionName} from "../utils/GraphUtil";
 import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP , hasCycle} from "./TspAlgorithims";
+import presetGraphs from '../utils/preset_graphs.json';
+
+
 
 // Represents the graph and its adjacency matrix
 function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep, showAdjacencyMatrix, setShowAdjacencyMatrix , christofidesAlgorithim, setChristofidesAlgorithim, setChristofidesStepNum, christofidesStepNum , interactiveMode, setInteractiveMode}) {
@@ -40,6 +46,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [stepStore, setStepStore] = useState([]);
     const [tempAdjacencyMatrix, setTempAdjMatrix] = useState({});
 
+    const [maxChristofidesStep, setMaxChristofidesStep] = useState(0);
+
     // Error handeling
     const [errorAlertVisible, setErrorAlertVisible] = useState(false);
     const [errorAlertMessage, setErrorAlertMessage] = useState('');
@@ -53,7 +61,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         setErrorAlertVisible(false);
       }, 4000)); // Hides the alert after 5 seconds
     };
-    
+
 
     // Function to restart states
     const resetBestTour = () => {
@@ -71,6 +79,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setTempAdjMatrix({});
       setStepStore([]);
       setStop(true);
+      setMaxChristofidesStep(0);
     }
 
 
@@ -169,6 +178,17 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       };
       input.click();
     };
+
+    // imports preset graphs from preset_graphs.json
+    const importRandomPresetGraph = () => {
+      const randomIndex = Math.floor(Math.random() * presetGraphs.length);
+      const randomGraph = presetGraphs[randomIndex];
+      setNumNodes(randomGraph.numNodes);
+      setAdjacencyMatrix(randomGraph.adjacencyMatrix);
+    };
+    
+
+    
   
     // Function to update edge weight in the adjacency matrix
     const updateEdgeWeight = (node1, node2, weight) => {
@@ -203,8 +223,15 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // Function to return the component that renders the adjacency matrix
     const renderAdjacencyMatrix = () => {
-      const adjacencyMatrix = generateAdjacencyMatrix();
-      const percent = (stepNum / bestTour.length) * 100;
+      const adjacencyMatrix = generateAdjacencyMatrix()
+      
+
+      let percent = (stepNum / bestTour.length) * 100;
+      if (interactiveMode && algo === "Christofides") {
+        percent = (christofidesStepNum / bestTour.length) * 100;
+      }
+
+
       return (
           showAdjacencyMatrix ? (
           <>
@@ -268,9 +295,15 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               )}
               {interactiveMode ? (
               <div class="alert alert-warning d-flex align-items-center " role="alert">
-                  <span className="fw-bold"> <AiTwotoneExperiment /> Interactive mode on</span>
+                  <span className="fw-bold"> <AiTwotoneExperiment /> Interactive mode</span>
               </div>
-              ) : ( null )}
+              ) : ( 
+                <div class="alert alert-success d-flex align-items-center " role="alert">
+                  <span className="fw-bold"> <FaEye />    Visualisation mode</span>
+                </div>
+
+
+               )}
 
                 {algo !== "Select Algorithm" ? (
                     <div>
@@ -366,7 +399,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                             
                             <h4> Instructions: </h4>
                             <p className="text-left d-flex justify-content-start">
-                                1) Construct graph and assign weights
+                                1) Create the graph and assign weights
                             </p>
                             <p className="text-left d-flex justify-content-start">
                                 2) Select an algorithm to visualise
@@ -459,8 +492,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           // Proceed to the next step
           console.log("Correct MST");
           setChristofidesStepNum(2);
+          setMaxChristofidesStep(2);
           setStepNum(1);
           setSteps([...stepsBefore, []]);
+
         }
         else{
           // Clear the MST steps
@@ -506,6 +541,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           // Proceed to the next step
           console.log("Correct Perfect Matching");
           setChristofidesStepNum(3);
+          setMaxChristofidesStep(3);
           setStepNum(2);
           setSteps([...stepsBefore, []]);
           
@@ -635,6 +671,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             console.log("Correct Hamiltonian Tour");
             setExpectingInput(false);
             setChristofidesStepNum(4);
+            setMaxChristofidesStep(4);
             setStepNum(3);
             setSteps([...steps, bestTour[bestTour.length - 1]]);
             setPresentTour(true);
@@ -660,10 +697,14 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // Functions to handle the graph visualisation
     const cforwards = () => {
+
       if (stepStore.length > 0) {
         let lastStep = stepStore.pop();
         setSteps([...lastStep]);
         setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+      }
+      if (christofidesStepNum + 1 === 4) {
+        setPresentTour(true);
       }
     }
 
@@ -675,6 +716,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           return newState;
         });
         setChristofidesStepNum(prevStepNum => prevStepNum - 1);
+      }
+      // if currently in last step, then set the present tour to false
+      if (christofidesStepNum === 4) {
+        setPresentTour(false);
       }
     }
 
@@ -756,6 +801,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               setSteps(prevSteps => [...prevSteps, clickedNode]);
               setStepNum(prevStepNum => prevStepNum + 1);
               setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+
               setAltSteps(prevSteps => [...prevSteps, considered]);
               console.log("Correct step");
             }
@@ -975,6 +1021,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setStepNum(0);
       setPresentTour(false);
       setChristofidesStepNum(0);
+      setMaxChristofidesStep(0);
       setClickedNode(null);
       setBeginInteractiveMode(false);
       setBeginVisualisationMode(false);
@@ -1040,7 +1087,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
         setAlgo(functionName(tspAlgorithm));
-        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim, clickedNode);
+        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
       };
     };
 
@@ -1054,9 +1101,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // Starting point for the interactive mode, user selects a node / edge to start the algorithm
     useEffect(() => {
-  
+
       if (interactiveMode) {
-        if (algo === "Nearest Neighbor") {
+        if (algo === "Select Algorithm") {
+          showErrorAlert("Please select an algorithm");
+        }
+        else if (algo === "Nearest Neighbor") {
           if (clickedNode !== null ) {
             if (stepNum === 0) {
               resetBestTour();
@@ -1127,6 +1177,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               setMstWeight(data.mstWeight);
               setChristofidesAlgorithim(true);
               setChristofidesStepNum(1);
+              setMaxChristofidesStep(1);
               setSteps([[clickedEdge]]);
               setStepNum(1);           
               console.log("MUST DUYSTY RUSTY")
@@ -1350,15 +1401,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       }
                       else if (christofidesStepNum === 3){
                         color = "#e100ff";
-
-                        // Check if [1, 3] is in secondLast
-                        // const secondLast = steps[steps.length - 3];
-                        // const isPresent = secondLast.some(step => step[0] === node1 && step[1] === node2);
-                        // if (isPresent) {
-                        //     color =  "#e100ff"; // Set color to pink if [1, 3] is present
-                        // } else {
-                        //     color = "#ff2730" ; // Set color to orange if [1, 3] is not present
-                        // }
                       }
                       
                       return (
@@ -1378,7 +1420,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
                               onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
                               onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
-                              // onMouseOut={(e) => { e.target.style.stroke = color; }}
+
                           />
                       );
                   } else {
@@ -1412,7 +1454,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
                                   onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
                                   onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
-                                  // onMouseOut={(e) => { e.target.style.stroke = color; }}
+
                               />
                           );
                       }
@@ -1489,7 +1531,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
                             onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
                             onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
-                            // onMouseOut={(e) => { e.target.style.stroke = color; }}
+
                         />
                     );
                   }
@@ -1519,7 +1561,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
                                   onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
                                   onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
-                                  // onMouseOut={(e) => { e.target.style.stroke = color; }}
+
                               />
                           );
                       }
@@ -1559,8 +1601,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   <button onClick={() => removeNode()} disabled={numNodes === 0} className="btn btn-outline-dark btn-sm"><FaMinus /> Remove Node</button>
                   <button onClick={() => resetGraph()} className="btn btn-outline-dark btn-sm"><FaSync /> Reset Graph</button>
                   <button onClick={() => clearWeights()} className="btn btn-outline-dark btn-sm"><FaEraser /> Clear Weights</button>
-                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Weight</button>
+                  <button onClick={importRandomPresetGraph} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Graph</button>
                   <button onClick={() => showAdjMatrix()} className="btn btn-outline-dark btn-sm"><FaRuler /> Show Distance</button>
+
                 </div>
               </div>
             </div>
@@ -1597,17 +1640,17 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                             </div>
                           ) : (
                             // Allows users to step through the chrisofides algorithim during interactive mode
-                            <>
-                              <button className="btn btn-light mx-1" onClick={() => nextChristofidesStep() }>
-                                <FaToggleOn /> Next Step
+                            <div className="controller">
+                              <button className="btn btn-light mx-1" onClick={() => cbackwards() } disabled={(christofidesStepNum <= 1) } >
+                                <FaStepBackward /> 
                               </button>
-                              <button className="btn btn-light mx-1" onClick={() => cforwards() }>
-                                C FORWARDS
+                              <button className="btn btn-light mx-1" onClick={() => nextChristofidesStep()} disabled={(christofidesStepNum !== maxChristofidesStep)} >
+                              <IoIosCheckmarkCircle /> Check Step
                               </button>
-                              <button className="btn btn-light mx-1" onClick={() => cbackwards() }>
-                                C BACK
+                              <button className="btn btn-light mx-1" onClick={() => cforwards() } disabled={ ( christofidesStepNum === 0 ||  (christofidesStepNum == maxChristofidesStep)  ) }  >
+                                <FaStepForward />
                               </button>
-                            </>
+                            </div>
                           )}
                         </>
                       ) : (

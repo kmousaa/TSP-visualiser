@@ -342,6 +342,9 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         for (let i = 0; i < numNodes; i++) {
             degreeDict[i] = 0;
         }
+
+        console.log("Overwrite MST")
+        console.log(mstOverwrite);
         for (let edge of mstOverwrite) {
             degreeDict[edge[0]] += 1;
             degreeDict[edge[1]] += 1;
