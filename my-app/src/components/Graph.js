@@ -1670,9 +1670,51 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           ) : (
               // All other algorithms
               
-              
+
               steps.map((node, index) => {
                 if (Array.isArray(node)) {
+
+                    if (algo === "Brute Force") {
+      
+                      return (
+                        <g >
+                            { (index == steps.length - 1) && node.map((nodeIn, indexIn) => {
+                                const node1 = nodeIn;
+                                const node2 = steps[index][indexIn + 1];
+                                if (node2 === undefined) {
+                                  return;
+                                }
+                                const x1 = nodeCoordinates[node1].x;
+                                const y1 = nodeCoordinates[node1].y;
+                                const x2 = nodeCoordinates[node2].x;
+                                const y2 = nodeCoordinates[node2].y;
+                                const color = presentTour ? "#ff0000" : "#ff8a27";
+                                return (
+                                    <motion.line
+                                        className="edge"
+                                        key={`edge-${node1}-${node2}`}
+                                        x1={x1}
+                                        y1={y1}
+                                        x2={x2}
+                                        y2={y2}
+                                        stroke={color}
+                                        strokeWidth="4"
+                                        initial={{ pathLength: 0, x2: x1, y2: y1 }}
+                                        animate={{ pathLength: 1, x2: x2, y2: y2 }}
+                                        transition={{ duration: 0.45 }}
+                                        onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                                        onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+                                    />
+                                );
+                            })}
+                        </g>
+                    );
+                      
+                    }
+                    else{
+
+
+                    
                     const node1 = node[0];
                     const node2 = node[1];
                     const x1 = nodeCoordinates[node1].x;
@@ -1700,6 +1742,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                             // onMouseOut={(e) => { e.target.style.stroke = color; }}
                         />
                     );
+                  }
                   } else {
                       if (index < steps.length - 1) {
                           const node1 = steps[index];

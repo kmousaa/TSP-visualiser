@@ -27,8 +27,43 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
         }
         intermediate_tours.push(tour);
     }
+
+    // remove identiacal tours with same weight inside the intermediate tours
+    intermediate_tours = intermediate_tours.filter((tour, index, self) =>
+        index === self.findIndex((t) => (
+            t.join() === tour.join()
+        ))
+    )
+    
         
-    setBestTour(best_tour);
+    
+
+    // mix up the intermediate tours order
+    intermediate_tours = intermediate_tours.sort(() => Math.random() - 0.5);
+    
+
+    // go through the intermediate tours , if the weight of the intermediate tour is same as best tour then keep all until what we found
+    console.log("Trying to find tour: ", best_tour + " with weight: " + best_weight );
+    
+    // loop through the intermediate tours and find a tour with the same weight as the best tour
+    let index = 0;
+    for (let i = 0; i < intermediate_tours.length; i++) {
+        let weight = tourWeight(intermediate_tours[i], adjacencyMatrix);
+        if (weight === best_weight) {
+            index = i;
+            break;
+        }
+    }
+
+    // remove identiacal tours with same weight inside the intermediate tours
+    
+    
+
+
+    // remove after the best tour in intermediate tours
+    intermediate_tours = intermediate_tours.slice(0, index + 1);
+    
+    setBestTour(intermediate_tours);
     setBestWeight(best_weight);
 
     console.log("Intermediate Tours");
