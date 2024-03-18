@@ -1,6 +1,6 @@
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
 import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP , hasCycle} from "./TspAlgorithims";
-import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer, FaRuler, FaToggleOff, FaToggleOn, FaRegHandPointLeft} from 'react-icons/fa';
+import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer, FaRuler, FaToggleOff, FaToggleOn, FaRegHandPointLeft, FaFastBackward} from 'react-icons/fa';
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { FaPersonHiking } from "react-icons/fa6";
 import { AiTwotoneExperiment } from "react-icons/ai";
@@ -10,6 +10,8 @@ import { useState , useEffect} from "react";
 import { motion } from "framer-motion";
 
 import { permutations, getAdjacentNodes , tourWeight, sortDictionary, removeDupeDict} from "../utils/GraphUtil";
+import Toggle from 'react-toggle';
+import "react-toggle/style.css";
 
 
 
@@ -107,6 +109,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setExpectingInput(false);
       setTempAdjMatrix({});
       setStepStore([]);
+      setStop(true);
       
     }
 
@@ -802,14 +805,37 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             }
             console.log("Degree Dict");
             console.log(degreeDict);
-                
+
+            // find all alternate nodes that can be clicked
+            // Consider the nodes we can visit
+            let considered = [];
+            let cur = steps[steps.length - 1];
+            let adj = getAdjacentNodes(cur, adjacencyMatrix)
+            considered.push(adj.filter(node => !steps.includes(node)));
+            // remove 1st element of considered
+
+            // if not last step
+            console.log("BEFORE")
+            console.log(considered);
+            if (stepNum < bestTour.length - 2) {
+              considered = considered.flat();
+            }
+            else{
+              // add first node to the considered list
+              considered = considered.flat();
+              considered.push(bestTour[0]);
+
+            }
+            console.log("AFTER")
+            console.log(considered);
+
 
             if (potentialHops.includes(clickedNode)) {
               setPresentTour(false);
               setSteps(prevSteps => [...prevSteps, clickedNode]);
               setStepNum(prevStepNum => prevStepNum + 1);
               setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-              setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+              setAltSteps(prevSteps => [...prevSteps, considered]);
               console.log("Correct step");
             }
             if (stepNum === bestTour.length - 1 && potentialHops.length === 0 && clickedNode === bestTour[0]) {
@@ -817,7 +843,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               setSteps(prevSteps => [...prevSteps, clickedNode]);
               setStepNum(prevStepNum => prevStepNum + 1);
               setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-              setAltSteps(prevSteps => [...prevSteps, consideredStep[stepNum]]);
+              setAltSteps(prevSteps => [...prevSteps, considered]);
               setInteractiveMode(false);
               setPresentTour(true);
             }
@@ -1076,12 +1102,25 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // Play the TSP simulation
     const play = () => {
+      if (stepNum === bestTour.length) {
+        restart();
+      }
       setStop(!stop);
     };
 
 
     // plays the TSP simulation by going nexxt step if stop is false play every 2 seconds
     useEffect(() => {
+
+      // if presentTour is true, then first restart the simulation
+      console.log("Present Tour");
+      console.log(presentTour);
+      console.log("Step Num");
+      console.log(stepNum);
+      console.log("Best Tour Length");
+      console.log(bestTour.length);
+
+
       if (!stop) {
         const interval = setInterval(() => {
           nextStep();
@@ -1157,10 +1196,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           if (clickedNode !== null ) {
             if (stepNum === 0) {
               resetBestTour();
-              NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, clickedNode);
+              let data = NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, clickedNode);
               setSteps([clickedNode]);
               setStepNum(1);
-              setAltSteps([consideredStep[0]]);
+              setAltSteps([data.considered[0]]);
             }
             else{
               nextStep();
@@ -1562,7 +1601,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           })}
 
           {/* Render all alternate connections */}
-          {!interactiveMode && currentAltStep && currentAltStep.map((altNode, index) => {
+          { currentAltStep && currentAltStep.map((altNode, index) => {
             const currentNode = steps[steps.length - 1]; // Get the current node
             const x1 = nodeCoordinates[currentNode].x;
             const y1 = nodeCoordinates[currentNode].y;
@@ -1832,88 +1871,109 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   <button onClick={() => clearWeights()} className="btn btn-outline-dark btn-sm"><FaEraser /> Clear Weights</button>
                   <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Weight</button>
                   <button onClick={() => showAdjMatrix()} className="btn btn-outline-dark btn-sm"><FaRuler /> Show Distance</button>
-                  <button onClick={() => logTour()} className="btn btn-outline-dark btn-sm"><FaRuler /> Log</button>
+                 
                 </div>
               </div>
 
             </div>
           </div>
 
+
+
           {/* Control buttons */}
-          
-          <div className="title-bar bg-dark d-flex align-items-center justify-content-center fixed-bottom w-100 p-3">
-
-            {
-              interactiveMode ? (
-                <>
-
-                <button className="btn btn-success mx-1" onClick={() => setInteractiveMode(!interactiveMode)} ><FaToggleOn /> Interactive Mode  </button>
-
-                { christofidesAlgorithim ? (
-                  <>
-        
-
-                    {/* Input for the 4th step in chrisofides algorithim */}
-                    {expectingInput === true ? (
-
-                    <div>
-                    <input 
-                      type="text"
-                      value={inputValueEularian}
-                      onChange={handleChangeEularian}
-                      placeholder="Eularian Tour..."z
-                    />
-
-                    <input 
-                      type="text"
-                      value={inputHamiltonian}
-                      onChange={handleChangeHamiltonian}
-                      placeholder="Hamiltonian Tour..."z
-                    />
-                    <button className="btn btn-primary" onClick={handleSubmit}>
-                      Submit
-                    </button>
-                  </div>
-           
-                    ) : (
-                  // go forwards c for chrisofides
-                  <>
-                  <button className="btn btn-light mx-1" onClick={() => nextChristofidesStep() }><FaToggleOn /> Next Step  </button>
-                  <button className="btn btn-light mx-1" onClick={() => cforwards() }> C FORWARDS  </button>
-                  <button className="btn btn-light mx-1" onClick={() => cbackwards() }> C BACK  </button>
+          <div className="title-bar bg-dark d-flex fixed-bottom w-100 p-3 ">
+            <div className="container-fluid">
+              <div className="row justify-content-center">
+                {/* Centered buttons */}
+                <div className="col text-center">
+                  {interactiveMode ? (
+                    <>
+                      {christofidesAlgorithim ? (
+                        <>
+                          {/* Input for the 4th step in chrisofides algorithim */}
+                          {expectingInput === true ? (
+                            <div>
+                              <input 
+                                type="text"
+                                value={inputValueEularian}
+                                onChange={handleChangeEularian}
+                                placeholder="Eularian Tour..."
+                              />
+                              <input 
+                                type="text"
+                                value={inputHamiltonian}
+                                onChange={handleChangeHamiltonian}
+                                placeholder="Hamiltonian Tour..."
+                              />
+                              <button className="btn btn-primary" onClick={handleSubmit}>
+                                Submit
+                              </button>
+                            </div>
+                          ) : (
+                            // go forwards c for chrisofides
+                            <>
+                              <button className="btn btn-light mx-1" onClick={() => nextChristofidesStep() }>
+                                <FaToggleOn /> Next Step
+                              </button>
+                              <button className="btn btn-light mx-1" onClick={() => cforwards() }>
+                                C FORWARDS
+                              </button>
+                              <button className="btn btn-light mx-1" onClick={() => cbackwards() }>
+                                C BACK
+                              </button>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <button className="btn btn-light mx-1"   style={{ visibility: "hidden" }}>
+                          <FaStepForward /> PLACEHOLDER
+                        </button>
+                      )}
                     </>
-                    )}
-
-                 </>
-
-                ) : (
-                  <button className="btn btn-light mx-1" onClick={nextStep}><FaStepForward /> PLACEHOLDER</button>
-                )}
-                
-                </>
-              ) : (
-                <>
-                <button className="btn btn-light mx-1" onClick={prevStep} disabled = {beginInteractiveMode && algo == "Christofides"} ><FaStepBackward /></button>
-                <button className="btn btn-light mx-1" onClick={play} disabled = {beginInteractiveMode && algo == "Christofides"} >   {stop ? <FaPlay /> : <FaPause />}</button>
-                <button className="btn btn-light mx-1" onClick={nextStep} disabled = {beginInteractiveMode && algo == "Christofides"} ><FaStepForward /></button>
-                <button className="btn btn-light mx-1" onClick={restart} ><FaRedo /></button>
-                <button className="btn btn-light mx-1" onClick={fastForward}><FaFastForward /></button>
-                <button className="btn btn-danger mx-1" onClick ={() => {
-                  if (!presentTour){
-                  setInteractiveMode(!interactiveMode)
-                  softRestart();
-                  setShowAdjacencyMatrix(false)
-                  setStepStore([]);
-                  }
-                  }
-                }
-                disabled={ (beginVisualisationMode && algo == "Christofides")  || algo == "Brute Force"}
-                ><FaToggleOn /> Interactive Mode  </button>
-                </>
-              )
-            }
-           
+                  ) : (
+                    <div className = "controller">
+                      <button className="btn btn-light mx-1" onClick={restart}>
+                        <FaFastBackward />
+                      </button>
+                      <button className="btn btn-light mx-1" onClick={prevStep} disabled={beginInteractiveMode && algo === "Christofides"}>
+                        <FaStepBackward />
+                      </button>
+                      <button className="btn btn-light mx-1" onClick={play} disabled={beginInteractiveMode && algo === "Christofides"}>
+                        {stop ? <FaPlay /> : <FaPause />}
+                      </button>
+                      <button className="btn btn-light mx-1" onClick={nextStep} disabled={beginInteractiveMode && algo === "Christofides"}>
+                        <FaStepForward />
+                      </button>
+                      <button className="btn btn-light mx-1" onClick={fastForward}>
+                        <FaFastForward />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {/* Interactive Mode toggle button on the right */}
+                <div className="flicker col-auto">
+                  <Toggle
+                    id='cheese-status'
+                    defaultChecked={interactiveMode}
+                    onChange={() => {
+                      if (!presentTour) {
+                        setInteractiveMode(!interactiveMode);
+                        softRestart();
+                        setShowAdjacencyMatrix(false);
+                        setStepStore([]);
+                      }
+                    }}
+                    disabled={beginVisualisationMode && algo === "Christofides" || algo === "Brute Force"}
+                  />
+                  <span className="flicker-text ms-2 text-white">Interactive Mode</span>
+                </div>
+              </div>
+            </div>
           </div>
+
+
+
+
         </div>
 
 

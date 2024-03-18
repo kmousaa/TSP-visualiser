@@ -149,9 +149,11 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
     // setAltSteps(prevSteps => [...prevSteps, considered[0]]);
     // setCurrentStep(1);
 
+    console.log("Considering,,,,,", considered);
+
     console.log("Total weight:", weight); // Log the total weight
 
-    return weight;
+    return {considered, weight, tour};
 };
 
 

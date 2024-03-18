@@ -60,3 +60,43 @@
 .node-group:hover .nodeNo {
   fill: #000000; /* Blue */
 }
+
+
+.controller {
+
+  margin-left: 320px;
+}
+
+
+/* .flicker {
+  margin-right: 20px;  
+
+} */
+
+/* .flicker {
+  position: absolute;
+  bottom: 8px;
+  right: 16px;
+  font-size: 18px;
+} */
+
+/* .flicker-text {
+  position: absolute;
+  bottom: -10px;
+  right: 16px;
+  font-size: 18px;
+} */
+
+.title-bar .controller {
+  display: flex;
+  align-items: center;
+}
+
+.title-bar .col-auto {
+  display: flex;
+  align-items: center;
+}
+
+.title-bar .btn {
+  margin: 0 5px; /* Adjust the margins of the buttons */
+}
