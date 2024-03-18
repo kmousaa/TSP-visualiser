@@ -1,24 +1,24 @@
-/* General Styles */
+
 .table-responsive {
   max-width: 600px;
-  max-height: 340px;
-  overflow-x: auto;
+  max-height: 340px; 
+  overflow-x: auto; 
   margin-right: 20px;
 }
 
 .adjacency-matrix {
-  width: auto;
+  width: auto; 
   min-width: 100%;
-  table-layout: auto;
+  table-layout: auto ; 
 }
 
 .adjacency-matrix th,
 .adjacency-matrix td {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 9px;
-  min-width: 80px;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  padding: 9px; 
+  min-width: 80px; 
 }
 
 .edit-graph-box {
@@ -27,42 +27,45 @@
 }
 
 .icon {
-  font-size: 24px;
+  font-size: 24px; 
 }
 
-.key {
+.key{
   text-align: left;
 }
 
 .algorithm {
-  padding: 5px;
+  padding: 5px; 
 }
 
-/* Color Definitions */
-/* Default color */
-/* Hover color */
 .edge:hover {
-  stroke: #00aeff;
-  stroke-opacity: 1;
+  stroke: #00aeff; 
+  stroke-opacity: 1; 
 }
 
 .node-group:hover .node {
   fill: #00aeff;
-  stroke: #000000;
+  stroke: #000000; 
 }
-
 .node-group:hover .nodeNo {
-  fill: #000000;
+  fill: #000000; 
 }
 
 .controller {
   margin-left: 320px;
 }
 
-/* Title Bar Styles */
-.title-bar .controller,
-.title-bar .col-auto .btn {
+
+.title-bar .controller {
   display: flex;
   align-items: center;
-  margin: 0 5px;
+}
+
+.title-bar .col-auto {
+  display: flex;
+  align-items: center;
+}
+
+.title-bar .btn {
+  margin: 0 5px; 
 }

@@ -4,6 +4,8 @@ import "../utils/Graph.css";
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
 import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer, FaRuler, FaToggleOff, FaToggleOn, FaRegHandPointLeft, FaFastBackward} from 'react-icons/fa';
 import { IoIosCheckmarkCircle } from "react-icons/io";
+import { GiPathDistance } from "react-icons/gi";
+import { BiSolidError } from "react-icons/bi";
 import { FaPersonHiking } from "react-icons/fa6";
 import { AiTwotoneExperiment } from "react-icons/ai";
 import { useState , useEffect} from "react";
@@ -37,6 +39,21 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [inputHamiltonian, setInputHamiltonian] = useState('');
     const [stepStore, setStepStore] = useState([]);
     const [tempAdjacencyMatrix, setTempAdjMatrix] = useState({});
+
+    // Error handeling
+    const [errorAlertVisible, setErrorAlertVisible] = useState(false);
+    const [errorAlertMessage, setErrorAlertMessage] = useState('');
+    const [errorAlertTimeout, setErrorAlertTimeout] = useState(null); // State for managing timeout ID
+
+    const showErrorAlert = (errorMessage) => {
+      setErrorAlertMessage(errorMessage);
+      setErrorAlertVisible(true);
+      clearTimeout(errorAlertTimeout); // Clear the previous timeout
+      setErrorAlertTimeout(setTimeout(() => {
+        setErrorAlertVisible(false);
+      }, 4000)); // Hides the alert after 5 seconds
+    };
+    
 
     // Function to restart states
     const resetBestTour = () => {
@@ -191,6 +208,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       return (
           showAdjacencyMatrix ? (
           <>
+
+
+
           <div className="table-responsive">
               <table id="adjMatrix" className="table  table-sm adjacency-matrix">
                   <thead>
@@ -238,16 +258,25 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
           {
             <div>
+              {errorAlertVisible && (
+                <div className="alert alert-danger d-flex align-items-center" role="alert">
+                  <span className="fw-bold">
+                  <BiSolidError className="pr-5" /> 
+                  {" " + errorAlertMessage}
+                  </span>
+                </div>
+              )}
               {interactiveMode ? (
-              <div class="alert alert-warning" role="alert">
+              <div class="alert alert-warning d-flex align-items-center " role="alert">
                   <span className="fw-bold"> <AiTwotoneExperiment /> Interactive mode on</span>
               </div>
               ) : ( null )}
 
                 {algo !== "Select Algorithm" ? (
                     <div>
-                        <div class="alert alert-info" role="alert">
-                            You have selected: <span className="fw-bold">{algo} Algorithm</span>
+
+                        <div class="alert alert-info d-flex align-items-cente" role="alert">
+                        <span className="fw-bold">{algo} Algorithm</span>
                         </div>
 
                         <div className="key">
@@ -337,13 +366,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                             
                             <h4> Instructions: </h4>
                             <p className="text-left d-flex justify-content-start">
-                                1) Construct graph and add weights
+                                1) Construct graph and assign weights
                             </p>
                             <p className="text-left d-flex justify-content-start">
                                 2) Select an algorithm to visualise
                             </p>
-                            <p className="text-left d-flex justify-content-start">
-                                3) Click on interactive mode to test yourself
+                            <p className="text-left d-flex ">
+                                3) Test yourself by selecting interactive mode
                             </p>
 
                         </div>
@@ -389,8 +418,14 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // Check if we have a valid tour present
     function checkUndefined() {
+      if (bestTour.length === 0) {
+        showErrorAlert('Add weights to all edges before running the algorithm');
+        return true;
+      }
+      
       console.log(bestTour);
       if (bestTour.includes(-1) || bestTour.flat().includes(-1)) {
+        showErrorAlert('Add weights to all edges before running the algorithm');
         return true;
       }
     }
@@ -436,6 +471,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             return newState;
           });
           console.log("Incorrect MST");
+          showErrorAlert("Selected MST is incorrect");
+          
         }
 
       }
@@ -476,6 +513,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         else{
           // Clear the perfect matching steps
           console.log("Incorrect Perfect Matching");
+          showErrorAlert("Minimum weight perfect matching is incorrect");
           setSteps(prevSteps => {
             const newState = prevSteps.slice(0, -1);
             newState.push([]);
@@ -498,6 +536,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         else{
           // Clear the multigraph steps
           console.log("Incorrect Multigraph");
+          showErrorAlert("Selected multigraph is incorrect");
           setSteps(prevSteps => {
             const newState = prevSteps.slice(0, -1); 
             newState.push([]);
@@ -590,8 +629,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             hamiltonianInputArray[i] -= 1;
           }
 
+          let correctHamiltonianTour = JSON.stringify(hamiltonian) === JSON.stringify(hamiltonianInputArray);
           // If the user inputted the correct hamiltonian tour, then proceed
-          if (JSON.stringify(hamiltonian) === JSON.stringify(hamiltonianInputArray)) {
+          if (correctHamiltonianTour) {
             console.log("Correct Hamiltonian Tour");
             setExpectingInput(false);
             setChristofidesStepNum(4);
@@ -602,6 +642,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           else{
             console.log("Incorrect Hamiltonian Tour");
           }
+
+          // error message if eulairan false, if eularian true and hamiltonian false, if both false
+          if (!correctEulerianTour && !correctHamiltonianTour) {
+            showErrorAlert("Eulerian and Hamiltonian tours are incorrect");
+          }
+          else if (!correctEulerianTour) {
+            showErrorAlert("Eulerian tour is incorrect");
+          }
+          else if (!correctHamiltonianTour) {
+            showErrorAlert("Hamiltonian tour is incorrect");
+          }
+    
         }
       }
     }
@@ -707,6 +759,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               setAltSteps(prevSteps => [...prevSteps, considered]);
               console.log("Correct step");
             }
+            else{
+              showErrorAlert("Selected node is not the nearest neighbor");
+            }
             if (stepNum === bestTour.length - 1 && potentialHops.length === 0 && clickedNode === bestTour[0]) {
               setPresentTour(false);
               setSteps(prevSteps => [...prevSteps, clickedNode]);
@@ -719,9 +774,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             
           }
           else if (algo == "Greedy") {
-            console.log("tempAdjacencyMatrix");
-            console.log(tempAdjacencyMatrix);
-            
+
             let adjacencyMatrixNoDupes = removeDupeDict(tempAdjacencyMatrix);
             let sortedAdjacencyMatrix = sortDictionary(adjacencyMatrixNoDupes);
             let potentialEdges = [];
@@ -735,11 +788,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 degreeDict[edge[1]] += 1; 
             }
         
-            console.log("Degree Dict");
-            console.log(degreeDict);
-                    
-            console.log("Sorted Adjacency Matrix");
-            console.log(sortedAdjacencyMatrix);
         
             let smallestWeight = Number.MAX_VALUE;
             for (const [key, value] of Object.entries(sortedAdjacencyMatrix)) {
@@ -753,9 +801,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 } 
             }
         
-            console.log("Potential Edges");
-            console.log(potentialEdges);
-        
             // if the clicked edge is in the potential edges, then go to the next step
             let included = false;
             for (const edge of potentialEdges) {
@@ -764,17 +809,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     break;
                 }
             }
-        
-            console.log("LAbadaba");
-            console.log("Def dict");
-            console.log(degreeDict);
-            console.log("Clicked edge");
-            console.log(clickedEdge);
-            console.log("Included");
-            console.log(included);
-            console.log("Has cycle");
-            console.log(hasCycle(steps, clickedEdge));
-        
+                
             // last edge
             if (steps.length + 1 === numNodes && hasCycle(steps, clickedEdge) && degreeDict[clickedEdge[0]]< 2 && degreeDict[clickedEdge[1]] < 2) {
                 setPresentTour(false);
@@ -804,21 +839,23 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 setTempAdjMatrix(tempAdjacencyMatrixCopy);
         
             } else {
-                console.log("Clicked edge is not in potential edges");
+              // id adding caused cycle error message 
+              if (hasCycle(steps, clickedEdge)) {
+                showErrorAlert("Adding this edge will cause an incomplete cycle");
+              }
+              else{
+                showErrorAlert("Selected edge is not in potential edges");
+              }
+
             }
         }
         
         
-        
-        
-
           else if (algo === "Christofides") { 
 
             if (christofidesStepNum === 1) {
               let mstStep = steps[0];
               // if adding the edge creates a cycle, then go to next step
-           
-                console.log("No cycle formed");
                 setPresentTour(false);
                 setSteps(prevSteps => {
                   // Toggle edge: if already present, remove it; if not, add it
@@ -1162,10 +1199,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 <span className="fw-bold">Select Algorithim</span>
               </a>
               <ul class="dropdown-menu">
-                <li><a  onClick={generateTSPHandler(BruteForceTSP)}  class="dropdown-item" href="#0">Brute Force</a></li>
-                <li><a  onClick={generateTSPHandler(NearestNeighborTSP)} class="dropdown-item" href="#0">Nearest Neighbor</a></li>
-                <li><a  onClick={generateTSPHandler(GreedyTSP)} class="dropdown-item" href="#0">Greedy</a></li>
-                <li><a  onClick={generateTSPHandler(ChristofidesTSP)} class="dropdown-item" href="#0">Christofides</a></li>
+                
+                <li><a  onClick={generateTSPHandler(BruteForceTSP)}  class={numNodes < 3 ||  numNodes > 9 ? "dropdown-item disabled" : "dropdown-item"}href="#0" >Brute Force</a></li>
+                <li><a  onClick={generateTSPHandler(NearestNeighborTSP)} class={numNodes < 3 ? "dropdown-item disabled" : "dropdown-item"} href="#0">Nearest Neighbor</a></li>
+                <li><a  onClick={generateTSPHandler(GreedyTSP)} class={numNodes < 3 ? "dropdown-item disabled" : "dropdown-item"} href="#0">Greedy</a></li>
+                <li><a  onClick={generateTSPHandler(ChristofidesTSP)} class={numNodes < 3 ? "dropdown-item disabled" : "dropdown-item"} href="#0">Christofides</a></li>
               </ul>
             </div>
   
@@ -1529,6 +1567,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           </div>
 
           {/* Control buttons */}
+
           <div className="title-bar bg-dark d-flex fixed-bottom w-100 p-3 ">
             <div className="container-fluid">
               <div className="row justify-content-center">
@@ -1579,24 +1618,27 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     </>
                   ) : (
                     // Control buttons for the TSP simulation
+
+                    
                     <div className = "controller">
-                      <button className="btn btn-light mx-1" onClick={restart}>
+                      <button className="btn btn-light mx-1" onClick={restart} disabled={algo == "Select Algorithm"}>
                         <FaFastBackward />
                       </button>
-                      <button className="btn btn-light mx-1" onClick={prevStep} disabled={beginInteractiveMode && algo === "Christofides"}>
+                      <button className="btn btn-light mx-1" onClick={prevStep} disabled={ (beginInteractiveMode && algo === "Christofides") || algo == "Select Algorithm" }>
                         <FaStepBackward />
                       </button>
-                      <button className="btn btn-light mx-1" onClick={play} disabled={beginInteractiveMode && algo === "Christofides"}>
+                      <button className="btn btn-light mx-1" onClick={play} disabled={(beginInteractiveMode && algo === "Christofides") || algo == "Select Algorithm"}>
                         {stop ? <FaPlay /> : <FaPause />}
                       </button>
-                      <button className="btn btn-light mx-1" onClick={nextStep} disabled={beginInteractiveMode && algo === "Christofides"}>
+                      <button className="btn btn-light mx-1" onClick={nextStep} disabled={ (beginInteractiveMode && algo === "Christofides") || algo == "Select Algorithm"}>
                         <FaStepForward />
                       </button>
-                      <button className="btn btn-light mx-1" onClick={fastForward}>
+                      <button className="btn btn-light mx-1" onClick={fastForward} disabled={algo == "Select Algorithm"}>
                         <FaFastForward />
                       </button>
                     </div>
-                  )}
+                  )
+                  }
                 </div>
                 
                 {/* Interactive Mode toggle on the right side */}
@@ -1619,6 +1661,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               </div>
             </div>
           </div>
+
+          
         </div>
       </div>
     );
