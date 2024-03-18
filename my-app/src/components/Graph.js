@@ -15,7 +15,7 @@ import { motion } from "framer-motion";
 import Toggle from 'react-toggle';
 
 // Internal imports
-import {getAdjacentNodes , sortDictionary, removeDupeDict, calculateTextAttributes, generateTextJSX, areOddVerticesConnected, functionName} from "../utils/GraphUtil";
+import {getAdjacentNodes , sortDictionary, removeDupeDict, calculateTextAttributes, generateTextJSX, areOddVerticesConnected, functionName, tourWeight} from "../utils/GraphUtil";
 import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP , hasCycle} from "./TspAlgorithims";
 import presetGraphs from '../utils/preset_graphs.json';
 
@@ -31,6 +31,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [clickedEdge, setClickedEdge] = useState(null);
     const [beginInteractiveMode, setBeginInteractiveMode] = useState(false);
     const [beginVisualisationMode, setBeginVisualisationMode] = useState(false);
+    const [interTourWeight, setInterTourWeight] = useState(0);
 
     // States to handel the Christofides algorithim interactive mode
     const [mst, setMst] = useState([[]]);
@@ -45,7 +46,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [inputHamiltonian, setInputHamiltonian] = useState('');
     const [stepStore, setStepStore] = useState([]);
     const [tempAdjacencyMatrix, setTempAdjMatrix] = useState({});
-
     const [maxChristofidesStep, setMaxChristofidesStep] = useState(0);
 
     // Error handeling
@@ -181,6 +181,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // imports preset graphs from preset_graphs.json
     const importRandomPresetGraph = () => {
+      resetBestTour();
       const randomIndex = Math.floor(Math.random() * presetGraphs.length);
       const randomGraph = presetGraphs[randomIndex];
       setNumNodes(randomGraph.numNodes);
@@ -298,7 +299,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   <span className="fw-bold"> <AiTwotoneExperiment /> Interactive mode</span>
               </div>
               ) : ( 
-                <div class="alert alert-success d-flex align-items-center " role="alert">
+                <div class="alert alert-warning d-flex align-items-center " role="alert">
                   <span className="fw-bold"> <FaEye />    Visualisation mode</span>
                 </div>
 
@@ -948,20 +949,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     return [...prevSteps.slice(0, -1), updatedLastArray];
                 }
             });
-   
-           
-            }
-            else if (christofidesStepNum === 4) {
-
             }
             else{
-
+              // no more steps
             }
-
-
-
           }
-
         }
 
         else{
@@ -1471,7 +1463,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 if (Array.isArray(node)) {
 
                     if (algo === "Brute Force") {
-      
+                      // find the weight of the "node" anrray as the node array in this case is a tour
+                      
                       return (
                         <g >
                             { (index == steps.length - 1) && node.map((nodeIn, indexIn) => {
@@ -1588,11 +1581,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               </div>
               {
                 presentTour && (
-                  <div class="alert alert-success" role="alert">
+                  <div class="alert alert-success text-left" role="alert">
                     {/* Shows weight and tour when found */}
-                    <span className="fw-bold">Final Tour</span> has been found! 
+                    <span className="fw-bold text-left">Final Tour</span> has been found! 
                     <br/>
-                    <span className="fw-bold"> Weight: {bestWeight} </span>
+                    <span className="fw-bold text-left"> Weight: {bestWeight} </span>
                   </div>
                 )
               }

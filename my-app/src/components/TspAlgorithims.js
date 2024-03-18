@@ -1,11 +1,6 @@
 // Contains TSP algorithms 
 import { permutations, getAdjacentNodes , tourWeight, sortDictionary, removeDupeDict} from "../utils/GraphUtil";
-import { Munkres } from 'munkres-js';
-import { minWeightAssign, maxWeightAssign } from 'munkres-algorithm';
 
-
-
-// Import the Munkres library
 
 
 export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight) => {
@@ -39,16 +34,11 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
             filteredTours.push(tour);
         }
     }
-
     intermediate_tours = filteredTours;
-
-            
-        
 
     // mix up the intermediate tours order
     intermediate_tours = intermediate_tours.sort(() => Math.random() - 0.5);
     
-
     // go through the intermediate tours , if the weight of the intermediate tour is same as best tour then keep all until what we found
     console.log("Trying to find tour: ", best_tour + " with weight: " + best_weight );
     
@@ -62,24 +52,12 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
         }
     }
 
-    // remove identiacal tours with same weight inside the intermediate tours
-    
-    
-
-
     // remove after the best tour in intermediate tours
     intermediate_tours = intermediate_tours.slice(0, index + 1);
-    
     setBestTour(intermediate_tours);
     setBestWeight(best_weight);
 
-    console.log("Intermediate Tours");
-    console.log(intermediate_tours);
-
-
-    console.log("Total weight:", best_weight); // Log the total weight
-
-    return best_weight; // Return the weight of the best tour
+    return best_weight; 
 };
 
 
@@ -87,49 +65,37 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
     resetBestTour();
 
     // Pick a random starting node (unless we are in interactive mode, in which case the user picks the starting node)
-    console.log("Start Node freshhh", startNode);
     let start = startNode ?  startNode : Math.floor(Math.random() * numNodes) ;
-    console.log("Lets start here", start);
-    console.log( startNode !== null);
-
     let tour = [start];
     let weight = 0;
 
-    // Consider the nodes we can visit
+    // Consider the possible next nodes we can visit
     let considered = [];
     let current = tour[tour.length - 1];
     let adjNodes = getAdjacentNodes(current, adjacencyMatrix)
     considered.push(adjNodes.filter(node => !tour.includes(node)));
 
-
     // Find the nearest neighbor for each node
     for (let i = 0; i < numNodes - 1; i++) {
+        
         
         let current = tour[tour.length - 1];
         let adjNodes = getAdjacentNodes(current, adjacencyMatrix);
         let minWeight = Number.MAX_VALUE;
         let minNode = -1;
 
-        console.log("Current", current);
-        console.log("Adj Nodes", adjNodes);
-        console.log("Tour", tour);
-
- 
-
         // Find the nearest neighbor
         for (let j = 0; j < adjNodes.length; j++) {
             if (!tour.includes(adjNodes[j]) && adjacencyMatrix[`${current}-${adjNodes[j]}`] < minWeight) {
                 minWeight = adjacencyMatrix[`${current}-${adjNodes[j]}`];
                 minNode = adjNodes[j];
-            }
-            
+            }   
         }
         weight += minWeight;
         tour.push(minNode);
 
-       
+        // We can only consider the last node in the last step
         if(i === numNodes - 2){
-            // We can only consider the last node in the last step
             considered.push([start]);
         }
         else{
@@ -137,28 +103,16 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
         }
     }
 
-    console.log("Tour", tour);
-
     // Add the weight of the last edge
     weight += adjacencyMatrix[`${tour[tour.length - 1]}-${start}`];
     tour.push(start);
     
-
     // Show the sequence of nodes in the tour
     setBestTour(tour);
     setBestWeight(weight);
+
     // In every step of the tour, show what nodes we considered along the way
-
     setConsideredStep(considered);
-
-    // Initialise the steps to 1 in order to show the first step of simulating the algorithim
-    // setSteps([tour[0]]);
-    // setAltSteps(prevSteps => [...prevSteps, considered[0]]);
-    // setCurrentStep(1);
-
-    console.log("Considering,,,,,", considered);
-
-    console.log("Total weight:", weight); // Log the total weight
 
     return {considered, weight, tour, considered};
 };
@@ -222,7 +176,7 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
 };
 
 
-// Function that checks if adding a new edge to the graph creates a cycle [TICK]
+// Function that checks if adding a new edge to the graph creates a cycle 
 export const hasCycle = (graph, newNode) => {
     const adjacencyList = {};
     
@@ -267,9 +221,7 @@ export const hasCycle = (graph, newNode) => {
 
 
 
-// Function to find the Minimum Spanning Tree using Prim's algorithm [Chat GPT]
-// Check logs we allow dupes
-
+// Function to find the Minimum Spanning Tree using Prim's algorithm 
 const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim) => {
     resetBestTour();
 
@@ -325,11 +277,10 @@ const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBest
 
 
 
-// TRIANGLE INEQUALITY MUST HOLD for this to work
 export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim, mstOverwrite, bestPairOverwrite) => {
     resetBestTour();
 
-
+    // Final Tour will be an array of arrays, each array will represent a step in the algorithm
     let finalTour = [];
 
     // Step 1 - Find the Minimum Spanning Tree
@@ -340,7 +291,7 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         return;
     }
 
-    // overwrite the mst if we are in interactive mode
+    // Overwrite the mst if user defined
     if (mstOverwrite) {
         mst.mstEdges = mstOverwrite;
 
@@ -360,7 +311,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         
         console.log("Overwrite MST")
     }
-    // {mstEdges: [[0, 2], [0, 3], [3, 1]], degreeDict: Object}
     finalTour.push(mst.mstEdges);
     
 
@@ -371,12 +321,9 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
             oddDegreeNodes.push(parseInt(node));
         }
     }
-    console.log("ODD DEGREE NODES");
-    console.log(oddDegreeNodes);
 
-    // finalTour.push(oddDegreeNodes);
 
-    // Step 3 - Find the Minimum Weight Perfect Matching
+    // Step 3 - Find the Minimum Weight Perfect Matching of the odd-degree nodes
 
     // Build adjancecy matrix for the odd degree nodes, we will find the best mmacthing from that. Remeber we have symetry in the matrix, as well as the diagonal is 0
     let oddMatrix = [];
@@ -394,102 +341,33 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     console.log("Odd Matrix");
     console.log(oddMatrix);
 
-    // NUMBER 0
-    // Brute force to find the best match of the odd degree nodes
-
-    // const bruteForcePerfectMatching = (oddDegreeNodes, adjacencyMatrix) => {
-    //     let bestMatching = null;
-    //     let bestWeight = Infinity;
-
-    //     // Generate all possible permutations of odd degree nodes
-    //     const generatePermutations = (arr, permutation) => {
-    //         if (arr.length === 0) {
-    //             // Calculate weight of this permutation
-    //             let weight = 0;
-    //             for (let i = 0; i < permutation.length - 1; i++) {
-    //                 const node1 = permutation[i];
-    //                 const node2 = permutation[i + 1];
-    //                 weight += adjacencyMatrix[`${node1}-${node2}`];
-    //             }
-
-    //             // Update best matching if this permutation has a lower weight
-    //             if (weight < bestWeight) {
-    //                 bestWeight = weight;
-    //                 bestMatching = permutation.slice(); // Copy the permutation to avoid mutation
-    //             }
-    //             return;
-    //         }
-
-    //         for (let i = 0; i < arr.length; i++) {
-    //             const newArr = arr.slice(0, i).concat(arr.slice(i + 1));
-    //             generatePermutations(newArr, permutation.concat(arr[i]));
-    //         }
-    //     };
-
-    //     generatePermutations(oddDegreeNodes, []);
-
-    //     // Convert the permutation into pairs
-    //     const pairs = [];
-    //     for (let i = 0; i < bestMatching.length - 1; i += 2) {
-    //         pairs.push([bestMatching[i], bestMatching[i + 1]]);
-    //     }
-
-    //     return pairs;
-    // };
-
-    // // Find the minimum weight perfect matching using brute force
-    // let bestMatch = bruteForcePerfectMatching(oddDegreeNodes, adjacencyMatrix);
-    // console.log("Best Match Perfect Brute Force");
-    // console.log(bestMatch);
-
-    // // NUMBER 1 
+    // Using the Munkres algorithm to find the best matching for odd nodes:
+    // The Munkres algorithm (also known as the Hungarian algorithm) is utilized here to find the best way to match the odd nodes in a graph, ensuring the minimum total weight.
+    // It takes an odd matrix (representing the weights between odd nodes) as input and returns the best matching, which minimizes the total weight required to connect all odd nodes.
+    // I tried a brute force approach to find the best matching, but it was not efficient for larger graphs. The Munkres algorithm is a much more efficient way to solve this problem.
     let munkres1 = require('munkres-js');
-    let bestMatch = munkres1(oddMatrix)
+    let bestMatch = munkres1(oddMatrix) 
     console.log("Best Match");
     console.log(bestMatch);
 
-    // Remove symetry from the best match for example [1,0] and [0,1] are the same, so we only need one of them
     // Remove symmetry from the best match
     bestMatch = bestMatch.filter(pair => pair[0] < pair[1]);
 
     // Convert indicies to odd degree nodes
     bestMatch = bestMatch.map(pair => [oddDegreeNodes[pair[0]], oddDegreeNodes[pair[1]]]);
 
-    
-    console.log("Best Match After");
-    console.log(bestMatch);
-
-    // // NUMBER 2
-    // let munkres2 = require('hungarian-on3');
-    // let bestMatch2 = munkres2(oddMatrix);
-    // console.log("Best Match 2");
-    // console.log(bestMatch2);
-
-    // // NUMBER 3
-    // let munkres3 = minWeightAssign(oddMatrix);
-    // console.log("Best Match 3");
-    // console.log(munkres3);
-
+    // Overwrite the best match if user defined it
     if (bestPairOverwrite) {
         bestMatch = bestPairOverwrite;
         console.log("Overwrite Best Match");
     }
 
-
     finalTour.push(bestMatch);
-
 
 
     // Step 4 - Combine the MST and the minimum weight perfect matching to form a multigraph
     let multigraph = mst.mstEdges.concat(bestMatch);
-
-    // remove any duplicates such as [0,2] and [0,2]
-    multigraph = Array.from(new Set(multigraph.map(JSON.stringify)), JSON.parse);
-    
-
-    console.log("Multigraph");
-    console.log(multigraph);
-
+    multigraph = Array.from(new Set(multigraph.map(JSON.stringify)), JSON.parse); // remove dupe edges
     finalTour.push(multigraph);
 
     // Step 5 - Find an Eulerian Tour
@@ -503,8 +381,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         eulerianTour.push(currentVertex);
     };
 
-
-
     // Construct adjacency list representation of the multigraph
     const adjacencyList = {};
     for (const [u, v] of multigraph) {
@@ -513,58 +389,38 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         adjacencyList[u].push(v);
         adjacencyList[v].push(u);
     }
-
     let eulerianTour = [];
     findEulerianTour(adjacencyList, multigraph[0][0], eulerianTour);
-    console.log("Eulerian Tour");
-    console.log(eulerianTour);
 
-    // eulerianTour = [0,5,0,2,1,3,4,3]
-
-    // Step 6 - Generate the TSP tour from the Eulerian tour
+    // Step 6 - Generate the Hamiltonian (TSP tour) from the Eulerian tour
     const tspTour = [];
     for (let vertex of eulerianTour) {
         if (!tspTour.includes(vertex)) {
             tspTour.push(vertex);
         }
     }
-
     // Add the first vertex to the end of the tour
     tspTour.push(tspTour[0]);
-    console.log("TSP Tour");
-
     finalTour.push(tspTour);
-    console.log(finalTour);
 
+    // Set the best tour and its weight
     setBestTour(finalTour);
-    console.log("Final Tour", finalTour);
-    // setSteps([finalTour[0]]);
-
     setBestWeight(tourWeight(finalTour[finalTour.length - 1], adjacencyMatrix));
-
-    
-    console.log("Step", [finalTour[0]]);
-    // setCurrentStep(1);
-
     setChristofidesAlgorithim(true);
     
-
-
-    console.log("Total weight:", tourWeight(tspTour, adjacencyMatrix)); // Log the total weight
-
-    // weight of the MST
+    // Calculate the weight of the MST
     let mstWeight = 0;
     for (let edge of mst.mstEdges) {
         mstWeight += adjacencyMatrix[`${edge[0]}-${edge[1]}`];
     }
 
-    // weight of the perfect matching
+    // Calculate the weight of the perfect matching
     let matchingWeight = 0;
     for (let edge of bestMatch) {
         matchingWeight += adjacencyMatrix[`${edge[0]}-${edge[1]}`];
     }
 
-    
+    // Return relevant information for the algorithm
     return { mst, mstWeight, matchingWeight, oddDegreeNodes, bestMatch, multigraph, eulerianTour, tspTour};
 };
 
