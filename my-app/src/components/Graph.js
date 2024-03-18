@@ -234,6 +234,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Function to return the component that renders the adjacency matrix
     const renderAdjacencyMatrix = () => {
       const adjacencyMatrix = generateAdjacencyMatrix();
+      const percent = (stepNum / bestTour.length) * 100;
       return (
           showAdjacencyMatrix ? (
           <>
@@ -298,6 +299,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                         </div>
 
                         <div className="key">
+                        <div className="progress mb-4">
+                          <div
+                            className="progress-bar progress-bar-striped bg-info "
+                            role="progressbar"
+                            style={{ width: `${percent}%` }}
+                            aria-valuenow={percent}
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                          ></div>
+                        </div>
+
+
                             <h5>Key:</h5>
                             <ul class="list-group">
                                 {algo === "Brute Force" && (
@@ -364,13 +377,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                     </li>
                                     </>
                                 )}
-                            </ul>
-
-
-                       
+                            </ul>                       
                         </div>
-
-
 
                     </div>
                 ) : (
@@ -389,6 +397,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                             </p>
 
                         </div>
+
                     </div>
                 )}
             </div>
@@ -467,6 +476,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
 
     function checkUndefined(adjacencyMatrix) {
+      console.log("CHECKING WITH ME")
+      console.log(bestTour);
       if (bestTour.includes(-1) || bestTour.flat().includes(-1)) {
         return true;
       }
@@ -755,13 +766,15 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     }
 
+    
+
     // Move forwards in the TSP simulation
     const nextStep = () => {
+
       if ( checkUndefined() ){
         console.log("Undefined");
         return;
       }
-
 
       if (stepNum < bestTour.length) {
 
@@ -1084,12 +1097,19 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
       // run the algorithm again
       if (algo === "Nearest Neighbor") {
+        console.log("Nearest Neighboring");
         NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
+        console.log("Best Tour");
+        console.log(bestTour);
+        setBestTour(bestTour);
+        setConsideredStep(consideredStep);
       }
       else if (algo === "Greedy") {
+        console.log("Greedingy");
         GreedyTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
       }
       else if (algo === "Christofides") {
+        console.log("Christofides");
         ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
       }
     };
@@ -1133,6 +1153,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     useEffect(() => {
       if (presentTour) {
         setStop(true);
+        // turn off interactive mode
       }
     }, [presentTour]);
 
@@ -1187,9 +1208,15 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       };
     };
 
+    // use effect that turns off interactive mode when the algorithm is brute force changed
+    useEffect(() => {
+      if (algo === "Brute Force") {
+        setInteractiveMode(false);
+      }
+    }, [algo]);
+
     // if Nearest Neighbor algoirithim is chosen, and interactive mode is true, then when user clicks on a node, the algorithm should run again with the selected node
     useEffect(() => {
-
   
       if (interactiveMode) {
         if (algo === "Nearest Neighbor") {
@@ -1296,6 +1323,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
 
     }, [nextStep, prevStep]);
+
+    // make it so whenver the graph changes , algo becomes select algorithim
+    useEffect(() => {
+      setAlgo("Select Algorithm");
+    }, [adjacencyMatrix, numNodes]);
+
 
 
     function calculateTextAttributes(node1, node2, numNodes) {
@@ -1950,11 +1983,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     </div>
                   )}
                 </div>
+                
                 {/* Interactive Mode toggle button on the right */}
                 <div className="flicker col-auto">
                   <Toggle
                     id='cheese-status'
-                    defaultChecked={interactiveMode}
+                    checked={interactiveMode} // Set checked prop to interactiveMode
                     onChange={() => {
                       if (!presentTour) {
                         setInteractiveMode(!interactiveMode);

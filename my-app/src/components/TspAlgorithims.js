@@ -153,7 +153,7 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
 
     console.log("Total weight:", weight); // Log the total weight
 
-    return {considered, weight, tour};
+    return {considered, weight, tour, considered};
 };
 
 
