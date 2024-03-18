@@ -88,7 +88,7 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
 
     // Pick a random starting node (unless we are in interactive mode, in which case the user picks the starting node)
     console.log("Start Node freshhh", startNode);
-    let start = startNode !== null ?  startNode : Math.floor(Math.random() * numNodes) ;
+    let start = startNode ?  startNode : Math.floor(Math.random() * numNodes) ;
     console.log("Lets start here", start);
     console.log( startNode !== null);
 
@@ -109,6 +109,11 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
         let adjNodes = getAdjacentNodes(current, adjacencyMatrix);
         let minWeight = Number.MAX_VALUE;
         let minNode = -1;
+
+        console.log("Current", current);
+        console.log("Adj Nodes", adjNodes);
+        console.log("Tour", tour);
+
  
 
         // Find the nearest neighbor
@@ -131,6 +136,8 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
             considered.push(adjNodes.filter(node => !tour.includes(node)));
         }
     }
+
+    console.log("Tour", tour);
 
     // Add the weight of the last edge
     weight += adjacencyMatrix[`${tour[tour.length - 1]}-${start}`];

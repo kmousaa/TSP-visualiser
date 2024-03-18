@@ -395,21 +395,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     </div>
                 ) : (
                     <div>
-                        <div class="alert alert-primary text-left " role="alert">
-                            
-                            <h4> Instructions: </h4>
-                            <p className="text-left d-flex justify-content-start">
-                                1) Create the graph and assign weights
-                            </p>
-                            <p className="text-left d-flex justify-content-start">
-                                2) Select an algorithm to visualise
-                            </p>
-                            <p className="text-left d-flex ">
-                                3) Test yourself by selecting interactive mode
-                            </p>
-
-                        </div>
-
+                      <div class="alert alert-primary text-left" role="alert">
+                          <h4>Instructions:</h4>
+                          <p class="text-left d-flex justify-content-start">1) Create the graph and assign weights.</p>
+                          <p class="text-left d-flex justify-content-start">2) Select an algorithm for visualization.</p>
+                          <p class="text-left d-flex">3) Test yourself by selecting interactive mode.</p>
+                          <p>Please be aware of the triangle inequality when adding weights to the graph. You can use our preset graphs.</p>
+                      </div>
                     </div>
                 )}
             </div>
@@ -728,6 +720,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
       if ( checkUndefined() ){
         console.log("Undefined");
+        // if undefined run algorithim again
         return;
       }
 
@@ -1087,7 +1080,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const generateTSPHandler = (tspAlgorithm) => {
       return () => {
         setAlgo(functionName(tspAlgorithm));
-        tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
+        console.log("Algorithm");
+        console.log(algo);
+        if (functionName(tspAlgorithm) === "Nearest Neighbor") {
+          let data = NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
+          console.log("data");
+          console.log(data);
+        }
+        else{
+          tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
+        }
+
+       
       };
     };
 
