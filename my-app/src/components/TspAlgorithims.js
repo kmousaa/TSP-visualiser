@@ -347,9 +347,7 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     if (bestPairOverwrite) {
         bestMatch = bestPairOverwrite;
     }
-
     finalTour.push(bestMatch);
-
 
     // Step 4 - Combine the MST and the minimum weight perfect matching to form a multigraph
     let multigraph = mst.mstEdges.concat(bestMatch);
