@@ -39,7 +39,7 @@ export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, chr
 
 // Function to generate coordinates for equidistant nodes on a circle
 export const generateNodeCoordinates = (numNodes) => {
-    const coordinates = [];
+    const coordinates = []; // Stores the coordinates of the nodes
     const centerX = 330; // X coordinate of the center of the circle
     const centerY = 330; // Y coordinate of the center of the circle
     const radius = 295; // Radius of the circle
@@ -53,7 +53,8 @@ export const generateNodeCoordinates = (numNodes) => {
     return coordinates;
 };
 
-// Given TSP tour return weight , inout tour looks like [n1, n2 ,n3 n4, n1]
+
+// Given TSP tour return its weight
 export const tourWeight = (tour, adjacencyMatrix) => {
     let weight = 0;
     for (let i = 0; i < tour.length - 1; i++) {

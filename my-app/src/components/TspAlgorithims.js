@@ -6,9 +6,9 @@ import { permutations, getAdjacentNodes , tourWeight, sortDictionary, removeDupe
 export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight) => {
     resetBestTour();
     
-    let possible_tours = permutations([...Array(numNodes).keys()]); // Generate all possible tours
-    let best_tour = [];
-    let best_weight = Number.MAX_VALUE;
+    // Find every possible permutation of the tour
+    let possible_tours = permutations([...Array(numNodes).keys()]); 
+    let best_weight = Number.MAX_VALUE; 
     let intermediate_tours = [];
 
     // Find the tour with the smallest weight
@@ -17,13 +17,12 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
         const tour = possible_tours[i];
         let weight = tourWeight(tour, adjacencyMatrix);
         if (weight < best_weight) {
-            best_tour = tour;
             best_weight = weight;
         }
         intermediate_tours.push(tour);
     }
 
-    // remove identiacal tours with same weight inside the intermediate tours
+    // Remove identiacal tours with same weight inside the intermediate tours
     let filteredTours = [];
     let seenWeights = new Set(); // Keep track of seen weights
 
@@ -36,7 +35,7 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
     }
     intermediate_tours = filteredTours;
 
-    // mix up the intermediate tours order
+    // Mix up the intermediate tours order
     intermediate_tours = intermediate_tours.sort(() => Math.random() - 0.5);
         
     // loop through the intermediate tours and find a tour with the same weight as the best tour
@@ -49,16 +48,19 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
         }
     }
 
-    // remove after the best tour in intermediate tours
+    // Remove after the best tour in intermediate tours
     intermediate_tours = intermediate_tours.slice(0, index + 1);
+
+    // Set the best tour and weight
     setBestTour(intermediate_tours);
     setBestWeight(best_weight);
 
+    // Metadata
     return best_weight; 
 };
 
 
-export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim, startNode) => {
+export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredSteps, setChristofidesAlgorithim, startNode) => {
     resetBestTour();
 
     // Pick a random starting node (unless we are in interactive mode, in which case the user picks the starting node)
@@ -109,8 +111,9 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
     setBestWeight(weight);
 
     // In every step of the tour, show what nodes we considered along the way
-    setConsideredStep(considered);
+    setConsideredSteps(considered);
 
+    // Metadata
     return {considered, weight, tour, considered};
 };
 
@@ -168,6 +171,8 @@ export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour,
     // Show the sequence of nodes in the tour
     setBestTour(tour);
     setBestWeight(weight);
+
+    // Metadata
     return degreeDict;
 
 };
@@ -219,7 +224,7 @@ export const hasCycle = (graph, newNode) => {
 
 
 // Function to find the Minimum Spanning Tree using Prim's algorithm 
-const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim) => {
+const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredSteps, setChristofidesAlgorithim) => {
     resetBestTour();
 
     // Initialize an empty set to store included nodes and an array to store MST edges
@@ -274,14 +279,14 @@ const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBest
 
 
 
-export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep, setChristofidesAlgorithim, mstOverwrite, bestPairOverwrite) => {
+export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredSteps, setChristofidesAlgorithim, mstOverwrite, bestPairOverwrite) => {
     resetBestTour();
 
     // Final Tour will be an array of arrays, each array will represent a step in the algorithm
     let finalTour = [];
 
     // Step 1 - Find the Minimum Spanning Tree
-    let mst = PrimsMST(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredStep);
+    let mst = PrimsMST(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setCurrentStep, setConsideredSteps);
     if (!mst) {
         return;
     }
@@ -404,7 +409,7 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         matchingWeight += adjacencyMatrix[`${edge[0]}-${edge[1]}`];
     }
 
-    // Return relevant information for the algorithm
+    // Metadata information for the algorithm
     return { mst, mstWeight, matchingWeight, oddDegreeNodes, bestMatch, multigraph, eulerianTour, tspTour};
 };
 

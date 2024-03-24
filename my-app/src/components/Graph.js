@@ -4,6 +4,11 @@
 import React from "react";
 import "react-toggle/style.css";
 import "../utils/Graph.css";
+
+
+import Box from '@mui/material/Box';
+import Tooltip from '@mui/material/Tooltip';
+
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
 import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer, FaRuler, FaToggleOff, FaToggleOn, FaRegHandPointLeft, FaFastBackward} from 'react-icons/fa';
 import { IoIosCheckmarkCircle } from "react-icons/io";
@@ -22,7 +27,7 @@ import presetGraphs from '../utils/preset_graphs.json';
 
 
 // Represents the graph and its adjacency matrix
-function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredStep, showAdjacencyMatrix, setShowAdjacencyMatrix , christofidesAlgorithim, setChristofidesAlgorithim, setChristofidesStepNum, christofidesStepNum , interactiveMode, setInteractiveMode}) {
+function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bestTour, setBestTour, bestWeight, setBestWeight , stepNum, setStepNum , steps, setSteps , altSteps, setAltSteps , presentTour, setPresentTour , consideredStep, setConsideredSteps, showAdjacencyMatrix, setShowAdjacencyMatrix , christofidesAlgorithim, setChristofidesAlgorithim, setChristofidesStepNum, christofidesStepNum , interactiveMode, setInteractiveMode}) {
 
     // States to handel graph visualisation
     const [algo, setAlgo] = useState("Select Algorithm");
@@ -70,7 +75,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setSteps([]);
       setStepNum(0);
       setPresentTour(false);
-      setConsideredStep([]);
+      setConsideredSteps([]);
       setAltSteps([]);
       setChristofidesAlgorithim(false);
       setChristofidesStepNum(0);
@@ -180,7 +185,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
 
     // imports preset graphs from preset_graphs.json
-    const importRandomPresetGraph = () => {
+    const randomPresetGraph = () => {
       resetBestTour();
       const randomIndex = Math.floor(Math.random() * presetGraphs.length);
       const randomGraph = presetGraphs[randomIndex];
@@ -204,19 +209,76 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setAdjacencyMatrix(newWeights);
     };
     
-    // Function to add random weights to the adjacency matrix CHANGE
-    const generateRandomWeights = () => {
-      resetBestTour();
-      const newWeights = {};
-      for (let i = 0; i < numNodes; i++) {
-        for (let j = i + 1; j < numNodes; j++) {
-          const weight = Math.floor(Math.random() * 20) + 1; // Generate a random weight between 1 and 10
-          newWeights[`${i}-${j}`] = weight;
-          newWeights[`${j}-${i}`] = weight; // Symmetrically assign weight
-        }
+    // // Function to add random weights to the adjacency matrix CHANGE
+    // const generateRandomWeights = () => {
+    //   resetBestTour();
+    //   const newWeights = {};
+    //   for (let i = 0; i < numNodes; i++) {
+    //     for (let j = i + 1; j < numNodes; j++) {
+    //       const weight = Math.floor(Math.random() * 20) + 1; // Generate a random weight between 1 and 10
+    //       newWeights[`${i}-${j}`] = weight;
+    //       newWeights[`${j}-${i}`] = weight; // Symmetrically assign weight
+    //     }
+    //   }
+    //   setAdjacencyMatrix(newWeights);
+    // };
+
+    // Function to add random weights to the adjacency matrix without triangle inequality
+// Function to add random weights to the adjacency matrix without triangle inequality
+// Function to add random weights to the adjacency matrix without triangle inequality
+const generateRandomWeights = () => {
+  resetBestTour();
+  let newWeights = {};
+
+  // Brute-force approach to ensure no triangle inequality
+  while (true) {
+      newWeights = generateWeights();
+      if (!hasTriangleInequality(newWeights)) {
+          break; // Found valid weights without triangle inequality
       }
-      setAdjacencyMatrix(newWeights);
-    };
+  }
+
+  setAdjacencyMatrix(newWeights);
+};
+
+// Generate random weights
+const generateWeights = () => {
+  const weights = {};
+  for (let i = 0; i < numNodes; i++) {
+      for (let j = i + 1; j < numNodes; j++) {
+          const weight = Math.floor(Math.random() * 39) + 1; // Generate a random weight between 1 and 20
+          weights[`${i}-${j}`] = weight;
+          weights[`${j}-${i}`] = weight; // Symmetrically assign weight
+      }
+  }
+  return weights;
+};
+
+// Check for triangle inequality
+const hasTriangleInequality = (weights) => {
+  for (const [edge1, weight1] of Object.entries(weights)) {
+      const [i, j] = edge1.split('-').map(Number);
+      for (const [edge2, weight2] of Object.entries(weights)) {
+          const [j2, k] = edge2.split('-').map(Number);
+          if (j === j2 && i !== k) {
+              const edge3 = `${i}-${k}`;
+              const weight3 = weights[edge3] || weights[`${k}-${i}`];
+              if (weight3 && (weight1 + weight2 <= weight3 || weight1 + weight3 <= weight2 || weight2 + weight3 <= weight1)) {
+                  return true; // Triangle inequality violated
+              }
+          }
+      }
+  }
+  return false; // No triangle inequality found
+};
+
+
+    // END TIME END TEST
+
+
+
+
+
 
     const showAdjMatrix = () => {
       setShowAdjacencyMatrix(!showAdjacencyMatrix);
@@ -236,9 +298,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       return (
           showAdjacencyMatrix ? (
           <>
-
-
-
           <div className="table-responsive">
               <table id="adjMatrix" className="table  table-sm adjacency-matrix">
                   <thead>
@@ -263,7 +322,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                                   className="form-control form-control-sm"
                                                   inputMode="numeric" 
                                                   id={`${rowIndex}-${columnIndex}`}
-                                          
                                                   placeholder='0'
                                                   value={weight || ''}
                                                   onChange={(e) => {
@@ -302,7 +360,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 <div class="alert alert-warning d-flex align-items-center " role="alert">
                   <span className="fw-bold"> <FaEye />    Visualisation mode</span>
                 </div>
-
 
                )}
 
@@ -397,7 +454,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 ) : (
                     <div>
                       <div class="alert alert-primary text-left" role="alert">
-                          <h4>Instructions:</h4>
+                          <h4>Instructions:</h4> 
                           <p class="text-left d-flex justify-content-start">1) Create the graph and assign weights.</p>
                           <p class="text-left d-flex justify-content-start">2) Select an algorithm for visualization.</p>
                           <p class="text-left d-flex">3) Test yourself by selecting interactive mode.</p>
@@ -472,7 +529,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         
           // Call the algorithim again to refresh the states, using the user defined mst
           let stepsBefore = steps;
-          let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, mstStep);
+          let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim, mstStep);
           
           // Updates information needed for future steps
           setMst(mstStep);
@@ -517,7 +574,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
           // Call the algorithim again to refresh the states, using the user defined perfect weight matching
           let stepsBefore = steps;
-          let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, mst,  bestPairStep);
+          let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim, mst,  bestPairStep);
 
           
           // Update information needed for future steps
@@ -982,15 +1039,15 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
       // Run the algorithm again, to avoid the user having to click the button again
       if (algo === "Nearest Neighbor") {
-        NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
+        NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim);
         setBestTour(bestTour);
-        setConsideredStep(consideredStep);
+        setConsideredSteps(consideredStep);
       }
       else if (algo === "Greedy") {
         GreedyTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
       }
       else if (algo === "Christofides") {
-        ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
+        ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim);
       }
     };
 
@@ -1038,10 +1095,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         setAlgo(functionName(tspAlgorithm));
       
         if (functionName(tspAlgorithm) === "Nearest Neighbor") {
-          let data = NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim);
+          let data = NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim);
         }
         else{
-          tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredStep, setChristofidesAlgorithim);
+          tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredSteps, setChristofidesAlgorithim);
         }
 
        
@@ -1067,7 +1124,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           if (clickedNode !== null ) {
             if (stepNum === 0) {
               resetBestTour();
-              let data = NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredStep, setChristofidesAlgorithim, clickedNode);
+              let data = NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim, clickedNode);
               setSteps([clickedNode]);
               setStepNum(1);
               setAltSteps([data.considered[0]]);
@@ -1114,6 +1171,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 delete newAdjacencyMatrix[`${clickedEdge[0]}-${clickedEdge[1]}`];
                 delete newAdjacencyMatrix[`${clickedEdge[1]}-${clickedEdge[0]}`];
                 setTempAdjMatrix(newAdjacencyMatrix);
+              }
+              else{
+                showErrorAlert("Selected edge does not have the smallest weight");
               } 
             }
             else{
@@ -1126,7 +1186,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           if (clickedEdge !== null){
             if (stepNum === 0) {
               resetBestTour();
-              let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setSteps, setConsideredStep, setChristofidesAlgorithim);
+              let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setSteps, setConsideredSteps, setChristofidesAlgorithim);
               setMstWeight(data.mstWeight);
               setChristofidesAlgorithim(true);
               setChristofidesStepNum(1);
@@ -1183,7 +1243,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // Render the graph and adjacency matrix
     return (
-      <div className="Graph">
+      <div className="Graph" data-testid="Graph">
+
 
         {/* Top of page */}
         <div className="title-bar bg-dark p-3 px-4 d-flex justify-content-between">
@@ -1263,8 +1324,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     />
                     </a>
                   ) : (
-       
-                    <a href="#0" class="pe-auto">
+
+                    // If numNodes bigger than 9, then show the weights USING tooltips
+                    numNodes > 9 ? (
+                      <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
+                      <a href="#0" class="pe-auto" >
                       <line
                         class="edge"
                         key={`${node1}-${node2}`} // Line with defined weight
@@ -1283,11 +1347,33 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                         }}
                       />
                     </a>
-    
-                  
+                    </Tooltip>
+                    ) : (
+                      <a href="#0" class="pe-auto" >
+                      <line
+                        class="edge"
+                        key={`${node1}-${node2}`} // Line with defined weight
+                        x1={node.x}
+                        y1={node.y}
+                        x2={nextNode.x}
+                        y2={nextNode.y}
+                        stroke="black"
+                        strokeOpacity="0.5"
+                        strokeWidth="3"
+                        onMouseMove={(e) => {
+                          showWeightedEdges(e, node1, node2);
+                        }}
+                        onClick={(e) => {
+                          SelectAdjMatrix(e, node1, node2);
+                        }}
+                      />
+                    </a>
+                    )
 
-  
 
+
+
+      
                   ) // Show line differently if the value is "NA"
                 );
                 
@@ -1307,7 +1393,30 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             
             
             return (
-              <motion.line
+              numNodes > 9 ? (
+                <Tooltip title={adjacencyMatrix[`${currentNode}-${altNode}`]} followCursor >
+                <motion.line
+                  class="edge"
+                  key={`${currentNode}-${altNode}`}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke={color}
+                  strokeOpacity="0.5"
+                  strokeWidth="4"
+  
+                  initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                  animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                  transition={{ duration: 0.45 , delay: 0.45 }} // Adjust the duration of the animation
+                  
+                  onMouseMove={(e) => { showWeightedEdges(e, currentNode, altNode) }}
+                  onClick={(e) => { SelectAdjMatrix(e, currentNode, altNode); }}
+                  // onMouseOut={(e) => { e.target.style.stroke = color; }}
+                />
+                </Tooltip>
+              ) : (
+                <motion.line
                 class="edge"
                 key={`${currentNode}-${altNode}`}
                 x1={x1}
@@ -1325,7 +1434,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 onMouseMove={(e) => { showWeightedEdges(e, currentNode, altNode) }}
                 onClick={(e) => { SelectAdjMatrix(e, currentNode, altNode); }}
                 // onMouseOut={(e) => { e.target.style.stroke = color; }}
-              />
+                />
+                
+              )
+
+              
+
     
             );
         })}
@@ -1356,24 +1470,49 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       }
                       
                       return (
-                          <motion.line
-                              class="edge"
-                              key={`${node1}-${node2}`}
-                              x1={x1}
-                              y1={y1}
-                              x2={x2}
-                              y2={y2}
-                              stroke={color}
-                              strokeWidth="4"
 
-                              initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
-                              animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
-                              transition={{ duration: 0.5}} // Adjust the duration of the animation
+                          numNodes > 9 ? (
+                            <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
+                            <motion.line
+                                class="edge"
+                                key={`${node1}-${node2}`} 
+                                x1={x1}
+                                y1={y1}
+                                x2={x2}
+                                y2={y2}
+                                stroke={color}
+                                strokeWidth="4"
+                                initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                                animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                                transition={{ duration: 0.5}} // Adjust the duration of the animation
+                                onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                                onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+  
+                            />
+                            </Tooltip>
+                          ) : (
+                            <motion.line
+                            class="edge"
+                            key={`${node1}-${node2}`} 
+                            x1={x1}
+                            y1={y1}
+                            x2={x2}
+                            y2={y2}
+                            stroke={color}
+                            strokeWidth="4"
+                            initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                            animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                            transition={{ duration: 0.5}} // Adjust the duration of the animation
+                            onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                            onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
 
-                              onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
-                              onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+                            />
+                            
+                          )
+    
 
-                          />
+                        
+ 
                       );
                   } else {
          
@@ -1390,24 +1529,46 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                             color = presentTour ? "#ff0000" : "#ff8a27";
                           }
                           return (
-                              <motion.line
-                                  class="edge"
-                                  key={`${node1}-${node2}`}
-                                  x1={x1}
-                                  y1={y1}
-                                  x2={x2}
-                                  y2={y2}
-                                  stroke={color}
-                                  strokeWidth="4"  
+                              numNodes > 9 ? (
+                                                            
+                                <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
+                                <motion.line
+                                    class="edge"
+                                    key={`${node1}-${node2}`}
+                                    x1={x1}
+                                    y1={y1}
+                                    x2={x2}
+                                    y2={y2}
+                                    stroke={color}
+                                    strokeWidth="4"   
+                                    initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                                    animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                                    transition={{ duration: 0.45 }} // Adjust the duration of the animation
+                                    onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                                    onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+                                />
+                                </Tooltip>
+                              ) : (
+                                <motion.line
+                                class="edge"
+                                key={`${node1}-${node2}`}
+                                x1={x1}
+                                y1={y1}
+                                x2={x2}
+                                y2={y2}
+                                stroke={color}
+                                strokeWidth="4"   
+                                initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                                animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                                transition={{ duration: 0.45 }} // Adjust the duration of the animation
+                                onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                                onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+                            />
+                                
+                              )
+        
 
-                                  initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
-                                  animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
-                                  transition={{ duration: 0.45 }} // Adjust the duration of the animation
 
-                                  onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
-                                  onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
-
-                              />
                           );
                       }
                   }
@@ -1435,6 +1596,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                 const y2 = nodeCoordinates[node2].y;
                                 const color = presentTour ? "#ff0000" : "#ff8a27";
                                 return (
+
+                                    numNodes > 9 ? (
+                                                    
+                                    <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
                                     <motion.line
                                         className="edge"
                                         key={`edge-${node1}-${node2}`}
@@ -1450,6 +1615,25 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                         onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
                                         onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
                                     />
+                                    </Tooltip>
+                                    ) : (
+                                      <motion.line
+                                      className="edge"
+                                      key={`edge-${node1}-${node2}`}
+                                      x1={x1}
+                                      y1={y1}
+                                      x2={x2}
+                                      y2={y2}
+                                      stroke={color}
+                                      strokeWidth="4"
+                                      initial={{ pathLength: 0, x2: x1, y2: y1 }}
+                                      animate={{ pathLength: 1, x2: x2, y2: y2 }}
+                                      transition={{ duration: 0.45 }}
+                                      onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                                      onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+                                  />
+                                    )
+
                                 );
                             })}
                         </g>
@@ -1468,24 +1652,50 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     const y2 = nodeCoordinates[node2].y;
                     const color = presentTour ? "#ff0000" : "#ff8a27";
                     return (
-                        <motion.line
-                            class="edge"
-                            key={`${node1}-${node2}`}
-                            x1={x1}
-                            y1={y1}
-                            x2={x2}
-                            y2={y2}
-                            stroke={color}
-                            strokeWidth="4"
 
-                            initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
-                            animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
-                            transition={{ duration: 0.45 }} // Adjust the duration of the animation
+                        numNodes > 9 ? (
+                          <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
+                          <motion.line
+                              class="edge"
+                              key={`${node1}-${node2}`}
+                              x1={x1}
+                              y1={y1}
+                              x2={x2}
+                              y2={y2}
+                              stroke={color}
+                              strokeWidth="4"
+  
+                              initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                              animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                              transition={{ duration: 0.45 }} // Adjust the duration of the animation
+  
+                              onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                              onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+  
+                          />
+                          </Tooltip>
+                        ) : (
+                          <motion.line
+                          class="edge"
+                          key={`${node1}-${node2}`}
+                          x1={x1}
+                          y1={y1}
+                          x2={x2}
+                          y2={y2}
+                          stroke={color}
+                          strokeWidth="4"
 
-                            onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
-                            onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+                          initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                          animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                          transition={{ duration: 0.45 }} // Adjust the duration of the animation
 
-                        />
+                          onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                          onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+
+                      />
+                        )
+  
+
                     );
                   }
                   } else {
@@ -1498,7 +1708,29 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                           const y2 = nodeCoordinates[node2].y;
                           const color = presentTour ? "#ff0000" : "#ff8a27";
                           return (
-                              <motion.line
+
+                                numNodes > 9 ? (
+                                  
+                                <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
+                                <motion.line
+                                    class="edge"
+                                    key={`${node1}-${node2}`}
+                                    x1={x1}
+                                    y1={y1}
+                                    x2={x2}
+                                    y2={y2}
+                                    stroke={color}
+                                    strokeWidth="4"
+                                    initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
+                                    animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
+                                    transition={{ duration: 0.45 }} // Adjust the duration of the animation
+                                    onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
+                                    onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
+
+                                />
+                                </Tooltip>
+                                ) : (
+                                  <motion.line
                                   class="edge"
                                   key={`${node1}-${node2}`}
                                   x1={x1}
@@ -1507,15 +1739,15 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                   y2={y2}
                                   stroke={color}
                                   strokeWidth="4"
-
                                   initial={{ pathLength: 0, x2: x1, y2: y1 }} // Initial values
                                   animate={{ pathLength: 1, x2: x2, y2: y2 }} // Animate to final values
                                   transition={{ duration: 0.45 }} // Adjust the duration of the animation
-
                                   onMouseMove={(e) => { showWeightedEdges(e, node1, node2); }}
                                   onClick={(e) => { SelectAdjMatrix(e, node1, node2); }}
 
                               />
+                                )
+
                           );
                       }
                   }
@@ -1554,8 +1786,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   <button onClick={() => removeNode()} disabled={numNodes === 0} className="btn btn-outline-dark btn-sm"><FaMinus /> Remove Node</button>
                   <button onClick={() => resetGraph()} className="btn btn-outline-dark btn-sm"><FaSync /> Reset Graph</button>
                   <button onClick={() => clearWeights()} className="btn btn-outline-dark btn-sm"><FaEraser /> Clear Weights</button>
-                  <button onClick={importRandomPresetGraph} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Graph</button>
+                  <button onClick={randomPresetGraph} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Graph</button>
                   <button onClick={() => showAdjMatrix()} className="btn btn-outline-dark btn-sm"><FaRuler /> Show Distance</button>
+                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm"><FaRuler /> Illumnati Confirm</button>
+              
 
                 </div>
               </div>

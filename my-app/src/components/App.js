@@ -21,7 +21,7 @@ function App() {
 
   // Keeps track of the edges considered by the TSP algorithm
   const [altSteps, setAltSteps] = useState([]);
-  const [consideredStep, setConsideredStep] = useState([]);
+  const [consideredStep, setConsideredSteps] = useState([]);
 
   // Keeps track if we sould show or hide adj matrix on screen
   const [showAdjacencyMatrix, setShowAdjacencyMatrix] = useState(false);
@@ -58,7 +58,7 @@ function App() {
         presentTour={presentTour}
         setPresentTour={setPresentTour}
         consideredStep={consideredStep}
-        setConsideredStep={setConsideredStep}
+        setConsideredSteps={setConsideredSteps}
         showAdjacencyMatrix={showAdjacencyMatrix}
         setShowAdjacencyMatrix={setShowAdjacencyMatrix}
         christofidesAlgorithim={christofidesAlgorithim}
