@@ -678,6 +678,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               }
           }
 
+          if (!correctEulerianTour) {
+            showErrorAlert("Eulerian tour is incorrect");
+            return;
+          }
+
           // Convert the user input to a hamiltonian tour
           const hamiltonian = [];
           for (let vertex of eularianInputArray) {
@@ -703,6 +708,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             setSteps([...steps, bestTour[bestTour.length - 1]]);
             setPresentTour(true);
           }
+          console.log("The verdict:")
+          console.log("Eulerian Tour: " + correctEulerianTour)
+          console.log("Hamiltonian Tour: " + correctHamiltonianTour)
+
 
           // error message if eulairan false, if eularian true and hamiltonian false, if both false
           if (!correctEulerianTour && !correctHamiltonianTour) {
