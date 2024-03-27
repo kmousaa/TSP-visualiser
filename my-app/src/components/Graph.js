@@ -5,7 +5,6 @@ import React from "react";
 import "react-toggle/style.css";
 import "../utils/Graph.css";
 
-
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 
@@ -66,6 +65,25 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         setErrorAlertVisible(false);
       }, 4000)); // Hides the alert after 5 seconds
     };
+
+    // reset edge and node after 1ms
+    useEffect(() => {
+      if (clickedEdge) {
+        setTimeout(() => {
+          setClickedEdge(null);
+        }, 1);
+      }
+    }, [clickedEdge]);
+
+    useEffect(() => {
+      if (clickedNode) {
+        setTimeout(() => {
+          setClickedNode(null);
+        }, 1);
+      }
+    }, [clickedNode]);
+
+
 
 
     // Function to restart states
@@ -209,76 +227,54 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setAdjacencyMatrix(newWeights);
     };
     
-    // // Function to add random weights to the adjacency matrix CHANGE
-    // const generateRandomWeights = () => {
-    //   resetBestTour();
-    //   const newWeights = {};
-    //   for (let i = 0; i < numNodes; i++) {
-    //     for (let j = i + 1; j < numNodes; j++) {
-    //       const weight = Math.floor(Math.random() * 20) + 1; // Generate a random weight between 1 and 10
-    //       newWeights[`${i}-${j}`] = weight;
-    //       newWeights[`${j}-${i}`] = weight; // Symmetrically assign weight
-    //     }
-    //   }
-    //   setAdjacencyMatrix(newWeights);
-    // };
+
 
     // Function to add random weights to the adjacency matrix without triangle inequality
-// Function to add random weights to the adjacency matrix without triangle inequality
-// Function to add random weights to the adjacency matrix without triangle inequality
-const generateRandomWeights = () => {
-  resetBestTour();
-  let newWeights = {};
+    const generateRandomWeights = () => {
+      resetBestTour();
+      let newWeights = {};
 
-  // Brute-force approach to ensure no triangle inequality
-  while (true) {
-      newWeights = generateWeights();
-      if (!hasTriangleInequality(newWeights)) {
-          break; // Found valid weights without triangle inequality
+      // Brute-force approach to ensure no triangle inequality
+      while (true) {
+          newWeights = generateWeights();
+          if (!hasTriangleInequality(newWeights)) {
+              break; // Found valid weights without triangle inequality
+          }
       }
-  }
 
-  setAdjacencyMatrix(newWeights);
-};
+      setAdjacencyMatrix(newWeights);
+    };
 
-// Generate random weights
-const generateWeights = () => {
-  const weights = {};
-  for (let i = 0; i < numNodes; i++) {
-      for (let j = i + 1; j < numNodes; j++) {
-          const weight = Math.floor(Math.random() * 39) + 1; // Generate a random weight between 1 and 20
-          weights[`${i}-${j}`] = weight;
-          weights[`${j}-${i}`] = weight; // Symmetrically assign weight
+    // Generate random weights
+    const generateWeights = () => {
+      const weights = {};
+      for (let i = 0; i < numNodes; i++) {
+          for (let j = i + 1; j < numNodes; j++) {
+              const weight = Math.floor(Math.random() * 2) + 1; // Generate a random weight between 1 and 20
+              weights[`${i}-${j}`] = weight;
+              weights[`${j}-${i}`] = weight; // Symmetrically assign weight
+          }
       }
-  }
-  return weights;
-};
+      return weights;
+    };
 
-// Check for triangle inequality
-const hasTriangleInequality = (weights) => {
-  for (const [edge1, weight1] of Object.entries(weights)) {
-      const [i, j] = edge1.split('-').map(Number);
-      for (const [edge2, weight2] of Object.entries(weights)) {
-          const [j2, k] = edge2.split('-').map(Number);
-          if (j === j2 && i !== k) {
-              const edge3 = `${i}-${k}`;
-              const weight3 = weights[edge3] || weights[`${k}-${i}`];
-              if (weight3 && (weight1 + weight2 <= weight3 || weight1 + weight3 <= weight2 || weight2 + weight3 <= weight1)) {
-                  return true; // Triangle inequality violated
+    // Check for triangle inequality
+    const hasTriangleInequality = (weights) => {
+      for (const [edge1, weight1] of Object.entries(weights)) {
+          const [i, j] = edge1.split('-').map(Number);
+          for (const [edge2, weight2] of Object.entries(weights)) {
+              const [j2, k] = edge2.split('-').map(Number);
+              if (j === j2 && i !== k) {
+                  const edge3 = `${i}-${k}`;
+                  const weight3 = weights[edge3] || weights[`${k}-${i}`];
+                  if (weight3 && (weight1 + weight2 <= weight3 || weight1 + weight3 <= weight2 || weight2 + weight3 <= weight1)) {
+                      return true; // Triangle inequality violated
+                  }
               }
           }
       }
-  }
-  return false; // No triangle inequality found
-};
-
-
-    // END TIME END TEST
-
-
-
-
-
+      return false; // No triangle inequality found
+    };
 
     const showAdjMatrix = () => {
       setShowAdjacencyMatrix(!showAdjacencyMatrix);
@@ -718,6 +714,9 @@ const hasTriangleInequality = (weights) => {
           else if (!correctHamiltonianTour) {
             showErrorAlert("Hamiltonian tour is incorrect");
           }
+          else{
+            showErrorAlert("man what");
+          }
     
         }
       }
@@ -813,18 +812,17 @@ const hasTriangleInequality = (weights) => {
               considered.push(bestTour[0]);
             }
 
-            if (potentialHops.includes(clickedNode)) {
-              setPresentTour(false);
-              setSteps(prevSteps => [...prevSteps, clickedNode]);
-              setStepNum(prevStepNum => prevStepNum + 1);
-              setChristofidesStepNum(prevStepNum => prevStepNum + 1);
-              setAltSteps(prevSteps => [...prevSteps, considered]);
+            console.log(considered);
 
-            }
-            else{
-              showErrorAlert("Selected node is not the nearest neighbor");
-            }
-            if (stepNum === bestTour.length - 1 && potentialHops.length === 0 && clickedNode === bestTour[0]) {
+            console.log(stepNum);
+            console.log(bestTour.length);
+
+            console.log(potentialHops);
+            console.log(clickedNode);
+            console.log(bestTour[0]);
+
+            if (stepNum === bestTour.length - 1 && potentialHops.length === 0 && clickedNode === steps[0]) {
+              console.log("here");
               setPresentTour(false);
               setSteps(prevSteps => [...prevSteps, clickedNode]);
               setStepNum(prevStepNum => prevStepNum + 1);
@@ -833,6 +831,21 @@ const hasTriangleInequality = (weights) => {
               setInteractiveMode(false);
               setPresentTour(true);
             }
+
+            else if (potentialHops.includes(clickedNode)) {
+              console.log("there");
+              setPresentTour(false);
+              setSteps(prevSteps => [...prevSteps, clickedNode]);
+              setStepNum(prevStepNum => prevStepNum + 1);
+              setChristofidesStepNum(prevStepNum => prevStepNum + 1);
+              setAltSteps(prevSteps => [...prevSteps, considered]);
+
+            }
+            else{
+              console.log("everywhere");
+              showErrorAlert("Selected node is not the nearest neighbor");
+            }
+
             
           }
           else if (algo == "Greedy") {
@@ -1778,7 +1791,8 @@ const hasTriangleInequality = (weights) => {
                 )
               }
 
-              {/* Buttons to edit graph */}
+              {/* Buttons to edit graph  */}
+              { /*  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm"><FaRuler /> Script to generate Confirm</button> */}
               <div className="edit-graph-box p-3 border">
                 <h3>Edit Graph</h3>
                 <div className="d-flex flex-wrap gap-2 justify-content-evenly">
@@ -1788,9 +1802,8 @@ const hasTriangleInequality = (weights) => {
                   <button onClick={() => clearWeights()} className="btn btn-outline-dark btn-sm"><FaEraser /> Clear Weights</button>
                   <button onClick={randomPresetGraph} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Graph</button>
                   <button onClick={() => showAdjMatrix()} className="btn btn-outline-dark btn-sm"><FaRuler /> Show Distance</button>
-                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm"><FaRuler /> Illumnati Confirm</button>
-              
-
+                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm"><FaRuler /> Random Weights</button>
+                 
                 </div>
               </div>
             </div>

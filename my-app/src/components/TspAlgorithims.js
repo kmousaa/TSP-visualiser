@@ -80,10 +80,11 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
         
         let current = tour[tour.length - 1];
         let adjNodes = getAdjacentNodes(current, adjacencyMatrix);
+        
         let minWeight = Number.MAX_VALUE;
         let minNode = -1;
 
-        // Find the nearest neighbor
+        // Find the nearest neighbor for a node
         for (let j = 0; j < adjNodes.length; j++) {
             if (!tour.includes(adjNodes[j]) && adjacencyMatrix[`${current}-${adjNodes[j]}`] < minWeight) {
                 minWeight = adjacencyMatrix[`${current}-${adjNodes[j]}`];
@@ -116,9 +117,6 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
     // Metadata
     return {considered, weight, tour, considered};
 };
-
-
-
 
 
 // Its US - this does not work
@@ -341,6 +339,9 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     // I tried a brute force approach to find the best matching, but it was not efficient for larger graphs. The Munkres algorithm is a much more efficient way to solve this problem.
     let munkres1 = require('munkres-js');
     let bestMatch = munkres1(oddMatrix) 
+
+    // console.log("bestMatch", oddMatrix);
+    // console.log("bestMatch", bestMatch);
 
     // Remove symmetry from the best match
     bestMatch = bestMatch.filter(pair => pair[0] < pair[1]);
