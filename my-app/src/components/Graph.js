@@ -9,6 +9,7 @@ import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
+import { GiPerspectiveDiceSixFacesRandom } from "react-icons/gi";
 import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer, FaRuler, FaToggleOff, FaToggleOn, FaRegHandPointLeft, FaFastBackward} from 'react-icons/fa';
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { BiSolidError } from "react-icons/bi";
@@ -250,7 +251,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       const weights = {};
       for (let i = 0; i < numNodes; i++) {
           for (let j = i + 1; j < numNodes; j++) {
-              const weight = Math.floor(Math.random() * 2) + 1; // Generate a random weight between 1 and 20
+              const weight = Math.floor(Math.random() * 20) + 1; // Generate a random weight between 1 and 20
               weights[`${i}-${j}`] = weight;
               weights[`${j}-${i}`] = weight; // Symmetrically assign weight
           }
@@ -1811,7 +1812,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   <button onClick={() => clearWeights()} className="btn btn-outline-dark btn-sm"><FaEraser /> Clear Weights</button>
                   <button onClick={randomPresetGraph} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Graph</button>
                   <button onClick={() => showAdjMatrix()} className="btn btn-outline-dark btn-sm"><FaRuler /> Show Distance</button>
-                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm"><FaRuler /> Random Weights</button>
+                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm" disabled={numNodes > 8}><GiPerspectiveDiceSixFacesRandom /> Random Weights</button>
                  
                 </div>
               </div>
