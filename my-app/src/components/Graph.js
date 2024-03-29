@@ -4,8 +4,6 @@
 import React from "react";
 import "react-toggle/style.css";
 import "../utils/Graph.css";
-
-import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
@@ -229,7 +227,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
     
 
-
     // Function to add random weights to the adjacency matrix without triangle inequality
     const generateRandomWeights = () => {
       resetBestTour();
@@ -251,7 +248,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       const weights = {};
       for (let i = 0; i < numNodes; i++) {
           for (let j = i + 1; j < numNodes; j++) {
-              const weight = Math.floor(Math.random() * 20) + 1; // Generate a random weight between 1 and 20
+              const weight = Math.floor(Math.random() * 50) + 1; // Generate a random weight between 1 and 20
               weights[`${i}-${j}`] = weight;
               weights[`${j}-${i}`] = weight; // Symmetrically assign weight
           }
@@ -283,6 +280,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // Function to return the component that renders the adjacency matrix
     const renderAdjacencyMatrix = () => {
+      
       const adjacencyMatrix = generateAdjacencyMatrix()
       
 
@@ -831,6 +829,15 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             console.log(clickedNode);
             console.log(bestTour[0]);
 
+
+            // if adding the node to the tour closes it prematurely display an error message and return
+            // means if node is already in "Steps"
+            if (stepNum !== bestTour.length - 1 && potentialHops.length !== 0  && steps.includes(clickedNode)) {
+              showErrorAlert("Adding this node will cause an incomplete cycle");
+              return;
+            }
+          
+
             if (stepNum === bestTour.length - 1 && potentialHops.length === 0 && clickedNode === steps[0]) {
               console.log("here");
               setPresentTour(false);
@@ -943,7 +950,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
             }
         }
-        
         
           else if (algo === "Christofides") { 
 
@@ -1150,7 +1156,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               let data = NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim, clickedNode);
               setSteps([clickedNode]);
               setStepNum(1);
-              setAltSteps([data.considered[0]]);
+              let arr = data.considered[0] ;
+              arr.push(data.considered[data.considered.length -1][0]);
+              setAltSteps([arr]);
             }
             else{
               nextStep();
@@ -1266,7 +1274,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     // Render the graph and adjacency matrix
     return (
-      <div className="Graph" data-testid="Graph">
+      <div className="Graph" data-testid="graph-container">
 
 
         {/* Top of page */}
@@ -1806,13 +1814,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               <div className="edit-graph-box p-3 border">
                 <h3>Edit Graph</h3>
                 <div className="d-flex flex-wrap gap-2 justify-content-evenly">
-                  <button onClick={() => addNode()} className="btn btn-outline-dark btn-sm ">  <FaPlus/> Add Node</button>
+                  <button onClick={() => addNode()} className="btn btn-outline-dark btn-sm " data-testid="add-node">  <FaPlus/> Add Node</button>
                   <button onClick={() => removeNode()} disabled={numNodes === 0} className="btn btn-outline-dark btn-sm"><FaMinus /> Remove Node</button>
                   <button onClick={() => resetGraph()} className="btn btn-outline-dark btn-sm"><FaSync /> Reset Graph</button>
                   <button onClick={() => clearWeights()} className="btn btn-outline-dark btn-sm"><FaEraser /> Clear Weights</button>
                   <button onClick={randomPresetGraph} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Graph</button>
                   <button onClick={() => showAdjMatrix()} className="btn btn-outline-dark btn-sm"><FaRuler /> Show Distance</button>
-                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm" disabled={numNodes > 8}><GiPerspectiveDiceSixFacesRandom /> Random Weights</button>
+                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm" disabled={numNodes > 7}><GiPerspectiveDiceSixFacesRandom /> Random Weights</button>
                  
                 </div>
               </div>
