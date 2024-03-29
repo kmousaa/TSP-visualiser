@@ -15,6 +15,8 @@ import { FaPersonHiking } from "react-icons/fa6";
 import { AiTwotoneExperiment } from "react-icons/ai";
 import { useState , useEffect} from "react";
 import { motion } from "framer-motion";
+import { RxQuestionMarkCircled } from "react-icons/rx";
+
 import Toggle from 'react-toggle';
 
 // Internal imports
@@ -167,6 +169,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const clearWeights = () => {
       resetBestTour();
       setAdjacencyMatrix({});
+      setInteractiveMode(false);
     };
 
     const saveGraph = () => {
@@ -722,10 +725,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           else if (!correctHamiltonianTour) {
             showErrorAlert("Hamiltonian tour is incorrect");
           }
-          else{
-            showErrorAlert("man what");
-          }
-    
+
         }
       }
     }
@@ -1852,9 +1852,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                 onChange={handleChangeHamiltonian}
                                 placeholder="Hamiltonian Tour..."
                               />
+                              
                               <button className="btn btn-primary" onClick={handleSubmit}>
-                                Submit
+                                Submit 
+                                <Tooltip title="Input is the node number separated by commas, e.g., 1,2,3,4,1 " arrow> <RxQuestionMarkCircled /> </Tooltip>
                               </button>
+                              
                             </div>
                           ) : (
                             // Allows users to step through the chrisofides algorithim during interactive mode
@@ -1863,7 +1866,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                 <FaStepBackward /> 
                               </button>
                               <button className="btn btn-light mx-1" onClick={() => nextChristofidesStep()} disabled={(christofidesStepNum !== maxChristofidesStep)} >
-                              <IoIosCheckmarkCircle /> Check Step
+                              <IoIosCheckmarkCircle /> Check Step 
                               </button>
                               <button className="btn btn-light mx-1" onClick={() => cforwards() } disabled={ ( christofidesStepNum === 0 ||  (christofidesStepNum == maxChristofidesStep)  ) }  >
                                 <FaStepForward />
@@ -1913,9 +1916,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                         setClickedNode(null);
                         setShowAdjacencyMatrix(false);
                         setStepStore([]);
+                        restart();
                       }
                     }}
-                    disabled={beginVisualisationMode && algo === "Christofides" || algo === "Brute Force"}
+                    disabled={(beginVisualisationMode && algo === "Christofides") || algo === "Brute Force"}
                   />
                   <span className="flicker-text ms-2 text-white">Interactive Mode</span>
                 </div>
