@@ -820,15 +820,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               considered.push(bestTour[0]);
             }
 
-            console.log(considered);
-
-            console.log(stepNum);
-            console.log(bestTour.length);
-
-            console.log(potentialHops);
-            console.log(clickedNode);
-            console.log(bestTour[0]);
-
 
             // if adding the node to the tour closes it prematurely display an error message and return
             // means if node is already in "Steps"
@@ -839,7 +830,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           
 
             if (stepNum === bestTour.length - 1 && potentialHops.length === 0 && clickedNode === steps[0]) {
-              console.log("here");
+
               setPresentTour(false);
               setSteps(prevSteps => [...prevSteps, clickedNode]);
               setStepNum(prevStepNum => prevStepNum + 1);
@@ -850,7 +841,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             }
 
             else if (potentialHops.includes(clickedNode)) {
-              console.log("there");
+
               setPresentTour(false);
               setSteps(prevSteps => [...prevSteps, clickedNode]);
               setStepNum(prevStepNum => prevStepNum + 1);
@@ -859,7 +850,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
             }
             else{
-              console.log("everywhere");
+
               showErrorAlert("Selected node is not the nearest neighbor");
             }
 

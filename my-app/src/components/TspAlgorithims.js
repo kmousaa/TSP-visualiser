@@ -119,7 +119,6 @@ export const NearestNeighborTSP = (resetBestTour, numNodes, adjacencyMatrix, set
 };
 
 
-// Its US - this does not work
 export const GreedyTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight) => {
     resetBestTour();
     let tour = [];
@@ -229,8 +228,8 @@ const PrimsMST = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBest
     const includedNodes = new Set();
     const mstEdges = [];
 
-    // Start with an arbitrary node (0)
-    let currentNode = 0;
+    // Start with an arbitrary node 
+    let currentNode = Math.floor(Math.random() * numNodes);
     includedNodes.add(currentNode);
 
     // Dictionary that stores every node as well as the number of degree it has
