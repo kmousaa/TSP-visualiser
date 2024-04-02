@@ -20,7 +20,7 @@ import { RxQuestionMarkCircled } from "react-icons/rx";
 import Toggle from 'react-toggle';
 
 // Internal imports
-import {getAdjacentNodes , sortDictionary, removeDupeDict, calculateTextAttributes, generateTextJSX, areOddVerticesConnected, functionName, tourWeight} from "../utils/GraphUtil";
+import {getAdjacentNodes , sortDictionary, removeDupeDict, calculateTextAttributes, generateTextJSX, areOddVerticesConnected, functionName} from "../utils/GraphUtil";
 import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP , hasCycle} from "./TspAlgorithims";
 import presetGraphs from '../utils/preset_graphs.json';
 
@@ -45,7 +45,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [minOddPairWeight, setMinOddPairWeight] = useState(0);
     const [minOddPairNum, setMinOddPairNum] = useState(0);
     const [multiGraph, setMultiGraph] = useState([[]]);
-    const [eulerianTour, setEulerianTour] = useState([[]]);
+
     const [expectingInput, setExpectingInput] = useState(false);
     const [inputValueEularian, setInputEularian] = useState('');
     const [inputHamiltonian, setInputHamiltonian] = useState('');
@@ -382,11 +382,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                     <>
                                         <li class="algorithm">
                                             <FaSquare className="icon" style={{ color: '#ff8a27' }} />
-                                            <span class="badge bg-primary"></span> Current Tour {(presentTour == false ) ? <FaRegHandPointLeft /> : null}
+                                            <span class="badge bg-primary"></span> Current Tour {(presentTour === false ) ? <FaRegHandPointLeft /> : null}
                                         </li>
                                         <li class="algorithm">
                                             <FaSquare className="icon" style={{ color: '#ff0000' }} />
-                                            <span class="badge bg-primary"></span> Final Tour {(presentTour == true ) ? <FaRegHandPointLeft /> : null}
+                                            <span class="badge bg-primary"></span> Final Tour {(presentTour === true ) ? <FaRegHandPointLeft /> : null}
                                         </li>
                                     </>
                                 )}
@@ -410,11 +410,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff8a27' }} />
-                                        <span class="badge bg-primary"></span> Current Tour {(presentTour == false ) ? <FaRegHandPointLeft /> : null}
+                                        <span class="badge bg-primary"></span> Current Tour {(presentTour === false ) ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff0000' }} />
-                                        <span class="badge bg-primary"></span> Final Tour {(presentTour == true ) ? <FaRegHandPointLeft /> : null}
+                                        <span class="badge bg-primary"></span> Final Tour {(presentTour === true ) ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     </>
                                 )}
@@ -422,23 +422,23 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                     <>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: "#2730ff" }} />
-                                        <span class="badge bg-primary"></span> Minimum Spanning Tree {(christofidesStepNum == 0 || christofidesStepNum == 1 ) ? <FaRegHandPointLeft /> : null}
+                                        <span class="badge bg-primary"></span> Minimum Spanning Tree {(christofidesStepNum === 0 || christofidesStepNum === 1 ) ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: "#ff2730" }} />
-                                        <span class="badge bg-primary"></span> Minimum Weight Perfect Matching for Odd Vertices {christofidesStepNum == 2 ? <FaRegHandPointLeft /> : null}
+                                        <span class="badge bg-primary"></span> Minimum Weight Perfect Matching for Odd Vertices {christofidesStepNum === 2 ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: "#e100ff" }} />
-                                        <span class="badge bg-primary"></span> Connected Multigraph {christofidesStepNum == 3 ? <FaRegHandPointLeft /> : null}
+                                        <span class="badge bg-primary"></span> Connected Multigraph {christofidesStepNum === 3 ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff8a27' }} />
-                                        <span class="badge bg-primary"></span> Hamiltoinian Cycle {presentTour == false && christofidesStepNum == 4 ? <FaRegHandPointLeft /> : null}
+                                        <span class="badge bg-primary"></span> Hamiltoinian Cycle {presentTour === false && christofidesStepNum === 4 ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff0000' }} />
-                                        <span class="badge bg-primary"></span> Final Tour {presentTour == true  && christofidesStepNum == 4 ? <FaRegHandPointLeft /> : null}
+                                        <span class="badge bg-primary"></span> Final Tour {presentTour === true  && christofidesStepNum === 4 ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     </>
                                 )}
@@ -510,7 +510,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Checks if the current input for christofides interactive mode is correct before moving to the next step
     const nextChristofidesStep = (eularianInput , hamiltonianInput) => {
 
-      if (christofidesStepNum == 1) {
+      if (christofidesStepNum === 1) {
         let mstStep = steps[0];
 
         // weight of the MST
@@ -554,7 +554,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
       }
 
-      else if (christofidesStepNum == 2) {
+      else if (christofidesStepNum === 2) {
         
         let bestPairStep = steps[steps.length - 1];
 
@@ -578,7 +578,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           setMinOddPairWeight(data.matchingWeight);
           setMinOddPairNum(data.bestMatch.length);
           setMultiGraph(data.multigraph);
-          setEulerianTour(data.eulerianTour);
+
 
           // Proceed to the next step
 
@@ -600,7 +600,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         }
 
       }
-      else if (christofidesStepNum == 3){
+      else if (christofidesStepNum === 3){
 
         // Function to see if 2 arrays are equal
         const isEqual = (a, b) => JSON.stringify(a.sort()) === JSON.stringify(b.sort());
@@ -623,7 +623,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       // Last step, the user is expected to input the eularian and hamiltonian tour
       if (eularianInput !== "" && eularianInput !== null && hamiltonianInput !== "" && hamiltonianInput !== null){
 
-        if (expectingInput == true){
+        if (expectingInput === true){
           
           // Dicitonary that stores edge and a boolean indicited if the edge has been visited
           let visitedEdgeDict = {};
@@ -707,9 +707,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             setSteps([...steps, bestTour[bestTour.length - 1]]);
             setPresentTour(true);
           }
-          console.log("The verdict:")
-          console.log("Eulerian Tour: " + correctEulerianTour)
-          console.log("Hamiltonian Tour: " + correctHamiltonianTour)
 
 
           // error message if eulairan false, if eularian true and hamiltonian false, if both false
@@ -755,6 +752,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
     }
 
+    
     // Move forwards in the TSP simulation
     const nextStep = () => {
 
@@ -772,16 +770,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
          
             const adjacentNodes = getAdjacentNodes(steps[steps.length-1], adjacencyMatrix);                      
             let current = steps[steps.length - 1];
-            let adjNodes = getAdjacentNodes(current, adjacencyMatrix);
             let minWeight = Number.MAX_VALUE;
-            let minNode = -1;
             let potentialHops = [];
 
             // Find the nearest neighbor
             for (let j = 0; j < adjacentNodes.length; j++) {
               if (!steps.includes(adjacentNodes[j]) && adjacencyMatrix[`${current}-${adjacentNodes[j]}`] < minWeight) {
                   minWeight = adjacencyMatrix[`${current}-${adjacentNodes[j]}`];
-                  minNode = adjNodes[j];
                   potentialHops = [];
                   potentialHops.push(adjacentNodes[j]);
               }
@@ -853,7 +848,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
             
           }
-          else if (algo == "Greedy") {
+          else if (algo === "Greedy") {
 
             let adjacencyMatrixNoDupes = removeDupeDict(tempAdjacencyMatrix);
             let sortedAdjacencyMatrix = sortDictionary(adjacencyMatrixNoDupes);
@@ -942,7 +937,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           else if (algo === "Christofides") { 
 
             if (christofidesStepNum === 1) {
-              let mstStep = steps[0];
               // if adding the edge creates a cycle, then go to next step
                 setPresentTour(false);
                 setSteps(prevSteps => {
@@ -1025,13 +1019,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         setChristofidesStepNum(christofidesStepNum - 1);
         setAltSteps(altSteps.slice(0, -1));
       } else {
-        console.log("Reached minimum step.");
+        
       }
     };
 
     // Show the answer of the TSP simulation
     const fastForward = () => {
-      if (algo != "Select Algorithm") {
+      if (algo !== "Select Algorithm") {
         setSteps(bestTour);
         setChristofidesStepNum(4);
         setStepNum(bestTour.length);
@@ -1112,7 +1106,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         setAlgo(functionName(tspAlgorithm));
       
         if (functionName(tspAlgorithm) === "Nearest Neighbor") {
-          let data = NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim);
+          NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim);
         }
         else{
           tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredSteps, setChristofidesAlgorithim);
@@ -1278,7 +1272,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           {/* Dropdown to select the algorithm */}
           <div>
             <div class="btn-group">
-              <a class="btn btn-light dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+              <a class="btn btn-light dropdown-toggle" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
                 <span className="fw-bold">Select Algorithim</span>
               </a>
               <ul class="dropdown-menu">
@@ -1541,8 +1535,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
  
                       );
                   } else {
-         
-
                       if (index < lastStep.length - 1) {
                           const node1 = lastStep[index];
                           const node2 = lastStep[index + 1];
@@ -1597,6 +1589,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
                           );
                       }
+                      else{
+                        return null;
+                      }
                   }
               })
 
@@ -1610,11 +1605,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       
                       return (
                         <g >
-                            { (index == steps.length - 1) && node.map((nodeIn, indexIn) => {
+                            { (index === steps.length - 1) && node.map((nodeIn, indexIn) => {
                                 const node1 = nodeIn;
                                 const node2 = steps[index][indexIn + 1];
                                 if (node2 === undefined) {
-                                  return;
+                                  return null;
                                 }
                                 const x1 = nodeCoordinates[node1].x;
                                 const y1 = nodeCoordinates[node1].y;
@@ -1666,10 +1661,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     );
                       
                     }
-                    else{
-
-
-                    
+                    else{ 
                     const node1 = node[0];
                     const node2 = node[1];
                     const x1 = nodeCoordinates[node1].x;
@@ -1776,6 +1768,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
                           );
                       }
+                      else {
+                        return null;
+                      }
                   }
               })
           )}
@@ -1863,7 +1858,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                               <button className="btn btn-light mx-1" onClick={() => nextChristofidesStep()} disabled={(christofidesStepNum !== maxChristofidesStep)} >
                               <IoIosCheckmarkCircle /> Check Step 
                               </button>
-                              <button className="btn btn-light mx-1" onClick={() => cforwards() } disabled={ ( christofidesStepNum === 0 ||  (christofidesStepNum == maxChristofidesStep)  ) }  >
+                              <button className="btn btn-light mx-1" onClick={() => cforwards() } disabled={ ( christofidesStepNum === 0 ||  (christofidesStepNum === maxChristofidesStep)  ) }  >
                                 <FaStepForward />
                               </button>
                             </div>
@@ -1880,19 +1875,19 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
                     
                     <div className = "controller">
-                      <button className="btn btn-light mx-1" onClick={restart} disabled={algo == "Select Algorithm"}>
+                      <button className="btn btn-light mx-1" onClick={restart} disabled={algo === "Select Algorithm"}>
                         <FaFastBackward />
                       </button>
-                      <button className="btn btn-light mx-1" onClick={prevStep} disabled={ (beginInteractiveMode && algo === "Christofides") || algo == "Select Algorithm" }>
+                      <button className="btn btn-light mx-1" onClick={prevStep} disabled={ (beginInteractiveMode && algo === "Christofides") || algo === "Select Algorithm" }>
                         <FaStepBackward />
                       </button>
-                      <button className="btn btn-light mx-1" onClick={play} disabled={(beginInteractiveMode && algo === "Christofides") || algo == "Select Algorithm"}>
+                      <button className="btn btn-light mx-1" onClick={play} disabled={(beginInteractiveMode && algo === "Christofides") || algo === "Select Algorithm"}>
                         {stop ? <FaPlay /> : <FaPause />}
                       </button>
-                      <button className="btn btn-light mx-1" onClick={nextStep} disabled={ (beginInteractiveMode && algo === "Christofides") || algo == "Select Algorithm"}>
+                      <button className="btn btn-light mx-1" onClick={nextStep} disabled={ (beginInteractiveMode && algo === "Christofides") || algo === "Select Algorithm"}>
                         <FaStepForward />
                       </button>
-                      <button className="btn btn-light mx-1" onClick={fastForward} disabled={algo == "Select Algorithm"}>
+                      <button className="btn btn-light mx-1" onClick={fastForward} disabled={algo === "Select Algorithm"}>
                         <FaFastForward />
                       </button>
                     </div>
