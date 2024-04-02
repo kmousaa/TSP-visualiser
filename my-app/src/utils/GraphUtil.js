@@ -22,7 +22,7 @@ export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, chr
   
     return (
       <a href="#0" class="pe-auto" style={{ textDecoration: 'none' }}>
-      <g class="node" onClick={() =>  interactiveMode ? setClickedNode(index) :    setClickedNode(null)  }  key={index} className="node-group">
+      <g class="node" data-testid="node" onClick={() =>  interactiveMode ? setClickedNode(index) :    setClickedNode(null)  }  key={index} className="node-group">
       {/* Node outline */}
       <circle class="node" cx={node.x} cy={node.y} r="20" fill="none" stroke={borderColor} strokeWidth="4" />
       {/* Node body */}

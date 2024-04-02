@@ -361,7 +361,9 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
 
     // Step 5 - Find an Eulerian Tour
     const findEulerianTour = (graph, currentVertex, eulerianTour) => {
+        console.log("parametrs", graph, currentVertex, eulerianTour);
         while (graph[currentVertex].length > 0) {
+            console.log("graph[currentVertex]", graph[currentVertex]);
             const nextVertex = graph[currentVertex].shift();
             // Remove the corresponding edge from the graph
             graph[nextVertex].splice(graph[nextVertex].indexOf(currentVertex), 1);
@@ -379,7 +381,14 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         adjacencyList[v].push(u);
     }
     let eulerianTour = [];
+
+    console.log("multigraph");
+    console.log(multigraph);
+    console.log("adjacencyList");
+    console.log(adjacencyList);
     findEulerianTour(adjacencyList, multigraph[0][0], eulerianTour);
+    console.log("eulerianTour");
+    console.log(eulerianTour);
 
     // Step 6 - Generate the Hamiltonian (TSP tour) from the Eulerian tour
     const tspTour = [];
@@ -391,6 +400,9 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     // Add the first vertex to the end of the tour
     tspTour.push(tspTour[0]);
     finalTour.push(tspTour);
+
+    console.log("Hamiltonian Tour");
+    console.log(tspTour);
 
     // Set the best tour and its weight
     setBestTour(finalTour);

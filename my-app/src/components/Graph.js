@@ -8,7 +8,7 @@ import Tooltip from '@mui/material/Tooltip';
 
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
 import { GiPerspectiveDiceSixFacesRandom } from "react-icons/gi";
-import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaRedo, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom, FaHandPointer, FaRuler, FaToggleOff, FaToggleOn, FaRegHandPointLeft, FaFastBackward} from 'react-icons/fa';
+import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom , FaRuler , FaRegHandPointLeft, FaFastBackward} from 'react-icons/fa';
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { BiSolidError } from "react-icons/bi";
 import { FaPersonHiking } from "react-icons/fa6";
@@ -36,7 +36,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [clickedEdge, setClickedEdge] = useState(null);
     const [beginInteractiveMode, setBeginInteractiveMode] = useState(false);
     const [beginVisualisationMode, setBeginVisualisationMode] = useState(false);
-    const [interTourWeight, setInterTourWeight] = useState(0);
+
 
     // States to handel the Christofides algorithim interactive mode
     const [mst, setMst] = useState([[]]);
@@ -213,9 +213,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setAdjacencyMatrix(randomGraph.adjacencyMatrix);
     };
     
-
-    
-  
     // Function to update edge weight in the adjacency matrix
     const updateEdgeWeight = (node1, node2, weight) => {
       resetBestTour();
@@ -296,7 +293,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       return (
           showAdjacencyMatrix ? (
           <>
-          <div className="table-responsive">
+          <div className="table-responsive" data-testid="distance-matrix">
               <table id="adjMatrix" className="table  table-sm adjacency-matrix">
                   <thead>
                       <tr>
@@ -1333,6 +1330,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     <a href="#0" class="pe-auto  stretched-link d-inline-block p-2">
                     <line
                       class="edge"
+                      data-testid="line-undefined"
                       key={`${node1}-${node2}`} // Line with undefined weight
                       x1={node.x} 
                       y1={node.y} 
@@ -1353,6 +1351,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       <a href="#0" class="pe-auto" >
                       <line
                         class="edge"
+                        data-testid="line-defined"
                         key={`${node1}-${node2}`} // Line with defined weight
                         x1={node.x}
                         y1={node.y}
@@ -1374,6 +1373,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       <a href="#0" class="pe-auto" >
                       <line
                         class="edge"
+                        data-testid="line-defined"
                         key={`${node1}-${node2}`} // Line with defined weight
                         x1={node.x}
                         y1={node.y}
@@ -1419,6 +1419,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 <Tooltip title={adjacencyMatrix[`${currentNode}-${altNode}`]} followCursor >
                 <motion.line
                   class="edge"
+                  data-testid="line-defined-algo"
                   key={`${currentNode}-${altNode}`}
                   x1={x1}
                   y1={y1}
@@ -1440,6 +1441,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               ) : (
                 <motion.line
                 class="edge"
+                data-testid="line-defined-algo"
                 key={`${currentNode}-${altNode}`}
                 x1={x1}
                 y1={y1}
@@ -1497,6 +1499,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                             <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
                             <motion.line
                                 class="edge"
+                                data-testid="line-defined-algo"
                                 key={`${node1}-${node2}`} 
                                 x1={x1}
                                 y1={y1}
@@ -1515,6 +1518,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                           ) : (
                             <motion.line
                             class="edge"
+                            data-testid="line-defined-algo"
                             key={`${node1}-${node2}`} 
                             x1={x1}
                             y1={y1}
@@ -1900,6 +1904,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 <div className="flicker col-auto">
                   <Toggle
                     id='cheese-status'
+                    data-testid="interactive-mode-toggle"
                     checked={interactiveMode} // Set checked prop to interactiveMode
                     onChange={() => {
                       if (!presentTour) {
