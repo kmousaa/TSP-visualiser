@@ -5,5 +5,8 @@
     "munkres-js": "^1.2.2",
     "react-bootstrap": "^2.10.0",
     "react-icons": "^5.0.1"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.1.1"
   }
 }
