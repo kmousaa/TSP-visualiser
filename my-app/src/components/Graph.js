@@ -754,8 +754,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     }
 
     
-
-
     // Move forwards in the TSP simulation
     const nextStep = () => {
 
