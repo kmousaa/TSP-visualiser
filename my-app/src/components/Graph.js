@@ -2,10 +2,10 @@
 
 // External imports
 import React from "react";
+
 import "react-toggle/style.css";
 import "../utils/Graph.css";
 import Tooltip from '@mui/material/Tooltip';
-
 import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
 import { GiPerspectiveDiceSixFacesRandom } from "react-icons/gi";
 import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom , FaRuler , FaRegHandPointLeft, FaFastBackward} from 'react-icons/fa';
@@ -13,7 +13,7 @@ import { IoIosCheckmarkCircle } from "react-icons/io";
 import { BiSolidError } from "react-icons/bi";
 import { FaPersonHiking } from "react-icons/fa6";
 import { AiTwotoneExperiment } from "react-icons/ai";
-import { useState , useEffect} from "react";
+import { useState , useEffect , useCallback} from "react";
 import { motion } from "framer-motion";
 import { RxQuestionMarkCircled } from "react-icons/rx";
 
@@ -464,7 +464,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
 
     const showWeight = (e, node1, node2) => {
-      const weight = adjacencyMatrix[`${node1}-${node2}`];
+      // const weight = adjacencyMatrix[`${node1}-${node2}`];
+      return;
     }
     
     const showWeightedEdges = (e, node1, node2) => {
@@ -753,6 +754,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     }
 
     
+
+
     // Move forwards in the TSP simulation
     const nextStep = () => {
 
