@@ -20,7 +20,7 @@ import { RxQuestionMarkCircled } from "react-icons/rx";
 import Toggle from 'react-toggle';
 
 // Internal imports
-import {getAdjacentNodes , sortDictionary, removeDupeDict, calculateTextAttributes, generateTextJSX, areOddVerticesConnected, functionName} from "../utils/GraphUtil";
+import {getAdjacentNodes , sortDictionary, removeDupeDict, calculateTextAttributes, generateTextJSX, areOddVerticesConnected, functionName , findMatchingEdges , edgesAreEqual} from "../utils/GraphUtil";
 import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP , hasCycle} from "./TspAlgorithims";
 import presetGraphs from '../utils/preset_graphs.json';
 
@@ -644,7 +644,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             eularianInputArray[i] -= 1;
           }
 
-          let correctEulerianTour = true;
+          let correcteulerianPath = true;
           for (let i = 0; i < eularianInputArray.length - 1; i++) {
 
               let node1 = parseInt(eularianInputArray[i]);
@@ -659,13 +659,13 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               }
               if (found) {
                   if (visitedEdgeDict[[node1,node2]] === true || visitedEdgeDict[[node2,node1]] === true) {
-                      correctEulerianTour = false;
+                      correcteulerianPath = false;
                       break;
                   }
                   visitedEdgeDict[[node1,node2]] = true;
                   visitedEdgeDict[[node2,node1]] = true;
               } else {
-                  correctEulerianTour = false;
+                  correcteulerianPath = false;
                   break;
               }
           }
@@ -673,12 +673,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           // Check to see if all edges have been visited
           for (let edge in visitedEdgeDict) {
               if (visitedEdgeDict[edge] === false) {
-                  correctEulerianTour = false;
+                  correcteulerianPath = false;
                   break;
               }
           }
 
-          if (!correctEulerianTour) {
+          if (!correcteulerianPath) {
             showErrorAlert("Eulerian tour is incorrect");
             return;
           }
@@ -711,10 +711,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
 
           // error message if eulairan false, if eularian true and hamiltonian false, if both false
-          if (!correctEulerianTour && !correctHamiltonianTour) {
+          if (!correcteulerianPath && !correctHamiltonianTour) {
             showErrorAlert("Eulerian and Hamiltonian tours are incorrect");
           }
-          else if (!correctEulerianTour) {
+          else if (!correcteulerianPath) {
             showErrorAlert("Eulerian tour is incorrect");
           }
           else if (!correctHamiltonianTour) {
@@ -1466,6 +1466,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           {/* Render the current / final TSP tour */}
           {/* There is a difference in rendering tours for each algorithim, for example nearest neighbor has the nodes inside the tour, while the other algorithms have the edges inside the tour */}
           {christofidesAlgorithim ? (
+            
               lastStep && lastStep.map((node, index) => {
                   if (Array.isArray(node)) {
                       const node1 = node[0];
@@ -1476,6 +1477,24 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       const x2 = nodeCoordinates[node2].x;
                       const y2 = nodeCoordinates[node2].y;
 
+                    
+                      let mstEdges = [];
+                      let matchingEdges = [];
+                      if  (steps[0]){
+                        mstEdges = steps[0];
+                      }
+                      if (steps[1]){
+                        matchingEdges = steps[1];
+                      }
+
+
+                      
+                      // edges where its in mstEdge and matchingEdges
+                      let matchingEdgesBoth = findMatchingEdges(mstEdges, matchingEdges);
+
+
+   
+                      
                       let color = "#ff8a27"
 
                       if (christofidesStepNum === 1) {
@@ -1484,8 +1503,16 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       else if (christofidesStepNum === 2) {
                         color = "#ff2730";
                       }
-                      else if (christofidesStepNum === 3){
-                        color = "#e100ff";
+                      else if (christofidesStepNum === 3) {
+                        color = "#e100ff"; // default color
+                      
+                        // Define the current edge using node1 and node2
+                        const currentEdge = [node1, node2];
+                      
+                        // Check if the current edge is in matchingEdgesBoth
+                        if (!interactiveMode && matchingEdgesBoth.some(matchEdge => edgesAreEqual(matchEdge, currentEdge))) {
+                          color = "#9e00b3"; // Change color if the edge is in matchingEdgesBoth
+                        }
                       }
                       
                       return (

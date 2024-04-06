@@ -95,7 +95,26 @@ export const getAdjacentNodes = (nodeIndex, adjacencyMatrix) => {
     return adjacentNodes;
 };
 
-    
+// Function to check if two edges are equal
+export function edgesAreEqual(edge1, edge2) {
+  const [a1, b1] = edge1.sort();
+  const [a2, b2] = edge2.sort();
+  return a1 === a2 && b1 === b2;
+}
+
+// Function to find matching edges
+export function findMatchingEdges(mstEdges, matchingEdges) {
+  let matchingEdgesBoth = [];
+
+  mstEdges.forEach(mstEdge => {
+
+    if (matchingEdges.some(matchEdge => edgesAreEqual(mstEdge, matchEdge))) {
+      matchingEdgesBoth.push(mstEdge);
+    }
+  });
+
+  return matchingEdgesBoth;
+}
 
 // Sort the adjacency matrix dictionary by weight src: https://www.educative.io/answers/how-can-we-sort-a-dictionary-by-value-in-javascript
 export const sortDictionary = (dict) => {

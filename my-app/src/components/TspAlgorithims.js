@@ -6,12 +6,12 @@ import { permutations, getAdjacentNodes , tourWeight, sortDictionary, removeDupe
 export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight) => {
     resetBestTour();
     
-    // Find every possible permutation of the tour
-    let possible_tours = permutations([...Array(numNodes).keys()]); 
-    let best_weight = Number.MAX_VALUE; 
-    let intermediate_tours = [];
 
-    // Find the tour with the smallest weight
+    let possible_tours = permutations([...Array(numNodes).keys()]);  // returns all permutations of the tour
+    let best_weight = Number.MAX_VALUE;  
+    let intermediate_tours = []; // Stores all the tours with the same weight as the best tour
+
+
     for (let i = 0; i < possible_tours.length; i++) {
         possible_tours[i].push(possible_tours[i][0]);
         const tour = possible_tours[i];
@@ -46,6 +46,10 @@ export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestT
             index = i;
             break;
         }
+    }
+
+    if (best_weight >= Number.MAX_VALUE) {
+        return;
     }
 
     // Remove after the best tour in intermediate tours
@@ -319,6 +323,23 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     // Step 3 - Find the Minimum Weight Perfect Matching of the odd-degree nodes
 
     // Build adjancecy matrix for the odd degree nodes, we will find the best mmacthing from that. Remeber we have symetry in the matrix, as well as the diagonal is 0
+   
+    // let oddMatrix = [];
+    // for (let i = 0; i < oddDegreeNodes.length; i++) {
+    //     let row = [];
+    //     for (let j = 0; j < oddDegreeNodes.length; j++) {
+    //         if (i === j) {
+    //             row.push(Infinity);
+    //         } else {
+    //             row.push(adjacencyMatrix[`${oddDegreeNodes[i]}-${oddDegreeNodes[j]}`]);
+    //         }
+    //     }
+    //     oddMatrix.push(row);
+    // }
+
+    // Step 3 - Find the Minimum Weight Perfect Matching of the odd-degree nodes
+
+    // Build adjacency matrix for the odd degree nodes, we will find the best matching from that. Remember we have symmetry in the matrix, as well as the diagonal is 0
     let oddMatrix = [];
     for (let i = 0; i < oddDegreeNodes.length; i++) {
         let row = [];
@@ -326,21 +347,31 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
             if (i === j) {
                 row.push(Infinity);
             } else {
-                row.push(adjacencyMatrix[`${oddDegreeNodes[i]}-${oddDegreeNodes[j]}`]);
+                // Slight perturbation to ensure determinism in case of equal weights
+                let weight = adjacencyMatrix[`${oddDegreeNodes[i]}-${oddDegreeNodes[j]}`];
+                let tieBreaker = 1e-10 * (i + j); 
+                row.push(weight + tieBreaker);
             }
         }
         oddMatrix.push(row);
     }
 
+    // Rest of your code...
+
+
+
+
+
+
     // Using the Munkres algorithm to find the best matching for odd nodes:
     // The Munkres algorithm (also known as the Hungarian algorithm) is utilized here to find the best way to match the odd nodes in a graph, ensuring the minimum total weight.
-    // It takes an odd matrix (representing the weights between odd nodes) as input and returns the best matching, which minimizes the total weight required to connect all odd nodes.
-    // I tried a brute force approach to find the best matching, but it was not efficient for larger graphs. The Munkres algorithm is a much more efficient way to solve this problem.
     let munkres1 = require('munkres-js');
     let bestMatch = munkres1(oddMatrix) 
 
-    // 
-    // 
+    console.log("MUNKRES")
+    console.log(oddMatrix)
+    console.log(bestMatch)
+
 
     // Remove symmetry from the best match
     bestMatch = bestMatch.filter(pair => pair[0] < pair[1]);
@@ -359,18 +390,16 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     multigraph = Array.from(new Set(multigraph.map(JSON.stringify)), JSON.parse); // remove dupe edges
     finalTour.push(multigraph);
 
-    // Step 5 - Find an Eulerian Tour
-    const findEulerianTour = (graph, currentVertex, eulerianTour) => {
-        
+    // Step 5 - Find an Eulerian Tour using Hierholzer's algorithm
+    const findeulerianPath = (graph, currentVertex, eulerianPath) => {
         while (graph[currentVertex].length > 0) {
-            
             const nextVertex = graph[currentVertex].shift();
-            // Remove the corresponding edge from the graph
             graph[nextVertex].splice(graph[nextVertex].indexOf(currentVertex), 1);
-            findEulerianTour(graph, nextVertex, eulerianTour);
+            findeulerianPath(graph, nextVertex, eulerianPath);
         }
-        eulerianTour.push(currentVertex);
+        eulerianPath.push(currentVertex);
     };
+
 
     // Construct adjacency list representation of the multigraph
     const adjacencyList = {};
@@ -380,25 +409,32 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         adjacencyList[u].push(v);
         adjacencyList[v].push(u);
     }
-    let eulerianTour = [];
+    let eulerianPath = [];
 
     
-    
-    
-    
-    findEulerianTour(adjacencyList, multigraph[0][0], eulerianTour);
+    findeulerianPath(adjacencyList, multigraph[0][0], eulerianPath);
+    console.log("EULER")
+    console.log(eulerianPath);
+
     
     
 
     // Step 6 - Generate the Hamiltonian (TSP tour) from the Eulerian tour
     const tspTour = [];
-    for (let vertex of eulerianTour) {
+    for (let vertex of eulerianPath) {
+        // Add the vertex to the tour if it hasn't been visited yet
         if (!tspTour.includes(vertex)) {
             tspTour.push(vertex);
         }
     }
-    // Add the first vertex to the end of the tour
+    // Close the tour by adding the first vertex to the end
     tspTour.push(tspTour[0]);
+
+
+
+
+
+
     finalTour.push(tspTour);
 
     
@@ -422,6 +458,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     }
 
     // Metadata information for the algorithm
-    return { mst, mstWeight, matchingWeight, oddDegreeNodes, bestMatch, multigraph, eulerianTour, tspTour};
+    return { mst, mstWeight, matchingWeight, oddDegreeNodes, bestMatch, multigraph, eulerianPath, tspTour};
 };
 
