@@ -13,7 +13,7 @@ import { IoIosCheckmarkCircle } from "react-icons/io";
 import { BiSolidError } from "react-icons/bi";
 import { FaPersonHiking } from "react-icons/fa6";
 import { AiTwotoneExperiment } from "react-icons/ai";
-import { useState , useEffect , useCallback} from "react";
+import { useState , useEffect } from "react";
 import { motion } from "framer-motion";
 import { RxQuestionMarkCircled } from "react-icons/rx";
 
@@ -104,7 +104,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setStepStore([]);
       setStop(true);
       setMaxChristofidesStep(0);
+
+
     }
+
+
 
 
     // Handels user input for the Christofides algorithim
@@ -509,19 +513,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }, 1); 
     };
 
-    // Check if we have a valid tour present
-    function checkUndefined() {
-      if (bestTour.length === 0) {
-        showErrorAlert('Add weights to all edges before running the algorithm');
-        return true;
-      }
-      
-      if (bestTour.includes(-1) || bestTour.flat().includes(-1)) {
-        showErrorAlert('Add weights to all edges before running the algorithm');
-        return true;
-      }
-    }
-    
+
     // Checks if the current input for christofides interactive mode is correct before moving to the next step
     const nextChristofidesStep = (eularianInput , hamiltonianInput) => {
 
@@ -1062,6 +1054,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setClickedNode(null);
       setBeginInteractiveMode(false);
       setBeginVisualisationMode(false);
+  
 
       // Run the algorithm again, to avoid the user having to click the button again
       if (algo === "Nearest Neighbor") {
@@ -1117,6 +1110,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
    
     // Helper function to generate TSP algorithm handlers
     const generateTSPHandler = (tspAlgorithm) => {
+
+      // time how long the algorithm takes to run
       return () => {
         setAlgo(functionName(tspAlgorithm));
       
@@ -1151,6 +1146,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             if (stepNum === 0) {
               resetBestTour();
               let data = NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim, clickedNode);
+              
               setSteps([clickedNode]);
               setStepNum(1);
               let arr = data.considered[0] ;
@@ -1215,6 +1211,12 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             if (stepNum === 0) {
               resetBestTour();
               let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setSteps, setConsideredSteps, setChristofidesAlgorithim);
+              if (!data) {
+                showErrorAlert("Graph has undefined edges");
+                return;
+              }
+
+              console.log(data);
               setMstWeight(data.mstWeight);
               setChristofidesAlgorithim(true);
               setChristofidesStepNum(1);

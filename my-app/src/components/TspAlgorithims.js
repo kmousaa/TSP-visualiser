@@ -368,10 +368,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     let munkres1 = require('munkres-js');
     let bestMatch = munkres1(oddMatrix) 
 
-    console.log("MUNKRES")
-    console.log(oddMatrix)
-    console.log(bestMatch)
-
 
     // Remove symmetry from the best match
     bestMatch = bestMatch.filter(pair => pair[0] < pair[1]);
@@ -413,10 +409,7 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
 
     
     findeulerianPath(adjacencyList, multigraph[0][0], eulerianPath);
-    console.log("EULER")
-    console.log(eulerianPath);
 
-    
     
 
     // Step 6 - Generate the Hamiltonian (TSP tour) from the Eulerian tour
