@@ -240,32 +240,22 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     }, [numNodes]);
 
 
-    // generate random weight without checking for triangle inequality NO TRIANGLE INEQUALITY
-    const generateRandomWeights = () => { 
+    
+    // Function to add random weights to the adjacency matrix without triangle inequality
+    const generateRandomWeights = () => {
       resetBestTour();
       let newWeights = {};
 
-      newWeights = generateWeights();
+      // Brute-force approach to ensure no triangle inequality
+      while (true) {
+          newWeights = generateWeights();
+          if (!hasTriangleInequality(newWeights)) {
+              break; // Found valid weights without triangle inequality
+          }
+      }
+
       setAdjacencyMatrix(newWeights);
     };
-          
-      
-
-    // // Function to add random weights to the adjacency matrix without triangle inequality
-    // const generateRandomWeights = () => {
-    //   resetBestTour();
-    //   let newWeights = {};
-
-    //   // Brute-force approach to ensure no triangle inequality
-    //   while (true) {
-    //       newWeights = generateWeights();
-    //       if (!hasTriangleInequality(newWeights)) {
-    //           break; // Found valid weights without triangle inequality
-    //       }
-    //   }
-
-    //   setAdjacencyMatrix(newWeights);
-    // };
 
     // Generate random weights
     const generateWeights = () => {
@@ -1862,7 +1852,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   <button onClick={() => clearWeights()} className="btn btn-outline-dark btn-sm"><FaEraser /> Clear Weights</button>
                   <button onClick={randomPresetGraph} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Graph</button>
                   <button onClick={() => showAdjMatrix()} className="btn btn-outline-dark btn-sm"><FaRuler /> Show Distance</button>
-                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm" ><GiPerspectiveDiceSixFacesRandom /> Random Weights</button>
+                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm" disabled={numNodes > 7} ><GiPerspectiveDiceSixFacesRandom /> Random Weights</button>
                  
                 </div>
               </div>
