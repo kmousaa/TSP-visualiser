@@ -123,19 +123,19 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
   
 
-    // Function to generate the adjacency matrix
-    const generateAdjacencyMatrix = () => {
-      const newMatrix = Array.from({ length: numNodes }, () => Array(numNodes).fill(0)); // Initialize a 2D array of 0s
-      for (const [edge, weight] of Object.entries(adjacencyMatrix)) {
-        const [node1, node2] = edge.split('-').map(Number);
-        if (newMatrix[node1] && newMatrix[node2]) {
-          newMatrix[node1][node2] = weight;
-          newMatrix[node2][node1] = weight; // Symmetrically assign weight [e.g 1-2 and 2-1 have the same weight]
-          newMatrix[node1][node1] = 0; // Set the diagonal to 0 [e.g 0-0 has no weight]
-          newMatrix[node2][node2] = 0; // Set the diagonal to 0 [e.g 0-0 has no weight] 
+
+      const generateAdjacencyMatrix = () => {
+        const newMatrix = Array.from({ length: numNodes }, () =>
+            Array(numNodes).fill(0)); // Initialize all to 0
+    
+        for (const [edge, weight] of Object.entries(adjacencyMatrix)) {
+            const [node1, node2] = edge.split('-').map(Number);
+            if (newMatrix[node1] && newMatrix[node2]) {
+                newMatrix[node1][node2] = isFinite(weight) ? weight : 0;
+                newMatrix[node2][node1] = isFinite(weight) ? weight : 0;
+            }
         }
-      }
-      return newMatrix;
+        return newMatrix;
     };
     
     // Graph creation functions
@@ -225,23 +225,47 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       }
       setAdjacencyMatrix(newWeights);
     };
-    
 
-    // Function to add random weights to the adjacency matrix without triangle inequality
-    const generateRandomWeights = () => {
+    // Automatically make the weights of any undefined edges in the adjacency matrix 0 using effect
+    useEffect(() => {
+      const newWeights = { ...adjacencyMatrix };
+      for (let i = 0; i < numNodes; i++) {
+        for (let j = 0; j < numNodes; j++) {
+          if (i !== j && !newWeights[`${i}-${j}`]) {
+            newWeights[`${i}-${j}`] = 0;
+          }
+        }
+      }
+      setAdjacencyMatrix(newWeights);
+    }, [numNodes]);
+
+
+    // generate random weight without checking for triangle inequality NO TRIANGLE INEQUALITY
+    const generateRandomWeights = () => { 
       resetBestTour();
       let newWeights = {};
 
-      // Brute-force approach to ensure no triangle inequality
-      while (true) {
-          newWeights = generateWeights();
-          if (!hasTriangleInequality(newWeights)) {
-              break; // Found valid weights without triangle inequality
-          }
-      }
-
+      newWeights = generateWeights();
       setAdjacencyMatrix(newWeights);
     };
+          
+      
+
+    // // Function to add random weights to the adjacency matrix without triangle inequality
+    // const generateRandomWeights = () => {
+    //   resetBestTour();
+    //   let newWeights = {};
+
+    //   // Brute-force approach to ensure no triangle inequality
+    //   while (true) {
+    //       newWeights = generateWeights();
+    //       if (!hasTriangleInequality(newWeights)) {
+    //           break; // Found valid weights without triangle inequality
+    //       }
+    //   }
+
+    //   setAdjacencyMatrix(newWeights);
+    // };
 
     // Generate random weights
     const generateWeights = () => {
@@ -758,9 +782,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const nextStep = () => {
 
       // Prevents error
-      if ( checkUndefined() ){
-        return;
-      }
+      // if ( checkUndefined() ){
+      //   return;
+      // }
 
       if (stepNum < bestTour.length) {
 
@@ -1838,7 +1862,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   <button onClick={() => clearWeights()} className="btn btn-outline-dark btn-sm"><FaEraser /> Clear Weights</button>
                   <button onClick={randomPresetGraph} className="btn btn-outline-dark btn-sm"><FaRandom /> Random Graph</button>
                   <button onClick={() => showAdjMatrix()} className="btn btn-outline-dark btn-sm"><FaRuler /> Show Distance</button>
-                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm" disabled={numNodes > 7}><GiPerspectiveDiceSixFacesRandom /> Random Weights</button>
+                  <button onClick={() => generateRandomWeights()} className="btn btn-outline-dark btn-sm" ><GiPerspectiveDiceSixFacesRandom /> Random Weights</button>
                  
                 </div>
               </div>
