@@ -46,6 +46,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [minOddPairNum, setMinOddPairNum] = useState(0);
     const [multiGraph, setMultiGraph] = useState([[]]);
 
+    const[mstEdge2, setMstEdge2] = useState([]);
+    const[matchingEdges2, setMatchingEdges2] = useState([]);
+
     const [expectingInput, setExpectingInput] = useState(false);
     const [inputValueEularian, setInputEularian] = useState('');
     const [inputHamiltonian, setInputHamiltonian] = useState('');
@@ -104,6 +107,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setStepStore([]);
       setStop(true);
       setMaxChristofidesStep(0);
+      setMstEdge2([]);
+      setMatchingEdges2([]);
 
 
     }
@@ -546,6 +551,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           setStepNum(1);
           setSteps([...stepsBefore, []]);
 
+          console.log("Gimme you loggin tonight")
+ 
+
         }
         else{
           // Clear the MST steps
@@ -585,6 +593,16 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           setMinOddPairWeight(data.matchingWeight);
           setMinOddPairNum(data.bestMatch.length);
           setMultiGraph(data.multigraph);
+
+          console.log("Gimme you loggin tonight")
+          console.log(steps[0]);
+          console.log(steps[steps.length - 1]);
+
+
+          setMstEdge2(steps[0]);
+          setMatchingEdges2(steps[steps.length - 1]);
+
+          console.log("ok good luck ;)")
 
 
           // Proceed to the next step
@@ -631,63 +649,73 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       if (eularianInput !== "" && eularianInput !== null && hamiltonianInput !== "" && hamiltonianInput !== null){
 
         if (expectingInput === true){
+
+          // Function to convert edge array to a standardized string key
+        const edgeKey = (a, b) => `${Math.min(a, b)}-${Math.max(a, b)}`;
+
+          // edge thats in MST and in matching edges
+          const matchingEdges = findMatchingEdges(mstEdge2, matchingEdges2);
+          // ADD THAT TO THE MULTIGRAPH - it could be reverse
+
+
+                  
+        // Create a dictionary to track visits for each edge
+        let edgeVisitCount = {};
+        multiGraph.forEach(edge => {
+            const key = edgeKey(edge[0], edge[1]);
+            edgeVisitCount[key] = (edgeVisitCount[key] || 0) + 1;
+        });
+
+        // Add the matching edges to the edge visit count
+        matchingEdges.forEach(edge => {
+            const key = edgeKey(edge[0], edge[1]);
+            edgeVisitCount[key] = (edgeVisitCount[key] || 0) + 1;
+        });
+        
+            
+
+        // Parse the user input into an array of indices
+        let eularianInputArray = eularianInput.split(',').map(Number).map(x => x - 1);
+
+        let correctEulerianTour = true;
+        let previousNode = eularianInputArray[0];
+
+        for (let i = 1; i < eularianInputArray.length; i++) {
+            const currentNode = eularianInputArray[i];
+            const currentKey = edgeKey(previousNode, currentNode);
+
+            if (edgeVisitCount[currentKey] > 0) {
+                edgeVisitCount[currentKey]--;
+            } else {
+                correctEulerianTour = false;
+                showErrorAlert("Eulerian tour is incorrect - edge visited incorrectly or too many times");
+                break;
+            }
+
+            previousNode = currentNode;
+        }
+
+        // Ensure all edges are visited exactly as many times as they appear in the graph
+        if (correctEulerianTour) {
+            Object.values(edgeVisitCount).forEach(count => {
+                if (count !== 0) {
+                    correctEulerianTour = false;
+                    showErrorAlert("Eulerian tour is incomplete - not all edges were visited the correct number of times");
+                }
+            });
+        }
+
+        if (correctEulerianTour) {
+            console.log("Eulerian tour validation succeeded.");
+            // Proceed with Hamiltonian tour validation if needed
+        } else {
+            return;  // Stop execution if the Eulerian tour is incorrect
+        }
+
+
           
-          // Dicitonary that stores edge and a boolean indicited if the edge has been visited
-          let visitedEdgeDict = {};
-          for (let edge of multiGraph) {
-            visitedEdgeDict[edge] = false;
-          }
 
-          // - Check if edge [node1,node2] exists in the multigraph tour in any order. If it does, mark it as visited.
-          // - If all edges are visited, then the Eulerian tour is correct.
-          // - If we visit an edge that is already visited, then the Eulerian tour is incorrect.
-          // - If we visit an edge that does not exist, then the Eulerian tour is incorrect.
-          // - All edges in multiGraph must be visited.
-
-          // Reduce the user input by 1 to match the array index
-          let eularianInputArray = eularianInput.split(',').map(Number);
-          for (let i = 0; i < eularianInputArray.length; i++) {
-            eularianInputArray[i] -= 1;
-          }
-
-          let correcteulerianPath = true;
-          for (let i = 0; i < eularianInputArray.length - 1; i++) {
-
-              let node1 = parseInt(eularianInputArray[i]);
-              let node2 = parseInt(eularianInputArray[i + 1]);          
-              let found = false;
-
-              for (let edge of multiGraph) {
-                  if ((edge[0] === node1 && edge[1] === node2) || (edge[0] === node2 && edge[1] === node1)) {
-                      found = true;
-                      break;
-                  }
-              }
-              if (found) {
-                  if (visitedEdgeDict[[node1,node2]] === true || visitedEdgeDict[[node2,node1]] === true) {
-                      correcteulerianPath = false;
-                      break;
-                  }
-                  visitedEdgeDict[[node1,node2]] = true;
-                  visitedEdgeDict[[node2,node1]] = true;
-              } else {
-                  correcteulerianPath = false;
-                  break;
-              }
-          }
-
-          // Check to see if all edges have been visited
-          for (let edge in visitedEdgeDict) {
-              if (visitedEdgeDict[edge] === false) {
-                  correcteulerianPath = false;
-                  break;
-              }
-          }
-
-          if (!correcteulerianPath) {
-            showErrorAlert("Eulerian tour is incorrect");
-            return;
-          }
+          
 
           // Convert the user input to a hamiltonian tour
           const hamiltonian = [];
@@ -716,16 +744,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           }
 
 
-          // error message if eulairan false, if eularian true and hamiltonian false, if both false
-          if (!correcteulerianPath && !correctHamiltonianTour) {
-            showErrorAlert("Eulerian and Hamiltonian tours are incorrect");
-          }
-          else if (!correcteulerianPath) {
-            showErrorAlert("Eulerian tour is incorrect");
-          }
-          else if (!correctHamiltonianTour) {
-            showErrorAlert("Hamiltonian tour is incorrect");
-          }
+
 
         }
       }
@@ -1224,6 +1243,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               setSteps([[clickedEdge]]);
               setStepNum(1);           
               setBeginInteractiveMode(true);  
+              
             }
             else{
               nextStep();

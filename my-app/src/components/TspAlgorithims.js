@@ -387,13 +387,18 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     finalTour.push(multigraph);
 
     // Step 5 - Find an Eulerian Tour using Hierholzer's algorithm
-    const findeulerianPath = (graph, currentVertex, eulerianPath) => {
+    // Step 5 - Find an Eulerian Tour using Hierholzer's algorithm
+    const findEulerianTour = (graph, currentVertex, eulerianTour) => {
         while (graph[currentVertex].length > 0) {
             const nextVertex = graph[currentVertex].shift();
-            graph[nextVertex].splice(graph[nextVertex].indexOf(currentVertex), 1);
-            findeulerianPath(graph, nextVertex, eulerianPath);
+            // Remove the edge from the next vertex's list only if it exists to account for duplicates
+            const edgeIndex = graph[nextVertex].indexOf(currentVertex);
+            if (edgeIndex > -1) {
+                graph[nextVertex].splice(edgeIndex, 1);
+            }
+            findEulerianTour(graph, nextVertex, eulerianTour);
         }
-        eulerianPath.push(currentVertex);
+        eulerianTour.push(currentVertex);
     };
 
 
@@ -405,16 +410,17 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         adjacencyList[u].push(v);
         adjacencyList[v].push(u);
     }
-    let eulerianPath = [];
+    let eulerianTour = [];
 
     
-    findeulerianPath(adjacencyList, multigraph[0][0], eulerianPath);
+    findEulerianTour(adjacencyList, multigraph[0][0], eulerianTour);
+    console.log("EULERIAN TOUR", eulerianTour)
 
     
 
     // Step 6 - Generate the Hamiltonian (TSP tour) from the Eulerian tour
     const tspTour = [];
-    for (let vertex of eulerianPath) {
+    for (let vertex of eulerianTour) {
         // Add the vertex to the tour if it hasn't been visited yet
         if (!tspTour.includes(vertex)) {
             tspTour.push(vertex);
@@ -422,6 +428,7 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     }
     // Close the tour by adding the first vertex to the end
     tspTour.push(tspTour[0]);
+    console.log("TSP TOUR", tspTour)
 
 
 
@@ -451,6 +458,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     }
 
     // Metadata information for the algorithm
-    return { mst, mstWeight, matchingWeight, oddDegreeNodes, bestMatch, multigraph, eulerianPath, tspTour};
+    return { mst, mstWeight, matchingWeight, oddDegreeNodes, bestMatch, multigraph, eulerianTour, tspTour};
 };
 
