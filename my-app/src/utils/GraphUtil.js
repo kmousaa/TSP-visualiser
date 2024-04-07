@@ -29,7 +29,7 @@ export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, chr
       <circle class="node" cx={node.x} cy={node.y} r="18" fill={nodeColor} />
       {/* Bold number inside the node */}
       <text class="nodeNo" x={node.x} y={node.y} fill={textColor} fontSize="20" fontWeight="bold" textAnchor="middle" alignmentBaseline="central">
-        {index }
+        {index + 1}
       </text>
     </g>
     </a>
