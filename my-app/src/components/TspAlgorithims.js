@@ -383,8 +383,10 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
 
     // Step 4 - Combine the MST and the minimum weight perfect matching to form a multigraph
     let multigraph = mst.mstEdges.concat(bestMatch);
-    multigraph = Array.from(new Set(multigraph.map(JSON.stringify)), JSON.parse); // remove dupe edges
+    // multigraph = Array.from(new Set(multigraph.map(JSON.stringify)), JSON.parse); // remove dupe edges
     finalTour.push(multigraph);
+
+
 
     // Step 5 - Find an Eulerian Tour using Hierholzer's algorithm
     // Step 5 - Find an Eulerian Tour using Hierholzer's algorithm

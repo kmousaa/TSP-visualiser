@@ -10,7 +10,7 @@ import { generateNodeCoordinates, renderCustomNode } from "../utils/GraphUtil";
 import { GiPerspectiveDiceSixFacesRandom } from "react-icons/gi";
 import { FaSave, FaDownload, FaSquare ,FaPlay, FaPause, FaStepForward, FaStepBackward, FaFastForward , FaPlus, FaMinus, FaEraser, FaSync, FaEye, FaRandom , FaRuler , FaRegHandPointLeft, FaFastBackward} from 'react-icons/fa';
 import { IoIosCheckmarkCircle } from "react-icons/io";
-import { BiSolidError } from "react-icons/bi";
+import { BiQuestionMark, BiSolidError } from "react-icons/bi";
 import { FaPersonHiking } from "react-icons/fa6";
 import { AiTwotoneExperiment } from "react-icons/ai";
 import { useState , useEffect } from "react";
@@ -48,6 +48,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
     const[mstEdge2, setMstEdge2] = useState([]);
     const[matchingEdges2, setMatchingEdges2] = useState([]);
+
+    const [eularianTour, setEularianTour] = useState([]);
+    const [hamiltonianTour, setHamiltonianTour] = useState([]);
 
     const [expectingInput, setExpectingInput] = useState(false);
     const [inputValueEularian, setInputEularian] = useState('');
@@ -109,10 +112,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setMaxChristofidesStep(0);
       setMstEdge2([]);
       setMatchingEdges2([]);
+      setEularianTour([]);
+      setHamiltonianTour([]);
 
 
     }
-
 
 
 
@@ -451,9 +455,18 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                         <FaSquare className="icon" style={{ color: "#ff2730" }} />
                                         <span class="badge bg-primary"></span> Minimum Weight Perfect Matching for Odd Vertices {christofidesStepNum === 2 ? <FaRegHandPointLeft /> : null}
                                     </li>
-                                    <li class="algorithm">
+                                    <li class="algorithm"> 
                                         <FaSquare className="icon" style={{ color: "#e100ff" }} />
-                                        <span class="badge bg-primary"></span> Connected Multigraph {christofidesStepNum === 3 ? <FaRegHandPointLeft /> : null}
+                                        <span class="badge bg-primary"></span> Connected Multigraph 
+
+                                   
+                                        {christofidesStepNum === 3 ? <>  <FaRegHandPointLeft /> <BiQuestionMark />  </> : null}
+                              
+                                        
+                                    </li>
+                                    <li class="algorithm"> 
+                                        <FaSquare className="icon" style={{ color: "#9e00b3" }} />
+                                        <span class="badge bg-primary"></span> Duplicate Multigraph Edge
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff8a27' }} />
@@ -1085,7 +1098,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         GreedyTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight);
       }
       else if (algo === "Christofides") {
-        ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim);
+        let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim);
+        setEularianTour(data.eulerianTour);
+        setHamiltonianTour(data.tspTour);
       }
     };
 
@@ -1136,6 +1151,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       
         if (functionName(tspAlgorithm) === "Nearest Neighbor") {
           NearestNeighborTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim);
+        }
+        else if (functionName(tspAlgorithm) === "Christofides") {
+          let data = ChristofidesTSP(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight, setSteps, setAltSteps, setStepNum, setConsideredSteps, setChristofidesAlgorithim);
+          setEularianTour(data.eulerianTour);
+          setHamiltonianTour(data.tspTour);
         }
         else{
           tspAlgorithm(resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight , setSteps, setAltSteps ,setStepNum , setConsideredSteps, setChristofidesAlgorithim);
@@ -1243,6 +1263,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               setSteps([[clickedEdge]]);
               setStepNum(1);           
               setBeginInteractiveMode(true);  
+              setEularianTour(data.eulerianTour);
+              setHamiltonianTour(data.tspTour);
               
             }
             else{
@@ -1276,6 +1298,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const AdjMatrix = generateAdjacencyMatrix();
     const lastStep = steps[steps.length - 1];
     const currentAltStep = altSteps[altSteps.length - 1];
+
+    let edgesShown = [];
 
     // Generate the weights for the edges of the graph
     const textOverlays = [];
@@ -1546,18 +1570,30 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                         const currentEdge = [node1, node2];
                       
                         // Check if the current edge is in matchingEdgesBoth
-                        if (!interactiveMode &&  matchingEdgesBoth.some(matchEdge => edgesAreEqual(matchEdge, currentEdge))) {
+                        if (algo === "Christofides" && !interactiveMode &&  matchingEdgesBoth.some(matchEdge => edgesAreEqual(matchEdge, currentEdge))) {
                           color = "#9e00b3"; // Change color if the edge is in matchingEdgesBoth
                         }
                         // if interactive mode on and we are at expectting input is true then become purple
-                        if (expectingInput && matchingEdgesBoth.some(matchEdge => edgesAreEqual(matchEdge, currentEdge))) {
+                        if (algo === "Christofides" && expectingInput && matchingEdgesBoth.some(matchEdge => edgesAreEqual(matchEdge, currentEdge))) {
                           color = "#9e00b3"; // Change color if the edge is in matchingEdgesBoth
                         }
+                      }
+
+                      // if already in edgesShown then dont show it
+                      console.log("WE WANNA SHOW", `${node1}-${node2}`)
+                      console.log("EDGES SHOWN", edgesShown)
+
+
+                      if (edgesShown.includes(`${node1}-${node2}`) || edgesShown.includes(`${node2}-${node1}`)) {
+                        return null;
+                      }
+                      else{
+                        edgesShown.push(`${node1}-${node2}`);
                       }
                       
                       return (
 
-                          numNodes > 9 ? (
+                          (numNodes > 9 )? (
                             <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
                             <motion.line
                                 class="edge"
@@ -1854,9 +1890,43 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               
               {/* Adjacency Matrix */}
               <div className="adjacency-matrix-container">
-              {renderAdjacencyMatrix()}
+              {renderAdjacencyMatrix()} 
               </div>
               {
+                  (!interactiveMode && eularianTour.length > 0 && christofidesStepNum ===3)  && (
+                  <div class="alert alert-info text-left" role="alert">
+                    {/* Shows weight and tour when found */}
+                    <span className="fw-bold text-left">Eularian Tour: </span> 
+                    {eularianTour.map((item, index) => (
+                      <span key={index}>
+                        {item + 1}{index < eularianTour.length - 1 ? ' → ' : ''}
+                      </span>
+                    ))}
+                  
+                    <br/>
+                  </div>
+                )
+              }
+
+              {
+                  (!interactiveMode && hamiltonianTour.length > 0 && christofidesStepNum ===4)  && (
+                  <div class="alert alert-info text-left" role="alert">
+                    {/* Shows weight and tour when found */}
+                    <span className="fw-bold text-left">Hamiltonian Tour: </span> 
+                    {hamiltonianTour.map((item, index) => (
+                      <span key={index}>
+                        {item + 1}{index < hamiltonianTour.length - 1 ? ' → ' : ''}
+                      </span>
+                    ))}
+                  
+                    <br/>
+                  </div>
+                )
+
+              }
+
+
+              {              
                 presentTour && (
                   <div class="alert alert-success text-left" role="alert">
                     {/* Shows weight and tour when found */}
