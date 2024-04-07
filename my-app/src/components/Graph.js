@@ -671,7 +671,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             const key = edgeKey(edge[0], edge[1]);
             edgeVisitCount[key] = (edgeVisitCount[key] || 0) + 1;
         });
-        
+
             
 
         // Parse the user input into an array of indices
@@ -1546,7 +1546,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                         const currentEdge = [node1, node2];
                       
                         // Check if the current edge is in matchingEdgesBoth
-                        if (!interactiveMode && matchingEdgesBoth.some(matchEdge => edgesAreEqual(matchEdge, currentEdge))) {
+                        if (!interactiveMode &&  matchingEdgesBoth.some(matchEdge => edgesAreEqual(matchEdge, currentEdge))) {
+                          color = "#9e00b3"; // Change color if the edge is in matchingEdgesBoth
+                        }
+                        // if interactive mode on and we are at expectting input is true then become purple
+                        if (expectingInput && matchingEdgesBoth.some(matchEdge => edgesAreEqual(matchEdge, currentEdge))) {
                           color = "#9e00b3"; // Change color if the edge is in matchingEdgesBoth
                         }
                       }
