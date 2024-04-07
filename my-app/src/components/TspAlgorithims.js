@@ -416,7 +416,7 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
 
     
     findEulerianTour(adjacencyList, multigraph[0][0], eulerianTour);
-    console.log("EULERIAN TOUR", eulerianTour)
+    
 
     
 
@@ -430,7 +430,7 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     }
     // Close the tour by adding the first vertex to the end
     tspTour.push(tspTour[0]);
-    console.log("TSP TOUR", tspTour)
+    
 
 
 

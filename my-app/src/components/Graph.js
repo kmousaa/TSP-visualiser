@@ -564,7 +564,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           setStepNum(1);
           setSteps([...stepsBefore, []]);
 
-          console.log("Gimme you loggin tonight")
+          
  
 
         }
@@ -607,15 +607,15 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           setMinOddPairNum(data.bestMatch.length);
           setMultiGraph(data.multigraph);
 
-          console.log("Gimme you loggin tonight")
-          console.log(steps[0]);
-          console.log(steps[steps.length - 1]);
+          
+          
+          
 
 
           setMstEdge2(steps[0]);
           setMatchingEdges2(steps[steps.length - 1]);
 
-          console.log("ok good luck ;)")
+          
 
 
           // Proceed to the next step
@@ -719,7 +719,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         }
 
         if (correctEulerianTour) {
-            console.log("Eulerian tour validation succeeded.");
+            
             // Proceed with Hamiltonian tour validation if needed
         } else {
             return;  // Stop execution if the Eulerian tour is incorrect
@@ -1255,7 +1255,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 return;
               }
 
-              console.log(data);
+              
               setMstWeight(data.mstWeight);
               setChristofidesAlgorithim(true);
               setChristofidesStepNum(1);
@@ -1580,8 +1580,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       }
 
                       // if already in edgesShown then dont show it
-                      console.log("WE WANNA SHOW", `${node1}-${node2}`)
-                      console.log("EDGES SHOWN", edgesShown)
+                      
+                      
 
 
                       if (edgesShown.includes(`${node1}-${node2}`) || edgesShown.includes(`${node2}-${node1}`)) {
