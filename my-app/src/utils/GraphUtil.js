@@ -274,7 +274,7 @@ export const  calculateTextAttributes = (node1, node2, numNodes) => {
   else{
     sizeMultiplier = 0;
   }
-  // 8.......idk!!!
+
 
   let textSize = 24 * sizeMultiplier; // Adjust font size based on the multiplier
   let boxSize = 35 * sizeMultiplier; // Adjust box size based on the multiplier

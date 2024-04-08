@@ -1,8 +1,8 @@
 // Graph.js
 
-// External imports
 import React from "react";
 
+// External imports
 import "react-toggle/style.css";
 import "../utils/Graph.css";
 import Tooltip from '@mui/material/Tooltip';
@@ -16,7 +16,6 @@ import { AiTwotoneExperiment } from "react-icons/ai";
 import { useState , useEffect } from "react";
 import { motion } from "framer-motion";
 import { RxQuestionMarkCircled } from "react-icons/rx";
-
 import Toggle from 'react-toggle';
 
 // Internal imports
@@ -45,13 +44,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [minOddPairWeight, setMinOddPairWeight] = useState(0);
     const [minOddPairNum, setMinOddPairNum] = useState(0);
     const [multiGraph, setMultiGraph] = useState([[]]);
-
     const[mstEdge2, setMstEdge2] = useState([]);
     const[matchingEdges2, setMatchingEdges2] = useState([]);
-
     const [eularianTour, setEularianTour] = useState([]);
     const [hamiltonianTour, setHamiltonianTour] = useState([]);
-
     const [expectingInput, setExpectingInput] = useState(false);
     const [inputValueEularian, setInputEularian] = useState('');
     const [inputHamiltonian, setInputHamiltonian] = useState('');
@@ -64,16 +60,17 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     const [errorAlertMessage, setErrorAlertMessage] = useState('');
     const [errorAlertTimeout, setErrorAlertTimeout] = useState(null); // State for managing timeout ID
 
+    // Function to show error alert
     const showErrorAlert = (errorMessage) => {
       setErrorAlertMessage(errorMessage);
       setErrorAlertVisible(true);
-      clearTimeout(errorAlertTimeout); // Clear the previous timeout
+      clearTimeout(errorAlertTimeout); 
       setErrorAlertTimeout(setTimeout(() => {
         setErrorAlertVisible(false);
       }, 4000)); // Hides the alert after 5 seconds
     };
 
-    // reset edge and node after 1ms
+
     useEffect(() => {
       if (clickedEdge) {
         setTimeout(() => {
@@ -129,6 +126,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       setInputHamiltonian(event.target.value);
     };
 
+    // Handel submission of eulairan and hamiltonian tour
     const handleSubmit = () => {
       nextChristofidesStep(inputValueEularian, inputHamiltonian);
       setInputEularian('');
@@ -151,7 +149,8 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         return newMatrix;
     };
     
-    // Graph creation functions
+
+    // ------------ Graph creation functions ------------
     const addNode = () => {
       resetBestTour();
       setNumNodes(numNodes + 1);
@@ -161,7 +160,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       if (numNodes > 0) {
         resetBestTour();
         setNumNodes(numNodes - 1);
-        // Remove all edges connected to the last node
         const newAdjacencyMatrix = { ...adjacencyMatrix };
         for (const key in newAdjacencyMatrix) {
           const [node1, node2] = key.split('-').map(Number);
@@ -460,7 +458,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                         <span class="badge bg-primary"></span> Connected Multigraph 
 
                                    
-                                        {christofidesStepNum === 3 ? <>  <FaRegHandPointLeft /> <BiQuestionMark />  </> : null}
+                                        {christofidesStepNum === 3 ? <>  <FaRegHandPointLeft />  </> : null}
                               
                                         
                                     </li>
@@ -606,20 +604,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           setMinOddPairWeight(data.matchingWeight);
           setMinOddPairNum(data.bestMatch.length);
           setMultiGraph(data.multigraph);
-
-          
-          
-          
-
-
           setMstEdge2(steps[0]);
           setMatchingEdges2(steps[steps.length - 1]);
 
-          
-
-
           // Proceed to the next step
-
           setChristofidesStepNum(3);
           setMaxChristofidesStep(3);
           setStepNum(2);
@@ -634,9 +622,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             newState.push([]);
             return newState;
           });
-
         }
-
       }
       else if (christofidesStepNum === 3){
 
@@ -660,63 +646,54 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       
       // Last step, the user is expected to input the eularian and hamiltonian tour
       if (eularianInput !== "" && eularianInput !== null && hamiltonianInput !== "" && hamiltonianInput !== null){
-
         if (expectingInput === true){
-
-          // Function to convert edge array to a standardized string key
-        const edgeKey = (a, b) => `${Math.min(a, b)}-${Math.max(a, b)}`;
-
-          // edge thats in MST and in matching edges
+          const edgeKey = (a, b) => `${Math.min(a, b)}-${Math.max(a, b)}`;
           const matchingEdges = findMatchingEdges(mstEdge2, matchingEdges2);
-          // ADD THAT TO THE MULTIGRAPH - it could be reverse
+  
+          // Create a dictionary to track visits for each edge
+          let edgeVisitCount = {};
+          multiGraph.forEach(edge => {
+              const key = edgeKey(edge[0], edge[1]);
+              edgeVisitCount[key] = (edgeVisitCount[key] || 0) + 1;
+          });
 
+          // Add the matching edges to the edge visit count
+          matchingEdges.forEach(edge => {
+              const key = edgeKey(edge[0], edge[1]);
+              edgeVisitCount[key] = (edgeVisitCount[key] || 0) + 1;
+          });
 
-                  
-        // Create a dictionary to track visits for each edge
-        let edgeVisitCount = {};
-        multiGraph.forEach(edge => {
-            const key = edgeKey(edge[0], edge[1]);
-            edgeVisitCount[key] = (edgeVisitCount[key] || 0) + 1;
-        });
+              
+          // Parse the user input into an array of indices
+          let eularianInputArray = eularianInput.split(',').map(Number).map(x => x - 1);
 
-        // Add the matching edges to the edge visit count
-        matchingEdges.forEach(edge => {
-            const key = edgeKey(edge[0], edge[1]);
-            edgeVisitCount[key] = (edgeVisitCount[key] || 0) + 1;
-        });
+          let correctEulerianTour = true;
+          let previousNode = eularianInputArray[0];
 
-            
+          for (let i = 1; i < eularianInputArray.length; i++) {
+              const currentNode = eularianInputArray[i];
+              const currentKey = edgeKey(previousNode, currentNode);
 
-        // Parse the user input into an array of indices
-        let eularianInputArray = eularianInput.split(',').map(Number).map(x => x - 1);
+              if (edgeVisitCount[currentKey] > 0) {
+                  edgeVisitCount[currentKey]--;
+              } else {
+                  correctEulerianTour = false;
+                  showErrorAlert("Eulerian tour is incorrect - edge visited incorrectly or too many times");
+                  break;
+              }
 
-        let correctEulerianTour = true;
-        let previousNode = eularianInputArray[0];
+              previousNode = currentNode;
+          }
 
-        for (let i = 1; i < eularianInputArray.length; i++) {
-            const currentNode = eularianInputArray[i];
-            const currentKey = edgeKey(previousNode, currentNode);
-
-            if (edgeVisitCount[currentKey] > 0) {
-                edgeVisitCount[currentKey]--;
-            } else {
-                correctEulerianTour = false;
-                showErrorAlert("Eulerian tour is incorrect - edge visited incorrectly or too many times");
-                break;
-            }
-
-            previousNode = currentNode;
-        }
-
-        // Ensure all edges are visited exactly as many times as they appear in the graph
-        if (correctEulerianTour) {
-            Object.values(edgeVisitCount).forEach(count => {
-                if (count !== 0) {
-                    correctEulerianTour = false;
-                    showErrorAlert("Eulerian tour is incomplete - not all edges were visited the correct number of times");
-                }
-            });
-        }
+          // Ensure all edges are visited exactly as many times as they appear in the graph
+          if (correctEulerianTour) {
+              Object.values(edgeVisitCount).forEach(count => {
+                  if (count !== 0) {
+                      correctEulerianTour = false;
+                      showErrorAlert("Eulerian tour is incomplete - not all edges were visited the correct number of times");
+                  }
+              });
+          }
 
         if (correctEulerianTour) {
             
@@ -725,10 +702,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             return;  // Stop execution if the Eulerian tour is incorrect
         }
 
-
-          
-
-          
 
           // Convert the user input to a hamiltonian tour
           const hamiltonian = [];
@@ -795,11 +768,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     // Move forwards in the TSP simulation
     const nextStep = () => {
 
-      // Prevents error
-      // if ( checkUndefined() ){
-      //   return;
-      // }
-
       if (stepNum < bestTour.length) {
 
         // If in interactive mode, then check if the user input is correct before moving to the next step
@@ -839,7 +807,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             let cur = steps[steps.length - 1];
             let adj = getAdjacentNodes(cur, adjacencyMatrix)
             considered.push(adj.filter(node => !steps.includes(node)));
-            // remove 1st element of considered
 
             // if not last step
             if (stepNum < bestTour.length - 2) {
@@ -1326,7 +1293,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           <div>
             <h2 className="text-white fw-bold d-flex align-items-center justify-content-between">
               <FaPersonHiking className="me-2" />
-              <span>TSP Heuristic Algorithm Visualizer</span>
+              <span>TSP Algorithm Visualizer</span>
             </h2>
           </div>
 
@@ -1983,7 +1950,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                               
                               <button className="btn btn-primary" onClick={handleSubmit}>
                                 Submit 
-                                <Tooltip title="Input is the node number separated by commas, e.g., 1,2,3,4,1 " arrow> <RxQuestionMarkCircled /> </Tooltip>
+                                <Tooltip title="Input is the node number separated by commas, e.g., 1,2,3,4,1 " arrow></Tooltip>
                               </button>
                               
                             </div>

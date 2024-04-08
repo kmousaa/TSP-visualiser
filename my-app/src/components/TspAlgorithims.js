@@ -6,7 +6,6 @@ import { permutations, getAdjacentNodes , tourWeight, sortDictionary, removeDupe
 export const BruteForceTSP = (resetBestTour, numNodes, adjacencyMatrix, setBestTour, setBestWeight) => {
     resetBestTour();
     
-
     let possible_tours = permutations([...Array(numNodes).keys()]);  // returns all permutations of the tour
     let best_weight = Number.MAX_VALUE;  
     let intermediate_tours = []; // Stores all the tours with the same weight as the best tour
@@ -322,23 +321,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
 
     // Step 3 - Find the Minimum Weight Perfect Matching of the odd-degree nodes
 
-    // Build adjancecy matrix for the odd degree nodes, we will find the best mmacthing from that. Remeber we have symetry in the matrix, as well as the diagonal is 0
-   
-    // let oddMatrix = [];
-    // for (let i = 0; i < oddDegreeNodes.length; i++) {
-    //     let row = [];
-    //     for (let j = 0; j < oddDegreeNodes.length; j++) {
-    //         if (i === j) {
-    //             row.push(Infinity);
-    //         } else {
-    //             row.push(adjacencyMatrix[`${oddDegreeNodes[i]}-${oddDegreeNodes[j]}`]);
-    //         }
-    //     }
-    //     oddMatrix.push(row);
-    // }
-
-    // Step 3 - Find the Minimum Weight Perfect Matching of the odd-degree nodes
-
     // Build adjacency matrix for the odd degree nodes, we will find the best matching from that. Remember we have symmetry in the matrix, as well as the diagonal is 0
     let oddMatrix = [];
     for (let i = 0; i < oddDegreeNodes.length; i++) {
@@ -355,12 +337,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
         }
         oddMatrix.push(row);
     }
-
-    // Rest of your code...
-
-
-
-
 
 
     // Using the Munkres algorithm to find the best matching for odd nodes:
@@ -387,8 +363,6 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     finalTour.push(multigraph);
 
 
-
-    // Step 5 - Find an Eulerian Tour using Hierholzer's algorithm
     // Step 5 - Find an Eulerian Tour using Hierholzer's algorithm
     const findEulerianTour = (graph, currentVertex, eulerianTour) => {
         while (graph[currentVertex].length > 0) {
@@ -430,17 +404,7 @@ export const ChristofidesTSP = (resetBestTour, numNodes, adjacencyMatrix, setBes
     }
     // Close the tour by adding the first vertex to the end
     tspTour.push(tspTour[0]);
-    
-
-
-
-
-
-
     finalTour.push(tspTour);
-
-    
-    
 
     // Set the best tour and its weight
     setBestTour(finalTour);
