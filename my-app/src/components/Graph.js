@@ -815,8 +815,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             else{
               // add first node to the considered list
               considered = considered.flat();
-              considered.push(bestTour[0]);
+              considered.push(steps[0]);
             }
+
+            console.log("CONSIDERED")
+            console.log(considered)
 
 
             // if adding the node to the tour closes it prematurely display an error message and return
