@@ -30,6 +30,9 @@ npm install
 # Start the server
 npm start
 
+# Done!
+Once both the server and client are running, open your browser and navigate to http://localhost:3000.
+
 ```
 
 # Future Work
