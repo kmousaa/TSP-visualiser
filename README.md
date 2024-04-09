@@ -32,7 +32,7 @@ npm install
 npm start
 
 ```
-Once both the server and client are running, open your browser and navigate to http://localhost:3000
+- Once both the server and client are running, open your browser and navigate to http://localhost:3000
 
 # Future Work
 
