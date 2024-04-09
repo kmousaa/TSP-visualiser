@@ -13,10 +13,11 @@ The travelling salesman problem (TSP) is widely renowned and used all around us 
 <img width="1440" alt="image" src="https://github.com/kmousaa/TSP-visualiser/assets/99260175/ac77b9c5-821c-4309-8250-720693ed4464">
 
 
+
 ## Deployment
 
 To deploy this project on your local machine, follow these steps:
-
+- Before you begin, ensure you have installed Node.js - you can download it from the [Node.js official website](https://nodejs.org/en/download/). 
 ```bash
 # Clone the repository
 git clone https://github.com/kmousaa/TSP-visualiser.git
