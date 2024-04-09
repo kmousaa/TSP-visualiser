@@ -699,8 +699,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             
             // Proceed with Hamiltonian tour validation if needed
         } else {
+            showErrorAlert("Eulerian tour is incorrect");
             return;  // Stop execution if the Eulerian tour is incorrect
         }
+
+
 
 
           // Convert the user input to a hamiltonian tour
@@ -728,6 +731,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
             setSteps([...steps, bestTour[bestTour.length - 1]]);
             setPresentTour(true);
           }
+
+          if (!correctHamiltonianTour) {
+            showErrorAlert("Hamiltonian tour is incorrect");
+          }
+          
 
 
 
@@ -1106,8 +1114,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
       let nodeCoordinates = generateNodeCoordinates(numNodes);
       const flattenedSteps = steps.flat(); // Flatten the steps array if it's 2D
       const flattendedLastStep = (christofidesAlgorithim && lastStep) ? lastStep.flat() : []; // Flatten the last step array if it's 2D
+
       return nodeCoordinates.map((node, index) => (
-        renderCustomNode(node, index, (flattenedSteps.includes(index) || flattendedLastStep.includes(index))  , (steps[steps.length - 1] === index), presentTour , christofidesAlgorithim, christofidesStepNum, setClickedNode, interactiveMode)
+        renderCustomNode(node, index, (flattenedSteps.includes(index) || flattendedLastStep.includes(index))  , (steps[steps.length - 1] === index), presentTour , christofidesAlgorithim, christofidesStepNum, setClickedNode, interactiveMode , (oddDegreeVerticies.includes(index) && interactiveMode && christofidesStepNum==2))
       ));
     };
 
@@ -1852,6 +1861,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           {/* Render nodes */}
           {renderNodes()}
           {textOverlays}
+
+
+
+
+
           </svg>
 
           </div>

@@ -2,13 +2,18 @@
 
 
 // Function to render the nodes of the graph      
-export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, christofidesAlgorithim ,christofidesStepNum , setClickedNode, interactiveMode) => {
+export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, christofidesAlgorithim ,christofidesStepNum , setClickedNode, interactiveMode, oddDegreeOverwrite) => {
     let tempColor; 
     if (christofidesAlgorithim && christofidesStepNum === 1){
       tempColor = "#2730ff";
     }
-    else if (christofidesAlgorithim && christofidesStepNum === 2){
+    else if (oddDegreeOverwrite || (christofidesAlgorithim && christofidesStepNum === 2)){
+      console.log("HMMMM")
       tempColor = "#ff2730";
+      if (oddDegreeOverwrite){
+        isColorA = true;
+        
+      }
     }
     else if (christofidesAlgorithim && christofidesStepNum === 3){
       tempColor = "#e100ff";
@@ -16,6 +21,7 @@ export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, chr
     else{
       tempColor = "#ff8a27";
     }
+
     
     let nodeColor = tourFound ? "#ff0000" : isLatest ? "#30bbd1" : isColorA ? tempColor : "#FFFFFF"; 
     let borderColor = tourFound ? "#ff0000" : isLatest ? "#30bbd1" : isColorA ? tempColor : "#000000"; 
