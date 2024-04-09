@@ -19,7 +19,7 @@ import { RxQuestionMarkCircled } from "react-icons/rx";
 import Toggle from 'react-toggle';
 
 // Internal imports
-import {getAdjacentNodes , sortDictionary, removeDupeDict, calculateTextAttributes, generateTextJSX, areOddVerticesConnected, functionName , findMatchingEdges , edgesAreEqual} from "../utils/GraphUtil";
+import {getAdjacentNodes , sortDictionary, removeDupeDict, calculateTextAttributes, generateTextJSX, areOddVerticesConnected, functionName , findMatchingEdges , edgesAreEqual ,tourWeight} from "../utils/GraphUtil";
 import { NearestNeighborTSP, BruteForceTSP, GreedyTSP, ChristofidesTSP , hasCycle} from "./TspAlgorithims";
 import presetGraphs from '../utils/preset_graphs.json';
 
@@ -1894,7 +1894,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 )
 
               }
-
               {              
                 presentTour && (
                   <div class="alert alert-success text-left" role="alert">
