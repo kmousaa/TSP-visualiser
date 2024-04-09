@@ -30,8 +30,6 @@ npm install
 # Start the server
 npm start
 
-# Launch the application
-The application should open automatically in your web browser. If it does not, you can manually visit http://localhost:3000 in your browser to interact with the visualizer.
 ```
 
 # Future Work
