@@ -1879,7 +1879,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   (!interactiveMode && hamiltonianTour.length > 0 && christofidesStepNum ===4)  && (
                   <div class="alert alert-info text-left" role="alert">
                     {/* Shows weight and tour when found */}
-                    <span className="fw-bold text-left">Hamiltonian Tour: </span> 
+                    <span className="fw-bold text-left">Hamiltonian Cycle: </span> 
                     {hamiltonianTour.map((item, index) => (
                       <span key={index}>
                         {item + 1}{index < hamiltonianTour.length - 1 ? ' → ' : ''}
@@ -1891,7 +1891,6 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 )
 
               }
-
 
               {              
                 presentTour && (
