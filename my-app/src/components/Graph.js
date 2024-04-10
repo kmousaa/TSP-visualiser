@@ -629,12 +629,26 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
         // Function to see if 2 arrays are equal
         const isEqual = (a, b) => JSON.stringify(a.sort()) === JSON.stringify(b.sort());
         
+
+        // remove any duplicate edges in the multigraph EDGES LOOK LIKE [0, 1]
+        let multiGraphNoDupes = [];
+        for (let i = 0; i < multiGraph.length; i++) {
+          if (!multiGraphNoDupes.some(edge => edgesAreEqual(edge, multiGraph[i]))) {
+            multiGraphNoDupes.push(multiGraph[i]);
+          }
+        }
+
+        
+
+        
+
         // If user inputted the correct multiGraph, then proceed
-        if (isEqual(steps[steps.length - 1], multiGraph)) {
+        if (isEqual(steps[steps.length - 1], multiGraphNoDupes)) {
           setExpectingInput(true);
         }
         else{
           // Clear the multigraph steps
+
           showErrorAlert("Selected multigraph is incorrect");
           setSteps(prevSteps => {
             const newState = prevSteps.slice(0, -1); 
@@ -658,10 +672,10 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           });
 
           // Add the matching edges to the edge visit count
-          matchingEdges.forEach(edge => {
-              const key = edgeKey(edge[0], edge[1]);
-              edgeVisitCount[key] = (edgeVisitCount[key] || 0) + 1;
-          });
+          // matchingEdges.forEach(edge => {
+          //     const key = edgeKey(edge[0], edge[1]);
+          //     edgeVisitCount[key] = (edgeVisitCount[key] || 0) + 1;
+          // });
 
               
           // Parse the user input into an array of indices
@@ -670,9 +684,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           let correctEulerianTour = true;
           let previousNode = eularianInputArray[0];
 
+
           for (let i = 1; i < eularianInputArray.length; i++) {
               const currentNode = eularianInputArray[i];
               const currentKey = edgeKey(previousNode, currentNode);
+
 
               if (edgeVisitCount[currentKey] > 0) {
                   edgeVisitCount[currentKey]--;
@@ -681,6 +697,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   showErrorAlert("Eulerian tour is incorrect - edge visited incorrectly or too many times");
                   break;
               }
+
 
               previousNode = currentNode;
           }
@@ -826,8 +843,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               considered.push(steps[0]);
             }
 
-            console.log("CONSIDERED")
-            console.log(considered)
+  
 
 
             // if adding the node to the tour closes it prematurely display an error message and return
