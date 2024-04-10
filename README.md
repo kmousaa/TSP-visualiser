@@ -43,5 +43,4 @@ npm start
 
 ## Credits
 
-This project was developed by Karim Mousa as a final year individual project for King's College London. It represents a culmination of the skills and knowledge acquired over the course of my studies and serves as a practical application of theoretical concepts in computer science.
-
+This project was developed by Karim Mousa as a final year individual project for King's College London.
