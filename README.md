@@ -19,7 +19,7 @@ The travelling salesman problem (TSP) is widely renowned and used all around us 
 To deploy this project on your local machine, follow these steps:
 - Before you begin, ensure you have installed Node.js - you can download it from the [Node.js official website](https://nodejs.org/en/download/). 
 ```bash
-# Clone the repository
+# Clone the repository (or download the ZIP file)
 git clone https://github.com/kmousaa/TSP-visualiser.git
 
 # Navigate to the project directory
@@ -36,17 +36,11 @@ npm start
 
 # Future Work
 
-The current iteration of the tool offers a solid foundation for understanding and visualizing the Traveling Salesman Problem. Looking ahead, there are exciting potential enhancements that could further enrich the tool's capabilities:
-
-- **2-opt Algorithm**: Implementing this local search algorithm could provide users with a hands-on experience in refining TSP solutions, showcasing the iterative process of optimization.
-- **Simulated Annealing**: Integrating this algorithm could offer a more nuanced approach to finding optimal solutions by navigating the trade-off between exploration and exploitation.
-- **Ant Colony Optimization**: By simulating the foraging behavior of ants, this addition could provide a unique and dynamic method for solving TSP instances, potentially leading to new insights and strategies.
-
-These features would not only add depth to the tool's algorithmic repertoire but also give users more avenues to explore complex problem-solving techniques in computational theory.
-
+- **2-opt Algorithm**
+- **Simulated Annealing**
+- **Ant Colony Optimization**
 
 
 ## Credits
 
-This project was developed by Karim Mousa as a final year individual project for King's College London. It represents a culmination of the skills and knowledge acquired over the course of my studies and serves as a practical application of theoretical concepts in computer science.
-
+This project was developed by Karim Mousa as a final year individual project for King's College London.
