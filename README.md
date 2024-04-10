@@ -19,7 +19,7 @@ The travelling salesman problem (TSP) is widely renowned and used all around us 
 To deploy this project on your local machine, follow these steps:
 - Before you begin, ensure you have installed Node.js - you can download it from the [Node.js official website](https://nodejs.org/en/download/). 
 ```bash
-# Clone the repository
+# Clone the repository (or download the ZIP file)
 git clone https://github.com/kmousaa/TSP-visualiser.git
 
 # Navigate to the project directory
