@@ -485,7 +485,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                       <div class="alert alert-primary text-left" role="alert">
                           <h4>Instructions:</h4> 
                           <p class="text-left d-flex justify-content-start">1) Create the graph and assign weights.</p>
-                          <p class="text-left d-flex justify-content-start">2) Select an algorithm for visualization.</p>
+                          <p class="text-left d-flex justify-content-start">2) Select an algorithm for visualisation.</p>
                           <p class="text-left d-flex">3) Test yourself by selecting interactive mode.</p>
                           <p>Please be aware of the triangle inequality when adding weights to the graph. You can use our preset graphs.</p>
                       </div>
