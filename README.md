@@ -36,14 +36,9 @@ npm start
 
 # Future Work
 
-The current iteration of the tool offers a solid foundation for understanding and visualizing the Traveling Salesman Problem. Looking ahead, there are exciting potential enhancements that could further enrich the tool's capabilities:
-
-- **2-opt Algorithm**: Implementing this local search algorithm could provide users with a hands-on experience in refining TSP solutions, showcasing the iterative process of optimization.
-- **Simulated Annealing**: Integrating this algorithm could offer a more nuanced approach to finding optimal solutions by navigating the trade-off between exploration and exploitation.
-- **Ant Colony Optimization**: By simulating the foraging behavior of ants, this addition could provide a unique and dynamic method for solving TSP instances, potentially leading to new insights and strategies.
-
-These features would not only add depth to the tool's algorithmic repertoire but also give users more avenues to explore complex problem-solving techniques in computational theory.
-
+- **2-opt Algorithm**
+- **Simulated Annealing**
+- **Ant Colony Optimization**
 
 
 ## Credits
