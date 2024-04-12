@@ -480,7 +480,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff8a27' }} />
-                                        <span class="badge bg-primary"></span> Hamiltoinian Cycle {presentTour === false && christofidesStepNum === 4 ? <FaRegHandPointLeft /> : null}
+                                        <span class="badge bg-primary"></span> Derived Hamiltonian Cycle (From Eulerian Tour) {presentTour === false && christofidesStepNum === 4 ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     <li class="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff0000' }} />
