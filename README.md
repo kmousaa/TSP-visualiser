@@ -20,12 +20,12 @@ To deploy this project on your local machine, follow these steps:
 - Before you begin, ensure you have installed Node.js - you can download it from the [Node.js official website](https://nodejs.org/en/download/). 
 
 ## Deployment
-1. **Unzip the Folder:** Extract the contents of the **TSP_visualiser_code.zip** file. This should produce a folder named **TSP-heuristic-main**
-2. **Navigate to the Project Directory:** Open your terminal and navigate to the **TSP-heuristic-main** directory with the cd command. For instance:
+1. **Unzip the Folder:** Extract the contents of the **TSP_visualiser_code.zip** file. This should produce a folder named **TSP-visualiser-main**
+2. **Navigate to the Project Directory:** Open your terminal and navigate to the **TSP-visualiser-main** directory with the cd command. For instance:
 ```
-cd path/to/TSP-heuristic-main
+cd path/to/TSP-visualiser-main
 ```
-3. **Enter the Application Directory:** Within the **TSP-heuristic-main** directory, change to the **my-app** subdirectory:
+3. **Enter the Application Directory:** Within the **TSP-visualiser-main** directory, change to the **my-app** subdirectory:
 ```
 cd my-app
 ```
