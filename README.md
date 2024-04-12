@@ -21,7 +21,7 @@ To deploy this project on your local machine, follow these steps:
 
 ## Deployment
 1. **Unzip the Folder:** Extract the contents of the **TSP_visualiser_code.zip** file. This should produce a folder named **TSP-heuristic-main**
-2. **Navigate to the Project Directory:** Open your terminal and navigate to the TSP-heuristic-main directory with the cd command. For instance:
+2. **Navigate to the Project Directory:** Open your terminal and navigate to the **TSP-heuristic-main** directory with the cd command. For instance:
 ```
 cd path/to/TSP-heuristic-main
 ```
