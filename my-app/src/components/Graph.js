@@ -178,8 +178,20 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
     };
   
     const clearWeights = () => {
+      // make every edge inside the adjacency matrix 0 for every edge
+      const newWeights = { ...adjacencyMatrix };
+      for (let i = 0; i < numNodes; i++) {
+        for (let j = 0; j < numNodes; j++) {
+          if (i !== j) {
+            newWeights[`${i}-${j}`] = 0;
+          }
+        }
+      }
+      setAdjacencyMatrix(newWeights);
+      
+
       resetBestTour();
-      setAdjacencyMatrix({});
+
       setInteractiveMode(false);
     };
 
@@ -750,7 +762,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           }
 
           if (!correctHamiltonianTour) {
-            showErrorAlert("Hamiltonian tour is incorrect");
+            showErrorAlert("Hamiltonian tour is incorrect (it must be derived from your Eularian tour)");
           }
           
 
