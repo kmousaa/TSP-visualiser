@@ -14,25 +14,30 @@ The travelling salesman problem (TSP) is widely renowned and used all around us 
 
 
 
-## Deployment
+## Prerequisites
 
 To deploy this project on your local machine, follow these steps:
 - Before you begin, ensure you have installed Node.js - you can download it from the [Node.js official website](https://nodejs.org/en/download/). 
-```bash
-# Clone the repository (or download the ZIP file)
-git clone https://github.com/kmousaa/TSP-visualiser.git
 
-# Navigate to the project directory
-cd TSP-visualiser/my-app
-
-# Install dependencies
-npm install
-
-# Start the server
-npm start
-
+## Deployment
+1. **Unzip the Folder:** Extract the contents of the **TSP_visualiser_code.zip** file. This should produce a folder named **TSP-heuristic-main**
+2. **Navigate to the Project Directory:** Open your terminal and navigate to the TSP-heuristic-main directory with the cd command. For instance:
 ```
-- Once both the server and client are running, open your browser and navigate to http://localhost:3000
+cd path/to/TSP-heuristic-main
+```
+3. **Enter the Application Directory:** Within the **TSP-heuristic-main** directory, change to the **my-app** subdirectory:
+```
+cd my-app
+```
+4. **Install Dependancies:** Install project dependencies using:
+```
+npm install
+```
+5. **Start Server:** Start the local server by using command:
+```
+npm start
+```
+6. Once both the server and client are running, open your browser and navigate to http://localhost:3000
 
 # Future Work
 
