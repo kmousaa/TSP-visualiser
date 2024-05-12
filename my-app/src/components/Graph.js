@@ -1333,7 +1333,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
           <div>
             <h2 className="text-white fw-bold d-flex align-items-center justify-content-between">
               <FaPersonHiking className="me-2" />
-              <span>TSP Algorithm Visualizer</span>
+              <span>TSP Algorithm Visualiser</span>
             </h2>
           </div>
 
@@ -1706,7 +1706,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   }
               })
 
-              
+
           ) : (
               // All other algorithms
               steps.map((node, index) => {
