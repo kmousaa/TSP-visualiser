@@ -1706,6 +1706,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   }
               })
 
+              
           ) : (
               // All other algorithms
               steps.map((node, index) => {
