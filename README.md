@@ -1,4 +1,4 @@
-# TSP visualisation tool
+# TSP Visualisation Tool
 
 The travelling salesman problem (TSP) is widely renowned and used all around us in the real world. It involves finding the best path in a graph where distance is minimised. Think of the nodes in the graph as houses, the edges as roads, and you are a delivery driver trying to drop off packages in each home and return to the starting point. This project brings the TSP to life by allowing you to solve it visually using four algorithms: Brute Force, Nearest Neighbor, Greedy, and Christofides.
 
