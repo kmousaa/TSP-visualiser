@@ -20,7 +20,7 @@ To deploy this project on your local machine, follow these steps:
 - Before you begin, ensure you have installed Node.js - you can download it from the [Node.js official website](https://nodejs.org/en/download/). 
 
 ## Deployment
-1. **Unzip the Folder:** Extract the contents of the **TSP_visualiser_code.zip** file. This should produce a folder named **TSP-visualiser-main**
+1. **Clone the repository:** ```git clone https://github.com/kmousaa/TSP-visualiser.git```
 2. **Navigate to the Project Directory:** Open your terminal and navigate to the **TSP-visualiser-main** directory with the cd command. For instance:
 ```
 cd path/to/TSP-visualiser-main
