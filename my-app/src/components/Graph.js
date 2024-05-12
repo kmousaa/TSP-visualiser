@@ -385,11 +385,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 </div>
               )}
               {interactiveMode ? (
-              <div class="alert alert-warning d-flex align-items-center " role="alert">
+              <div className="alert alert-warning d-flex align-items-center " role="alert">
                   <span className="fw-bold"> <AiTwotoneExperiment /> Interactive mode</span>
               </div>
               ) : ( 
-                <div class="alert alert-warning d-flex align-items-center " role="alert">
+                <div className="alert alert-warning d-flex align-items-center " role="alert">
                   <span className="fw-bold"> <FaEye />    Visualisation mode</span>
                 </div>
 
@@ -398,7 +398,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 {algo !== "Select Algorithm" ? (
                     <div>
 
-                        <div class="alert alert-info d-flex align-items-cente" role="alert">
+                        <div className="alert alert-info d-flex align-items-cente" role="alert">
                         <span className="fw-bold">{algo} Algorithm</span>
                         </div>
 
@@ -414,77 +414,77 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                           ></div>
                         </div>
                             <h5>Key:</h5>
-                            <ul class="list-group">
+                            <ul className="list-group">
                                 {algo === "Brute Force" && (
                                     <>
-                                        <li class="algorithm">
+                                        <li className="algorithm">
                                             <FaSquare className="icon" style={{ color: '#ff8a27' }} />
-                                            <span class="badge bg-primary"></span> Current Tour {(presentTour === false ) ? <FaRegHandPointLeft /> : null}
+                                            <span className="badge bg-primary"></span> Current Tour {(presentTour === false ) ? <FaRegHandPointLeft /> : null}
                                         </li>
-                                        <li class="algorithm">
+                                        <li className="algorithm">
                                             <FaSquare className="icon" style={{ color: '#ff0000' }} />
-                                            <span class="badge bg-primary"></span> Final Tour {(presentTour === true ) ? <FaRegHandPointLeft /> : null}
+                                            <span className="badge bg-primary"></span> Final Tour {(presentTour === true ) ? <FaRegHandPointLeft /> : null}
                                         </li>
                                     </>
                                 )}
                                 {algo === "Greedy" && (
                                     <>
-                                    <li class="algorithm">
+                                    <li className="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff8a27' }} />
-                                        <span class="badge bg-primary"></span> Current Tour
+                                        <span className="badge bg-primary"></span> Current Tour
                                     </li>
-                                    <li class="algorithm">
+                                    <li className="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff0000' }} />
-                                        <span class="badge bg-primary"></span> Final Tour
+                                        <span className="badge bg-primary"></span> Final Tour
                                     </li>
                                     </>
                                 )}
                                 {algo === "Nearest Neighbor" && (
                                     <>
-                                    <li class="algorithm">
+                                    <li className="algorithm">
                                         <FaSquare className="icon" style={{ color: "#30bbd1" }} />
-                                        <span class="badge bg-primary"></span> Current Edge + Potential Next Edges 
+                                        <span className="badge bg-primary"></span> Current Edge + Potential Next Edges 
                                     </li>
-                                    <li class="algorithm">
+                                    <li className="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff8a27' }} />
-                                        <span class="badge bg-primary"></span> Current Tour {(presentTour === false ) ? <FaRegHandPointLeft /> : null}
+                                        <span className="badge bg-primary"></span> Current Tour {(presentTour === false ) ? <FaRegHandPointLeft /> : null}
                                     </li>
-                                    <li class="algorithm">
+                                    <li className="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff0000' }} />
-                                        <span class="badge bg-primary"></span> Final Tour {(presentTour === true ) ? <FaRegHandPointLeft /> : null}
+                                        <span className="badge bg-primary"></span> Final Tour {(presentTour === true ) ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     </>
                                 )}
                                 {algo === "Christofides" && (
                                     <>
-                                    <li class="algorithm">
+                                    <li className="algorithm">
                                         <FaSquare className="icon" style={{ color: "#2730ff" }} />
-                                        <span class="badge bg-primary"></span> Minimum Spanning Tree {(christofidesStepNum === 0 || christofidesStepNum === 1 ) ? <FaRegHandPointLeft /> : null}
+                                        <span className="badge bg-primary"></span> Minimum Spanning Tree {(christofidesStepNum === 0 || christofidesStepNum === 1 ) ? <FaRegHandPointLeft /> : null}
                                     </li>
-                                    <li class="algorithm">
+                                    <li className="algorithm">
                                         <FaSquare className="icon" style={{ color: "#ff2730" }} />
-                                        <span class="badge bg-primary"></span> Minimum Weight Perfect Matching for Odd Vertices {christofidesStepNum === 2 ? <FaRegHandPointLeft /> : null}
+                                        <span className="badge bg-primary"></span> Minimum Weight Perfect Matching for Odd Vertices {christofidesStepNum === 2 ? <FaRegHandPointLeft /> : null}
                                     </li>
-                                    <li class="algorithm"> 
+                                    <li className="algorithm"> 
                                         <FaSquare className="icon" style={{ color: "#e100ff" }} />
-                                        <span class="badge bg-primary"></span> Connected Multigraph 
+                                        <span className="badge bg-primary"></span> Connected Multigraph 
 
                                    
                                         {christofidesStepNum === 3 ? <>  <FaRegHandPointLeft />  </> : null}
                               
                                         
                                     </li>
-                                    <li class="algorithm"> 
+                                    <li className="algorithm"> 
                                         <FaSquare className="icon" style={{ color: "#9e00b3" }} />
-                                        <span class="badge bg-primary"></span> Duplicate Multigraph Edge
+                                        <span className="badge bg-primary"></span> Duplicate Multigraph Edge
                                     </li>
-                                    <li class="algorithm">
+                                    <li className="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff8a27' }} />
-                                        <span class="badge bg-primary"></span> Derived Hamiltonian Cycle (From Eulerian Tour) {presentTour === false && christofidesStepNum === 4 ? <FaRegHandPointLeft /> : null}
+                                        <span className="badge bg-primary"></span> Derived Hamiltonian Cycle (From Eulerian Tour) {presentTour === false && christofidesStepNum === 4 ? <FaRegHandPointLeft /> : null}
                                     </li>
-                                    <li class="algorithm">
+                                    <li className="algorithm">
                                         <FaSquare className="icon" style={{ color: '#ff0000' }} />
-                                        <span class="badge bg-primary"></span> Final Tour {presentTour === true  && christofidesStepNum === 4 ? <FaRegHandPointLeft /> : null}
+                                        <span className="badge bg-primary"></span> Final Tour {presentTour === true  && christofidesStepNum === 4 ? <FaRegHandPointLeft /> : null}
                                     </li>
                                     </>
                                 )}
@@ -494,11 +494,11 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     </div>
                 ) : (
                     <div>
-                      <div class="alert alert-primary text-left" role="alert">
+                      <div className="alert alert-primary text-left" role="alert">
                           <h4>Instructions:</h4> 
-                          <p class="text-left d-flex justify-content-start">1) Create the graph and assign weights.</p>
-                          <p class="text-left d-flex justify-content-start">2) Select an algorithm for visualisation.</p>
-                          <p class="text-left d-flex">3) Test yourself by selecting interactive mode.</p>
+                          <p className="text-left d-flex justify-content-start">1) Create the graph and assign weights.</p>
+                          <p className="text-left d-flex justify-content-start">2) Select an algorithm for visualisation.</p>
+                          <p className="text-left d-flex">3) Test yourself by selecting interactive mode.</p>
                           <p>Please be aware of the triangle inequality when adding weights to the graph. You can use our preset graphs.</p>
                       </div>
                     </div>
@@ -1339,16 +1339,16 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
           {/* Dropdown to select the algorithm */}
           <div>
-            <div class="btn-group">
-              <a class="btn btn-light dropdown-toggle" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+            <div className="btn-group">
+              <a className="btn btn-light dropdown-toggle" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
                 <span className="fw-bold">Select Algorithim</span>
               </a>
-              <ul class="dropdown-menu">
+              <ul className="dropdown-menu">
                 
-                <li><a  onClick={generateTSPHandler(BruteForceTSP)}  class={numNodes < 3 ||  numNodes > 9 ? "dropdown-item disabled" : "dropdown-item"}href="#0" >Brute Force</a></li>
-                <li><a  onClick={generateTSPHandler(NearestNeighborTSP)} class={numNodes < 3 ? "dropdown-item disabled" : "dropdown-item"} href="#0">Nearest Neighbor</a></li>
-                <li><a  onClick={generateTSPHandler(GreedyTSP)} class={numNodes < 3 ? "dropdown-item disabled" : "dropdown-item"} href="#0">Greedy</a></li>
-                <li><a  onClick={generateTSPHandler(ChristofidesTSP)} class={numNodes < 3 ? "dropdown-item disabled" : "dropdown-item"} href="#0">Christofides</a></li>
+                <li><a  onClick={generateTSPHandler(BruteForceTSP)}  className={numNodes < 3 ||  numNodes > 9 ? "dropdown-item disabled" : "dropdown-item"}href="#0" >Brute Force</a></li>
+                <li><a  onClick={generateTSPHandler(NearestNeighborTSP)} className={numNodes < 3 ? "dropdown-item disabled" : "dropdown-item"} href="#0">Nearest Neighbor</a></li>
+                <li><a  onClick={generateTSPHandler(GreedyTSP)} className={numNodes < 3 ? "dropdown-item disabled" : "dropdown-item"} href="#0">Greedy</a></li>
+                <li><a  onClick={generateTSPHandler(ChristofidesTSP)} className={numNodes < 3 ? "dropdown-item disabled" : "dropdown-item"} href="#0">Christofides</a></li>
               </ul>
             </div>
   
@@ -1389,9 +1389,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                   
                   // Check if node-node2 in the adjacency matrix has a value not "NA"
                   result ? (
-                    <a href="#0" class="pe-auto  stretched-link d-inline-block p-2">
+                    <a href="#0" className="pe-auto  stretched-link d-inline-block p-2">
                     <line
-                      class="edge"
+                      className="edge"
                       data-testid="line-undefined"
                       key={`${node1}-${node2}`} // Line with undefined weight
                       x1={node.x} 
@@ -1410,9 +1410,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     // If numNodes bigger than 9, then show the weights USING tooltips
                     numNodes > 9 ? (
                       <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
-                      <a href="#0" class="pe-auto" >
+                      <a href="#0" className="pe-auto" >
                       <line
-                        class="edge"
+                        className="edge"
                         data-testid="line-defined"
                         key={`${node1}-${node2}`} // Line with defined weight
                         x1={node.x}
@@ -1432,9 +1432,9 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                     </a>
                     </Tooltip>
                     ) : (
-                      <a href="#0" class="pe-auto" >
+                      <a href="#0" className="pe-auto" >
                       <line
-                        class="edge"
+                        className="edge"
                         data-testid="line-defined"
                         key={`${node1}-${node2}`} // Line with defined weight
                         x1={node.x}
@@ -1480,7 +1480,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               numNodes > 9 ? (
                 <Tooltip title={adjacencyMatrix[`${currentNode}-${altNode}`]} followCursor >
                 <motion.line
-                  class="edge"
+                  className="edge"
                   data-testid="line-defined-algo"
                   key={`${currentNode}-${altNode}`}
                   x1={x1}
@@ -1502,7 +1502,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                 </Tooltip>
               ) : (
                 <motion.line
-                class="edge"
+                className="edge"
                 data-testid="line-defined-algo"
                 key={`${currentNode}-${altNode}`}
                 x1={x1}
@@ -1603,7 +1603,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                           (numNodes > 9 )? (
                             <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
                             <motion.line
-                                class="edge"
+                                className="edge"
                                 data-testid="line-defined-algo"
                                 key={`${node1}-${node2}`} 
                                 x1={x1}
@@ -1622,7 +1622,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                             </Tooltip>
                           ) : (
                             <motion.line
-                            class="edge"
+                            className="edge"
                             data-testid="line-defined-algo"
                             key={`${node1}-${node2}`} 
                             x1={x1}
@@ -1662,7 +1662,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                                             
                                 <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
                                 <motion.line
-                                    class="edge"
+                                    className="edge"
                                     key={`${node1}-${node2}`}
                                     x1={x1}
                                     y1={y1}
@@ -1679,7 +1679,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                 </Tooltip>
                               ) : (
                                 <motion.line
-                                class="edge"
+                                className="edge"
                                 key={`${node1}-${node2}`}
                                 x1={x1}
                                 y1={y1}
@@ -1785,7 +1785,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                         numNodes > 9 ? (
                           <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
                           <motion.line
-                              class="edge"
+                              className="edge"
                               key={`${node1}-${node2}`}
                               x1={x1}
                               y1={y1}
@@ -1805,7 +1805,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                           </Tooltip>
                         ) : (
                           <motion.line
-                          class="edge"
+                          className="edge"
                           key={`${node1}-${node2}`}
                           x1={x1}
                           y1={y1}
@@ -1842,7 +1842,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                   
                                 <Tooltip title={adjacencyMatrix[`${node1}-${node2}`]} followCursor>
                                 <motion.line
-                                    class="edge"
+                                    className="edge"
                                     key={`${node1}-${node2}`}
                                     x1={x1}
                                     y1={y1}
@@ -1860,7 +1860,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
                                 </Tooltip>
                                 ) : (
                                   <motion.line
-                                  class="edge"
+                                  className="edge"
                                   key={`${node1}-${node2}`}
                                   x1={x1}
                                   y1={y1}
@@ -1906,7 +1906,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               </div>
               {
                   (!interactiveMode && eularianTour.length > 0 && christofidesStepNum ===3)  && (
-                  <div class="alert alert-info text-left" role="alert">
+                  <div className="alert alert-info text-left" role="alert">
                     {/* Shows weight and tour when found */}
                     <span className="fw-bold text-left">Eularian Tour: </span> 
                     {eularianTour.map((item, index) => (
@@ -1922,7 +1922,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
 
               {
                   (!interactiveMode && hamiltonianTour.length > 0 && christofidesStepNum ===4)  && (
-                  <div class="alert alert-info text-left" role="alert">
+                  <div className="alert alert-info text-left" role="alert">
                     {/* Shows weight and tour when found */}
                     <span className="fw-bold text-left">Hamiltonian Cycle: </span> 
                     {hamiltonianTour.map((item, index) => (
@@ -1938,7 +1938,7 @@ function Graph ({numNodes, setNumNodes, adjacencyMatrix, setAdjacencyMatrix, bes
               }
               {              
                 presentTour && (
-                  <div class="alert alert-success text-left" role="alert">
+                  <div className="alert alert-success text-left" role="alert">
                     {/* Shows weight and tour when found */}
                     <span className="fw-bold text-left">Final Tour</span> has been found! 
                     <br/>

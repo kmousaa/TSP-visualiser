@@ -8,7 +8,7 @@ export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, chr
       tempColor = "#2730ff";
     }
     else if (oddDegreeOverwrite || (christofidesAlgorithim && christofidesStepNum === 2)){
-      console.log("HMMMM")
+
       tempColor = "#ff2730";
       if (oddDegreeOverwrite){
         isColorA = true;
@@ -28,14 +28,14 @@ export const renderCustomNode = (node, index, isColorA, isLatest, tourFound, chr
     let textColor = tourFound ? "#FFFFFF" : isLatest ? "#FFFFFF" : isColorA ? "#FFFFFF" : "#000000"; 
   
     return (
-      <a href="#0" class="pe-auto" style={{ textDecoration: 'none' }}>
-      <g class="node" data-testid="node" onClick={() =>  interactiveMode ? setClickedNode(index) :    setClickedNode(null)  }  key={index} className="node-group">
+      <a href="#0" className="pe-auto" style={{ textDecoration: 'none' }}>
+      <g className="node" data-testid="node" onClick={() =>  interactiveMode ? setClickedNode(index) :    setClickedNode(null)  }  key={index} className="node-group">
       {/* Node outline */}
-      <circle class="node" cx={node.x} cy={node.y} r="20" fill="none" stroke={borderColor} strokeWidth="4" />
+      <circle className="node" cx={node.x} cy={node.y} r="20" fill="none" stroke={borderColor} strokeWidth="4" />
       {/* Node body */}
-      <circle class="node" cx={node.x} cy={node.y} r="18" fill={nodeColor} />
+      <circle className="node" cx={node.x} cy={node.y} r="18" fill={nodeColor} />
       {/* Bold number inside the node */}
-      <text class="nodeNo" x={node.x} y={node.y} fill={textColor} fontSize="20" fontWeight="bold" textAnchor="middle" alignmentBaseline="central">
+      <text className="nodeNo" x={node.x} y={node.y} fill={textColor} fontSize="20" fontWeight="bold" textAnchor="middle" alignmentBaseline="central">
         {index + 1}
       </text>
     </g>
