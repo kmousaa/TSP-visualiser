@@ -17,7 +17,7 @@ The travelling salesman problem (TSP) is widely renowned and used all around us 
 Before you begin, ensure you have installed Node.js - you can download it from the [Node.js official website](https://nodejs.org/en/download/). 
 
 1. **Clone the repository:** ```git clone https://github.com/kmousaa/TSP-visualiser.git```
-2. **Navigate to the Project Directory:** ```cd path/to/TSP-visualiser-main```
+2. **Navigate to the Project Directory:** ```cd TSP-visualiser```
 3. **Enter the Application Directory:** ```cd my-app```
 4. **Install Dependancies:** ```npm install```
 5. **Start Server:** ```npm start```
